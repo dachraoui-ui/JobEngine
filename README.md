@@ -659,30 +659,467 @@ volumes:
 
 ---
 
-## 👥 Team Structure
+## 👥 Team Structure & Work Partitions
 
-### Feature-Based Assignment
+> Each developer owns their feature **end-to-end**: Next.js pages + Spring Boot APIs + MongoDB models.
+> Branch naming: `feature/auth`, `feature/jobs`, `feature/pipeline`, `feature/ai`
 
-Each developer owns their feature **end-to-end** (frontend pages + backend API + database models).
+### Overview
 
-| Developer | Feature | Scope |
+| Developer | Feature | Branch | Effort |
+|---|---|---|---|
+| **Dev A** | 🔐 Auth & User Management + Admin | `feature/auth` | ~30% of codebase |
+| **Dev B** | 💼 Jobs & Applications + CV Upload | `feature/jobs` | ~25% of codebase |
+| **Dev C** | 📋 Pipeline & Automation (n8n) | `feature/pipeline` | ~20% of codebase |
+| **Dev D** | 🤖 AI Engine (Python Microservice) | `feature/ai` | ~25% of codebase |
+
+---
+
+### 🔐 Dev A — Auth & User Management + Admin Dashboard
+
+**Owns**: Everything related to users — registration, login, authentication, authorization, profiles, admin panel.
+
+#### Files Owned — Backend (Spring Boot)
+
+| File | Purpose |
+|---|---|
+| `config/SecurityConfig.java` | Spring Security configuration, CORS, route protection per role |
+| `config/WebConfig.java` | Web MVC configuration |
+| `security/JwtTokenProvider.java` | JWT token generation (sign), validation (verify), and parsing |
+| `security/JwtAuthenticationFilter.java` | Filter that intercepts every request, extracts JWT from `Authorization` header, and sets authentication |
+| `security/CustomUserDetailsService.java` | Loads user from MongoDB for Spring Security |
+| `model/User.java` | `@Document("users")` — email, password, firstName, lastName, phone, role, isVerified, isActive, timestamps |
+| `model/CandidateProfile.java` | `@Document("candidate_profiles")` — skills, experienceLevel, preferences, values, visibility, cvId |
+| `model/RecruiterProfile.java` | `@Document("recruiter_profiles")` — companyName, companyDescription, companyValues, industry |
+| `model/enums/Role.java` | Enum: `ADMIN`, `RECRUITER`, `CANDIDATE` |
+| `model/enums/Visibility.java` | Enum: `PUBLIC`, `VERIFIED_ONLY`, `PRIVATE` |
+| `dto/RegisterRequest.java` | Request body for registration (email, password, firstName, lastName, role) |
+| `dto/LoginRequest.java` | Request body for login (email, password) |
+| `dto/AuthResponse.java` | Response: JWT token + user info |
+| `dto/UserResponse.java` | Response: user profile data (no password) |
+| `dto/UpdateProfileRequest.java` | Request body for profile updates |
+| `repository/UserRepository.java` | `findByEmail()`, `existsByEmail()` |
+| `repository/CandidateProfileRepository.java` | `findByUserId()` |
+| `repository/RecruiterProfileRepository.java` | `findByUserId()` |
+| `controller/AuthController.java` | `POST /auth/register`, `POST /auth/login`, `GET /auth/me`, `PUT /auth/change-password` |
+| `controller/UserController.java` | `GET /users`, `GET /users/{id}`, `PUT /users/{id}`, `DELETE /users/{id}` |
+| `controller/AdminController.java` | `GET /admin/dashboard`, `GET /admin/pending-recruiters`, `PUT /admin/verify/{id}`, `GET/PUT /admin/settings` |
+| `service/AuthService.java` | Register logic (BCrypt hash, save user, generate JWT), Login logic (verify password, generate JWT) |
+| `service/UserService.java` | Profile CRUD, candidate/recruiter profile management, visibility settings |
+| `service/AdminService.java` | Dashboard stats, recruiter verification, user management |
+| `exception/GlobalExceptionHandler.java` | `@ControllerAdvice` — handles all exceptions globally |
+| `exception/ResourceNotFoundException.java` | 404 error |
+| `exception/UnauthorizedException.java` | 401 error |
+| `exception/DuplicateResourceException.java` | 409 error (email already exists) |
+
+#### Files Owned — Frontend (Next.js)
+
+| File | Purpose |
+|---|---|
+| `src/app/(auth)/login/page.tsx` | Login page — email + password form, calls `/auth/login`, stores JWT |
+| `src/app/(auth)/register/page.tsx` | Register page — form with role selector (Candidate/Recruiter), calls `/auth/register` |
+| `src/app/(dashboard)/admin/dashboard/page.tsx` | Admin overview — total users, jobs, applications, charts (Recharts) |
+| `src/app/(dashboard)/admin/users/page.tsx` | User management table — list, activate/deactivate, delete users |
+| `src/app/(dashboard)/admin/settings/page.tsx` | System settings — matching threshold, auto-reject score, general config |
+| `src/app/(dashboard)/candidate/profile/page.tsx` | Candidate profile editor — skills tags, experience, preferences, values, visibility toggle |
+| `src/app/(dashboard)/recruiter/profile/page.tsx` | Recruiter profile — company info, values, industry |
+| `src/context/AuthContext.tsx` | Global auth state: user object, login/logout functions, loading state |
+| `src/hooks/useAuth.ts` | Hook: get current user, check role, check if authenticated |
+| `src/lib/auth.ts` | JWT helpers: decode token, check expiry, get role from token |
+| `src/middleware.ts` | Next.js middleware: protect `/dashboard/*` routes, redirect by role |
+| `src/components/layout/Navbar.tsx` | Top navigation bar — logo, user menu, role-specific links |
+| `src/components/layout/Sidebar.tsx` | Side navigation — different menu items per role |
+| `src/components/layout/Footer.tsx` | Page footer |
+| `src/components/ui/Button.tsx` | Reusable button component (variants: primary, secondary, danger, ghost) |
+| `src/components/ui/Input.tsx` | Reusable form input with label and error message |
+| `src/components/ui/Modal.tsx` | Reusable modal/dialog component |
+| `src/components/ui/Card.tsx` | Reusable card container |
+| `src/components/ui/Badge.tsx` | Status badges (role badges, status tags) |
+| `src/components/ui/DataTable.tsx` | Reusable sortable/filterable data table |
+| `src/components/ui/LoadingSpinner.tsx` | Loading animation component |
+| `src/components/ui/Toast.tsx` | Toast notification wrapper (sonner) |
+| `src/lib/api.ts` | Axios instance — base URL, JWT interceptor (auto-attach token), error interceptor |
+| `src/types/index.ts` | ALL shared TypeScript interfaces (User, Job, Application, CV, etc.) |
+
+> **⚠️ Shared files**: Dev A creates `api.ts`, `types/index.ts`, `AuthContext`, `middleware.ts`, and all `ui/` components.
+> These are **shared** — other devs import them but Dev A maintains them.
+
+#### API Endpoints Owned
+
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| `POST` | `/api/v1/auth/register` | ❌ Public | Register new user (candidate or recruiter) |
+| `POST` | `/api/v1/auth/login` | ❌ Public | Login, returns JWT token + user data |
+| `GET` | `/api/v1/auth/me` | 🔒 JWT | Get current authenticated user |
+| `PUT` | `/api/v1/auth/change-password` | 🔒 JWT | Change password |
+| `GET` | `/api/v1/users` | 🔒 Admin | List all users (paginated) |
+| `GET` | `/api/v1/users/{id}` | 🔒 JWT | Get user by ID |
+| `PUT` | `/api/v1/users/{id}` | 🔒 Own/Admin | Update user info |
+| `DELETE` | `/api/v1/users/{id}` | 🔒 Admin | Deactivate user |
+| `GET` | `/api/v1/users/{id}/candidate-profile` | 🔒 JWT | Get candidate profile |
+| `PUT` | `/api/v1/users/{id}/candidate-profile` | 🔒 Candidate | Update candidate profile (skills, prefs) |
+| `PUT` | `/api/v1/users/{id}/visibility` | 🔒 Candidate | Set profile visibility |
+| `GET` | `/api/v1/admin/dashboard` | 🔒 Admin | Get system stats |
+| `GET` | `/api/v1/admin/pending-recruiters` | 🔒 Admin | List unverified recruiters |
+| `PUT` | `/api/v1/admin/verify/{id}` | 🔒 Admin | Approve/reject recruiter |
+| `GET` | `/api/v1/admin/settings` | 🔒 Admin | Get system settings |
+| `PUT` | `/api/v1/admin/settings` | 🔒 Admin | Update system settings |
+
+#### Weekly Breakdown
+
+| Week | Tasks | Deliverable |
 |---|---|---|
-| **Dev A** | 🔐 Auth & User Management | Registration, Login, JWT, Spring Security, Role-based access, Profile management, Admin dashboard, Recruiter verification, System settings |
-| **Dev B** | 💼 Jobs & Applications | Job CRUD (create, read, update, delete), Job listing/search/filters, CV upload (PDF/DOCX), Apply to job, Candidate application tracker, Search candidates |
-| **Dev C** | 📋 Pipeline & Automation | Kanban board (drag & drop), Pipeline status management, Status change history, n8n setup/workflows, Email automation, Google Calendar integration, Profile visibility settings |
-| **Dev D** | 🤖 AI Engine | Python microservice (FastAPI), CV parsing (PDF + DOCX), NLP skill extraction, Skills dictionary, TF-IDF + Cosine similarity matching, Score API, Career intelligence (feedback, skill gaps, career paths) |
+| **Week 1** | User model, RegisterRequest/LoginRequest DTOs, AuthService (BCrypt + JWT), SecurityConfig, JwtTokenProvider, JwtAuthenticationFilter, AuthController | ✅ Working `/register` and `/login` API endpoints |
+| **Week 2** | Login + Register pages (Next.js), AuthContext, middleware.ts, protected routes, Navbar/Sidebar, all `ui/` components, `api.ts`, `types/index.ts` | ✅ Full auth flow in browser + shared components for team |
+| **Week 3** | Admin dashboard page (stats + charts), Users management table, Recruiter verification workflow, CandidateProfile + RecruiterProfile models | ✅ Working admin panel |
+| **Week 4** | Candidate profile editor (skills, preferences, values), Visibility settings, RBAC hardening (test all roles on all endpoints) | ✅ Complete profile management |
+| **Week 5** | System settings page, Matching threshold config, Polish + edge cases | ✅ Admin settings complete |
+| **Week 6-7** | Bug fixes, integration testing with other devs, UI polish, help with deployment | ✅ Production-ready auth |
+
+---
+
+### 💼 Dev B — Jobs & Applications + CV Upload
+
+**Owns**: Everything related to jobs, job applications, CV file uploads, and candidate search.
+
+#### Files Owned — Backend (Spring Boot)
+
+| File | Purpose |
+|---|---|
+| `model/Job.java` | `@Document("jobs")` — title, description, location, type, requiredSkills, experienceLevel, companyValues, status, deadline |
+| `model/Cv.java` | `@Document("cvs")` — originalFileName, fileType, fileData (Binary), extractedText, detectedSkills, yearsExperience |
+| `model/Application.java` | `@Document("applications")` — candidateId, jobId, cvId, status, matchingScore, scoreBreakdown, statusHistory |
+| `model/enums/JobType.java` | Enum: `FULL_TIME`, `PART_TIME`, `INTERNSHIP` |
+| `model/enums/JobStatus.java` | Enum: `OPEN`, `CLOSED`, `DRAFT` |
+| `model/enums/ApplicationStatus.java` | Enum: `APPLIED`, `SHORTLISTED`, `INTERVIEW`, `REJECTED`, `HIRED` |
+| `model/enums/ExperienceLevel.java` | Enum: `JUNIOR`, `MID`, `SENIOR` |
+| `dto/JobRequest.java` | Create/update job request body |
+| `dto/JobResponse.java` | Job response with recruiter info |
+| `dto/ApplicationRequest.java` | Apply to job request (jobId, cvId) |
+| `dto/ApplicationResponse.java` | Application response with score + status |
+| `dto/CvResponse.java` | CV metadata + extracted info (no binary data) |
+| `repository/JobRepository.java` | `findByRecruiterId()`, `findByStatus()`, search queries |
+| `repository/CvRepository.java` | `findByUserId()` |
+| `repository/ApplicationRepository.java` | `findByCandidateId()`, `findByJobId()`, `findByJobIdOrderByMatchingScoreDesc()` |
+| `controller/JobController.java` | Full CRUD: `POST/GET/PUT/DELETE /jobs`, `GET /jobs/recommended`, search & filter |
+| `controller/CvController.java` | `POST /cv/upload`, `GET /cv/{id}`, `GET /cv/{id}/download`, `DELETE /cv/{id}` |
+| `controller/ApplicationController.java` | `POST /applications`, `GET /applications`, `GET /applications/{id}`, `GET /applications/job/{jobId}` |
+| `service/JobService.java` | Job CRUD logic, search/filter by skills/experience/location, recommended jobs (calls AI) |
+| `service/CvService.java` | File upload (validate PDF/DOCX, store in MongoDB), trigger parse via AI service, return metadata |
+| `service/ApplicationService.java` | Create application, check duplicates, trigger matching score, list applications |
+
+#### Files Owned — Frontend (Next.js)
+
+| File | Purpose |
+|---|---|
+| `src/app/(dashboard)/recruiter/jobs/page.tsx` | Recruiter: list own job postings, create/edit/delete jobs |
+| `src/app/(dashboard)/recruiter/jobs/new/page.tsx` | Recruiter: create new job form (title, description, skills tags, experience, values) |
+| `src/app/(dashboard)/recruiter/jobs/[id]/edit/page.tsx` | Recruiter: edit existing job |
+| `src/app/(dashboard)/recruiter/jobs/[id]/page.tsx` | Recruiter: view job details + applicant list (ranked by score) |
+| `src/app/(dashboard)/recruiter/candidates/page.tsx` | Recruiter: search candidate database (by skills, experience, score) |
+| `src/app/(dashboard)/candidate/jobs/page.tsx` | Candidate: browse all open jobs, search & filter, see compatibility score |
+| `src/app/(dashboard)/candidate/jobs/[id]/page.tsx` | Candidate: view job detail + matched/missing skills + apply button |
+| `src/app/(dashboard)/candidate/applications/page.tsx` | Candidate: application tracker — list all applications with status & timeline |
+| `src/components/jobs/JobCard.tsx` | Job listing card (title, company, skills tags, match score badge) |
+| `src/components/jobs/JobForm.tsx` | Create/edit job form component (react-hook-form + zod) |
+| `src/components/jobs/SkillsInput.tsx` | Tag input component for adding/removing skills |
+| `src/components/jobs/JobFilters.tsx` | Search bar + filter dropdowns (type, experience, location) |
+| `src/components/cv/CvUpload.tsx` | Drag & drop file upload component (accept PDF/DOCX, max 10MB) |
+| `src/components/cv/CvPreview.tsx` | Display extracted CV data (skills, experience, education) |
+| `src/components/applications/ApplicationCard.tsx` | Application status card with score and timeline |
+| `src/components/applications/ApplicationTimeline.tsx` | Visual timeline of status changes |
+| `src/hooks/useJobs.ts` | Hook: fetch jobs, create job, update job, delete job |
+| `src/hooks/useApplications.ts` | Hook: fetch applications, apply to job |
+| `src/hooks/useCv.ts` | Hook: upload CV, fetch CV data |
+
+#### API Endpoints Owned
+
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| `POST` | `/api/v1/jobs` | 🔒 Recruiter | Create a new job posting |
+| `GET` | `/api/v1/jobs` | 🔒 JWT | List jobs (paginated, with filters: skills, type, experience, location) |
+| `GET` | `/api/v1/jobs/{id}` | 🔒 JWT | Get full job details |
+| `PUT` | `/api/v1/jobs/{id}` | 🔒 Recruiter (own) | Update a job |
+| `DELETE` | `/api/v1/jobs/{id}` | 🔒 Recruiter (own) | Delete a job |
+| `GET` | `/api/v1/jobs/my-jobs` | 🔒 Recruiter | Get recruiter's own jobs |
+| `GET` | `/api/v1/jobs/recommended` | 🔒 Candidate | Get AI-recommended jobs for current user |
+| `POST` | `/api/v1/cv/upload` | 🔒 JWT | Upload CV file (PDF/DOCX, max 10MB) |
+| `GET` | `/api/v1/cv/{id}` | 🔒 JWT | Get CV metadata + extracted data |
+| `GET` | `/api/v1/cv/{id}/download` | 🔒 JWT | Download original CV file |
+| `DELETE` | `/api/v1/cv/{id}` | 🔒 JWT (own) | Delete a CV |
+| `POST` | `/api/v1/applications` | 🔒 Candidate | Apply to a job |
+| `GET` | `/api/v1/applications` | 🔒 JWT | List own applications (candidate) or job applications (recruiter) |
+| `GET` | `/api/v1/applications/{id}` | 🔒 JWT | Get application details + score breakdown |
+| `GET` | `/api/v1/applications/job/{jobId}` | 🔒 Recruiter | Get all applications for a job (ranked by score) |
+| `GET` | `/api/v1/candidates/search` | 🔒 Recruiter | Search candidates by skills, experience (respects visibility) |
+
+#### Weekly Breakdown
+
+| Week | Tasks | Deliverable |
+|---|---|---|
+| **Week 1** | Job model, Job DTOs, JobRepository, JobController (CRUD), JobService, CV model, CvController (upload endpoint) | ✅ Working job CRUD API + CV upload API |
+| **Week 2** | Job listing page, Job detail page, Job create/edit form, CV upload component (drag & drop), CvService (file validation + storage) | ✅ Recruiter can create jobs, candidate can browse jobs |
+| **Week 3** | Application model, ApplicationController, ApplicationService, Apply-to-job flow, Application tracker page, Recruiter applicant list | ✅ Candidates can apply, recruiter sees applicants |
+| **Week 4** | Integrate matching scores from Dev D's AI API, Ranked candidate list, Search & filter candidates, Min score filter | ✅ Scores visible on all application views |
+| **Week 5** | Missing skills view (candidate side), Edge cases (duplicate apply, closed jobs, etc.), Validation & error handling | ✅ Polished job + application flow |
+| **Week 6-7** | Bug fixes, integration testing, UI polish, responsive design, help with deployment | ✅ Production-ready jobs |
+
+---
+
+### 📋 Dev C — Pipeline & Automation (n8n)
+
+**Owns**: Kanban recruitment pipeline, status management, n8n automation workflows, email/calendar integrations, and profile visibility.
+
+#### Files Owned — Backend (Spring Boot)
+
+| File | Purpose |
+|---|---|
+| `controller/PipelineController.java` | `GET /pipeline/job/{jobId}` (grouped by status), `PUT /applications/{id}/status` (status update + history) |
+| `service/PipelineService.java` | Status transitions, validation (valid state transitions), history tracking |
+| `service/WebhookService.java` | Send HTTP POST to n8n webhooks on events (new application, status change, interview scheduled) |
+| `dto/StatusUpdateRequest.java` | Request body: new status + optional notes |
+| `dto/PipelineResponse.java` | Response: applications grouped by status columns |
+| `dto/StatusHistoryEntry.java` | Status + timestamp + changedBy for history array |
+| `config/N8nConfig.java` | n8n webhook URLs configuration |
+
+> **Note**: Dev C modifies `Application.java` (owned by Dev B) to add `statusHistory` logic. Coordinate with Dev B on model changes.
+
+#### Files Owned — Frontend (Next.js)
+
+| File | Purpose |
+|---|---|
+| `src/app/(dashboard)/recruiter/pipeline/page.tsx` | Kanban board page — select a job, see candidates in pipeline columns |
+| `src/app/(dashboard)/recruiter/pipeline/[jobId]/page.tsx` | Pipeline board for specific job |
+| `src/app/(dashboard)/recruiter/analytics/page.tsx` | Recruitment analytics — hiring funnel charts, time-to-hire, score distributions |
+| `src/components/kanban/KanbanBoard.tsx` | Main kanban board container — 5 columns, drop zones |
+| `src/components/kanban/KanbanColumn.tsx` | Single pipeline column (title, count badge, droppable area) |
+| `src/components/kanban/KanbanCard.tsx` | Candidate card in pipeline (name, score, skills preview, drag handle) |
+| `src/components/kanban/CandidateDetailModal.tsx` | Modal: full candidate info, CV preview, score breakdown, status history |
+| `src/components/charts/HiringFunnel.tsx` | Funnel chart: Applied → Shortlisted → Interview → Hired |
+| `src/components/charts/ScoreDistribution.tsx` | Bar chart: score ranges distribution |
+| `src/components/charts/TimelineChart.tsx` | Time-to-hire analytics |
+| `src/components/visibility/VisibilitySettings.tsx` | Toggle: Public / Verified Recruiters / Private |
+| `src/hooks/usePipeline.ts` | Hook: fetch pipeline data, update status |
+
+#### n8n Workflows Owned (Docker + n8n UI)
+
+| # | Workflow | Trigger Webhook | n8n Actions |
+|---|---|---|---|
+| 1 | **Auto-Reject Low Score** | `POST /webhook/auto-reject` | Receive score → If < threshold → Call backend API to update status → Send rejection email via SMTP |
+| 2 | **Interview Scheduler** | `POST /webhook/interview` | Receive candidate + job info → Create Google Calendar event (OAuth2) → Send interview invite email |
+| 3 | **Status Change Notification** | `POST /webhook/status-change` | Receive new status → Format email body → Send email to candidate |
+| 4 | **New Application Alert** | `POST /webhook/new-application` | Receive application info → Send email to recruiter |
+
+#### Webhook Payload Formats (Spring Boot → n8n)
+
+```json
+// POST /webhook/status-change
+{
+  "applicationId": "string",
+  "candidateName": "string",
+  "candidateEmail": "string",
+  "jobTitle": "string",
+  "previousStatus": "APPLIED",
+  "newStatus": "SHORTLISTED",
+  "changedAt": "2026-04-15T10:30:00Z"
+}
+
+// POST /webhook/auto-reject
+{
+  "applicationId": "string",
+  "candidateEmail": "string",
+  "candidateName": "string",
+  "jobTitle": "string",
+  "score": 32,
+  "threshold": 50
+}
+
+// POST /webhook/interview
+{
+  "applicationId": "string",
+  "candidateName": "string",
+  "candidateEmail": "string",
+  "recruiterName": "string",
+  "recruiterEmail": "string",
+  "jobTitle": "string",
+  "interviewDate": "2026-04-20T14:00:00Z",
+  "interviewDuration": 60
+}
+
+// POST /webhook/new-application
+{
+  "applicationId": "string",
+  "candidateName": "string",
+  "jobTitle": "string",
+  "recruiterEmail": "string",
+  "matchingScore": 78,
+  "appliedAt": "2026-04-15T09:00:00Z"
+}
+```
+
+#### API Endpoints Owned
+
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| `GET` | `/api/v1/pipeline/job/{jobId}` | 🔒 Recruiter | Get pipeline board data (applications grouped by status) |
+| `PUT` | `/api/v1/applications/{id}/status` | 🔒 Recruiter | Update application status (triggers webhook to n8n) |
+| `GET` | `/api/v1/applications/{id}/history` | 🔒 JWT | Get status change history for an application |
+| `GET` | `/api/v1/analytics/job/{jobId}` | 🔒 Recruiter | Get analytics for a job (funnel, timing, scores) |
+| `GET` | `/api/v1/analytics/overview` | 🔒 Recruiter | Get recruiter-wide analytics |
+
+#### Weekly Breakdown
+
+| Week | Tasks | Deliverable |
+|---|---|---|
+| **Week 1** | Study n8n docs, install Docker Desktop, run n8n container, explore n8n interface, design pipeline model & webhook payloads | ✅ n8n running locally, webhook payload specs documented |
+| **Week 2** | PipelineController, PipelineService, StatusUpdateRequest DTO, status validation (valid transitions), status history tracking | ✅ Working pipeline status API |
+| **Week 3** | Kanban board UI: KanbanBoard, KanbanColumn, KanbanCard using `@dnd-kit`, CandidateDetailModal, connect to pipeline API | ✅ Drag & drop pipeline board in browser |
+| **Week 4** | WebhookService (Spring Boot), n8n workflows (auto-reject + status change notification), Email node setup in n8n (SMTP config) | ✅ Automated emails on status change |
+| **Week 5** | Google Calendar n8n integration, Interview scheduling workflow, Analytics page (Recharts), Visibility settings | ✅ Full automation working |
+| **Week 6-7** | Bug fixes, test all automations end-to-end, UI polish, help with deployment | ✅ Production-ready pipeline + automation |
+
+---
+
+### 🤖 Dev D — AI Engine (Python Microservice)
+
+**Owns**: The entire Python FastAPI microservice — CV parsing, NLP, matching algorithm, career intelligence. Also owns the Spring Boot integration layer that calls the Python service.
+
+#### Files Owned — Python (FastAPI)
+
+| File | Purpose |
+|---|---|
+| `main.py` | FastAPI app entry, CORS config, router includes, uvicorn setup |
+| `app/routers/cv_parser.py` | `POST /api/ai/parse` — accepts PDF/DOCX file, returns extracted data |
+| `app/routers/matcher.py` | `POST /api/ai/match` — accepts job + candidate data, returns score |
+| `app/routers/career.py` | `POST /api/ai/career-advice` — returns CV feedback + skill gaps + career suggestions |
+| `app/services/parser_service.py` | PDF extraction (pdfplumber), DOCX extraction (python-docx), text cleaning + normalization |
+| `app/services/nlp_service.py` | Skill extraction (keyword match against dictionary + regex), Experience detection (regex: "X years"), Education parsing |
+| `app/services/matching_service.py` | TF-IDF vectorization (scikit-learn), Cosine similarity calculation, Weighted score composition |
+| `app/services/career_service.py` | CV quality feedback, Skill gap analysis (compare candidate vs market), Career path suggestion logic |
+| `app/models/schemas.py` | Pydantic models: `ParseResponse`, `MatchRequest`, `MatchResponse`, `CareerAdviceResponse` |
+| `app/data/skills_dictionary.json` | Master skills taxonomy (500+ skills, categorized: programming, frameworks, databases, soft skills, etc.) |
+| `tests/test_parser.py` | Unit tests for PDF/DOCX parsing accuracy |
+| `tests/test_matcher.py` | Unit tests for scoring accuracy with known CV-Job pairs |
+| `tests/sample_cvs/` | 5-10 sample CVs (PDF + DOCX) for testing |
+| `requirements.txt` | Python dependencies |
+| `Procfile` | Render deployment: `web: uvicorn main:app --host 0.0.0.0 --port $PORT` |
+
+#### Files Owned — Backend (Spring Boot) — Integration Layer
+
+| File | Purpose |
+|---|---|
+| `service/MatchingService.java` | Calls Python AI service via `RestTemplate` — `/parse`, `/match`, `/career-advice` |
+| `controller/MatchingController.java` | `GET /matching/score/{appId}`, `GET /matching/job/{jobId}/ranked`, `GET /matching/candidate/recommendations` |
+| `dto/MatchingScoreResponse.java` | Response: score, breakdown, matchedSkills, missingSkills |
+| `dto/CareerAdviceResponse.java` | Response: feedback, skillGaps, suggestions |
+| `config/AiServiceConfig.java` | RestTemplate bean + AI service URL config |
+
+#### Files Owned — Frontend (Next.js)
+
+| File | Purpose |
+|---|---|
+| `src/app/(dashboard)/candidate/career/page.tsx` | Career intelligence page — CV feedback, skill gaps, career path suggestions |
+| `src/components/matching/ScoreCard.tsx` | Circular score display (0-100) with color coding |
+| `src/components/matching/ScoreBreakdown.tsx` | Breakdown bars: skills %, experience %, culture % |
+| `src/components/matching/SkillsComparison.tsx` | Visual: matched skills (green) vs missing skills (red) |
+| `src/components/career/CvFeedback.tsx` | AI-generated feedback cards |
+| `src/components/career/SkillGapChart.tsx` | Radar chart showing current vs required skill levels |
+| `src/components/career/CareerSuggestions.tsx` | Career path suggestion cards |
+| `src/hooks/useMatching.ts` | Hook: fetch scores, recommendations |
+| `src/hooks/useCareer.ts` | Hook: fetch career advice |
+
+#### AI Service API Endpoints
+
+| Method | Endpoint | Input | Output |
+|---|---|---|---|
+| `POST` | `/api/ai/parse` | `multipart/form-data` — file (PDF/DOCX) | `{ extractedText, detectedSkills[], yearsExperience, education, languages[] }` |
+| `POST` | `/api/ai/match` | `{ jobSkills[], jobExperience, jobValues[], candidateSkills[], candidateExperience, candidateValues[] }` | `{ score (0-100), breakdown: { skills, experience, culture }, matchedSkills[], missingSkills[] }` |
+| `POST` | `/api/ai/career-advice` | `{ skills[], yearsExperience, education, targetJobTitles[] }` | `{ cvFeedback: { strengths[], improvements[] }, skillGaps: [{ skill, currentLevel, requiredLevel }], careerPaths: [{ title, description, requiredSkills[] }] }` |
+
+#### Matching Algorithm Details
+
+```
+Score = (Skills Score × 0.60) + (Experience Score × 0.25) + (Culture Score × 0.15)
+
+Skills Score (0-100):
+  1. Convert job required skills into a TF-IDF vector
+  2. Convert candidate skills into a TF-IDF vector
+  3. Calculate Cosine Similarity between vectors
+  4. Multiply by 100
+
+Experience Score (0-100):
+  - If candidate years >= required years → 100
+  - If candidate years >= required × 0.75 → 75
+  - If candidate years >= required × 0.50 → 50
+  - Otherwise → (candidate / required) × 100
+
+Culture Score (0-100):
+  - Count matching values between job and candidate
+  - (matched / total required) × 100
+```
+
+#### Skills Dictionary Structure (`skills_dictionary.json`)
+
+```json
+{
+  "categories": {
+    "programming_languages": ["Python", "Java", "JavaScript", "TypeScript", "C++", "C#", "Go", "Rust", "PHP", "Ruby", "Swift", "Kotlin"],
+    "frontend": ["React", "Angular", "Vue.js", "Next.js", "HTML", "CSS", "Tailwind", "Bootstrap", "SASS"],
+    "backend": ["Spring Boot", "Node.js", "Express.js", "Django", "FastAPI", "Flask", "ASP.NET", "Laravel"],
+    "databases": ["MongoDB", "PostgreSQL", "MySQL", "Redis", "Elasticsearch", "Firebase", "DynamoDB"],
+    "devops": ["Docker", "Kubernetes", "AWS", "Azure", "GCP", "CI/CD", "Jenkins", "GitHub Actions", "Terraform"],
+    "data_science": ["Machine Learning", "Deep Learning", "NLP", "TensorFlow", "PyTorch", "Pandas", "NumPy", "Scikit-learn"],
+    "mobile": ["React Native", "Flutter", "SwiftUI", "Jetpack Compose", "Xamarin"],
+    "soft_skills": ["Leadership", "Communication", "Teamwork", "Problem Solving", "Time Management", "Agile", "Scrum"],
+    "tools": ["Git", "Jira", "Figma", "Postman", "VS Code", "IntelliJ", "Linux"]
+  }
+}
+```
+
+#### Weekly Breakdown
+
+| Week | Tasks | Deliverable |
+|---|---|---|
+| **Week 1** | Setup Python project, FastAPI app, parser_service (pdfplumber + python-docx), `/parse` endpoint, test with 5 sample CVs | ✅ Working CV parser — input PDF/DOCX, output text + data |
+| **Week 2** | Build `skills_dictionary.json` (500+ skills), nlp_service (keyword matching, regex experience detection, education parsing), return detected skills | ✅ NLP extracts skills, experience, education from any CV |
+| **Week 3** | matching_service (TF-IDF with scikit-learn, Cosine similarity), weighted scoring formula, `/match` endpoint | ✅ Working matching algorithm — input job + candidate, output score |
+| **Week 4** | MatchingService.java (Spring Boot → Python bridge), MatchingController, Score API endpoints, Ranked candidate list, Score breakdown view | ✅ Full pipeline: CV → Parse → Match → Score visible in app |
+| **Week 5** | career_service (CV feedback, skill gap analysis, career suggestions), `/career-advice` endpoint, Career page (Next.js), ScoreCard + SkillsComparison components | ✅ Career intelligence working |
+| **Week 6-7** | Tune matching accuracy, test with diverse CVs, edge cases, integration testing, help with deployment (Render for Python service) | ✅ Production-ready AI |
+
+---
 
 ### Integration Dependencies
 
 ```
-Dev A (Auth) ──► provides JWT & User model to ALL devs (Week 1)
-Dev B (Jobs) ──► provides Job & Application model to Dev C & Dev D (Week 2)
-Dev D (AI)   ──► provides Score API to Dev B (Week 3-4)
-Dev C (Pipeline) ──► consumes Application model from Dev B (Week 3)
-Dev C (Pipeline) ──► sends Webhooks to n8n (Week 4)
+Week 1:  Dev A ──► ALL DEVS
+         │  Delivers: User model, JWT token format, SecurityConfig
+         │  Others need: AuthContext, api.ts, middleware.ts, types/index.ts
+         │
+Week 2:  Dev B ──► Dev C + Dev D
+         │  Delivers: Job model, Application model, ApplicationStatus enum
+         │  Dev C needs: Application model for pipeline
+         │  Dev D needs: Job model for matching
+         │
+Week 3:  Dev D ──► Dev B
+         │  Delivers: /api/ai/match endpoint (score API)
+         │  Dev B needs: to display scores on application list
+         │
+Week 3:  Dev B ──► Dev C
+         │  Delivers: ApplicationController endpoints
+         │  Dev C needs: to build pipeline board on top of applications
+         │
+Week 4:  Dev C ──► n8n
+         │  Delivers: WebhookService (Spring Boot sends events to n8n)
+         │  n8n workflows trigger on these webhooks
 ```
 
-> **⚠️ Critical**: Dev A must share the JWT token format and User model structure by end of Week 1. Dev D should start independently on the Python microservice from Day 1.
+> **⚠️ Critical Coordination Points:**
+> - **End of Day 1**: Dev A shares the `User.java` model and `RegisterRequest` / `LoginRequest` DTOs with everyone
+> - **End of Week 1**: Dev A provides working JWT auth that all devs can test their APIs with
+> - **End of Week 2**: Dev B shares `Job.java`, `Application.java`, and enum classes with Dev C and Dev D
+> - **Week 3**: Dev D provides the Python `/match` endpoint URL for Dev B to integrate
+> - **Use a shared Postman collection** or Swagger docs so everyone can test each other's APIs
 
 ---
 
