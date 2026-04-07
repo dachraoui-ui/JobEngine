@@ -1,0 +1,164 @@
+​JobEngine – Where Talent Meets​
+​Opportunity​
+​1. Portée du Projet​
+​1.1 Description Générale​
+​JobEngine est une plateforme web intelligente de recrutement permettant :​
+​●​ ​Le matching automatisé entre offres d’emploi et candidats​
+​●​ ​L’analyse intelligente des CV​
+​●​ ​Le classement automatique des candidats​
+​●​ ​L’automatisation du processus de recrutement​
+​●​ ​L’accompagnement du candidat dans son évolution professionnelle​
+​La plateforme est destinée aux recruteurs et aux candidats souhaitant optimiser leur recherche​
+​d’emploi ou leur processus de recrutement grâce à l’intelligence artificielle.​
+​1.2 Objectifs du Projet​
+​●​ ​Réduire le temps de tri des CV​
+​●​ ​Automatiser la présélection des candidats​
+​●​ ​Proposer un matching basé sur compétences et culture​
+​●​ ​Offrir un suivi clair des candidatures​
+​●​ ​Fournir des recommandations d’amélioration aux candidats​
+​1.3 Limites du Projet (MVP)​
+​Le projet ne comprend pas :​
+​●​ ​Réseau social professionnel​
+​●​ ​Messagerie instantanée avancée​
+​●​ ​Application mobile native (version web uniquement)​
+​●​ ​Intégration complète avec plateformes externes (LinkedIn, etc.)​
+​2. Classes d’Acteurs​
+​2.1 Administrateur​
+​Rôle :​
+​●​ ​Gestion globale du système​
+​●​ ​Validation des recruteurs​
+​●​ ​Supervision des comptes​
+​●​ ​Gestion des paramètres généraux​
+​2.2 Recruteur​
+​Rôle :​
+​●​ ​Création et gestion des offres d’emploi​
+​●​ ​Upload et consultation des CV​
+​●​ ​Consultation du score de matching​
+​●​ ​Gestion du pipeline de recrutement​
+​●​ ​Recherche dans la base de candidats​
+​●​ ​Déclenchement ou gestion des automatisations​
+​2.3 Candidate​
+​Rôle :​
+​●​ ​Création et gestion du profil​
+​●​ ​Upload du CV​
+​●​ ​Consultation des offres recommandées​
+​●​ ​Suivi des candidatures​
+​●​ ​Consultation des recommandations d’amélioration​
+​3. Besoins Fonctionnels​
+​3.1 Besoins Fonctionnels – Recruteur​
+​Gestion des Offres​
+​●​ ​Créer une offre d’emploi​
+​●​ ​Modifier une offre​
+​●​ ​Supprimer une offre​
+​●​ ​Définir compétences requises (tags)​
+​●​ ​Définir niveau d’expérience​
+​●​ ​Définir valeurs et culture d’entreprise​
+​Gestion des CV​
+​●​ ​Upload de CV (PDF/DOCX)​
+​●​ ​Stockage en base de données​
+​●​ ​Consultation du contenu extrait​
+​Analyse Automatique​
+​●​ ​Extraction du texte du CV​
+​●​ ​Extraction des compétences​
+​●​ ​Détection du nombre d’années d’expérience​
+​●​ ​Calcul du score de matching​
+​●​ ​Affichage du détail du score​
+​Classement des Candidats​
+​●​ ​Classement automatique par score décroissant​
+​●​ ​Filtrage par score minimum​
+​Pipeline de Recrutement​
+​●​ ​Gestion des statuts :​
+​○​ ​Applied​
+​○​ ​Shortlisted​
+​○​ ​Interview​
+​○​ ​Rejected​
+​○​ ​Hired​
+​●​ ​Drag & drop des candidatures​
+​●​ ​Historique des changements​
+​Automatisation​
+​●​ ​Rejet automatique si score < seuil​
+​●​ ​Création automatique d’événement calendrier​
+​●​ ​Envoi automatique d’emails​
+​3.2 Besoins Fonctionnels – Candidat​
+​Gestion du Profil​
+​●​ ​Création de compte​
+​●​ ​Modification des informations personnelles​
+​●​ ​Ajout des compétences​
+​●​ ​Définition des préférences professionnelles​
+​●​ ​Sélection des valeurs et type d’entreprise souhaité​
+​Gestion du CV​
+​●​ ​Upload du CV​
+​●​ ​Analyse automatique du CV​
+​●​ ​Affichage des compétences détectées​
+​Matching Personnalisé​
+​●​ ​Consultation des offres recommandées​
+​●​ ​Affichage du score de compatibilité​
+​●​ ​Visualisation des compétences manquantes​
+​Suivi des Candidatures​
+​●​ ​Tableau de suivi des candidatures​
+​●​ ​Visualisation du statut​
+​●​ ​Timeline d’évolution​
+​Career Intelligence​
+​●​ ​Feedback automatique sur le CV​
+​●​ ​Suggestions de compétences à améliorer​
+​●​ ​Suggestions de parcours professionnel​
+​Visibilité​
+​●​ ​Paramétrage de la visibilité du profil :​
+​○​ ​Public​
+​○​ ​Visible recruteurs vérifiés​
+​○​ ​Privé​
+​4. Besoins Non Fonctionnels​
+​4.1 Performance​
+​●​ ​Temps de réponse < 2 secondes pour les requêtes standards​
+​●​ ​Analyse d’un CV en moins de 5 secondes​
+​●​ ​Support d’au moins 1000 utilisateurs actifs​
+​4.2 Sécurité​
+​●​ ​Authentification sécurisée (JWT)​
+​●​ ​Gestion des rôles (Admin / Recruteur / Candidat)​
+​●​ ​Protection des données personnelles​
+​●​ ​Stockage sécurisé des CV​
+​●​ ​Chiffrement des mots de passe​
+​●​ ​Conformité aux normes RGPD​
+​4.3 Disponibilité​
+​●​ ​Disponibilité du système ≥ 99%​
+​●​ ​Sauvegarde régulière de la base de données​
+​●​ ​Tolérance aux pannes​
+​4.4 Scalabilité​
+​●​ ​Architecture modulaire​
+​●​ ​Possibilité d’ajouter de nouveaux modules IA​
+​●​ ​Extensibilité de la base de données MongoDB​
+​4.5 Maintenabilité​
+​●​ ​Code structuré et documenté​
+​●​ ​API REST claire et normalisée​
+​●​ ​Séparation frontend / backend​
+​4.6 Ergonomie​
+​●​ ​Interface moderne et intuitive​
+​●​ ​Navigation simple​
+​●​ ​Responsive design​
+​5. Technologies Utilisées​
+​5.1 Frontend​
+​●​ ​React.js​
+​●​ ​Tailwind CSS​
+​●​ ​Axios (communication API)​
+​5.2 Backend​
+​●​ ​Spring Boot​
+​●​ ​API REST​
+​●​ ​Spring Security​
+​●​ ​JWT Authentication​
+​5.3 Base de Données​
+​●​ ​MongoDB​
+​●​ ​Spring Data MongoDB​
+​5.4 Intelligence Artificielle​
+​●​ ​Extraction de texte (PDF/DOCX parser)​
+​●​ ​NLP pour extraction des compétences​
+​●​ ​Algorithme de similarité (Cosine Similarity / TF-IDF)​
+​5.5 Automatisation​
+​●​ ​n8n​
+​●​ ​Webhooks​
+​●​ ​Intégration Email / Google Calendar​
+​6. Résultat Attendu​
+​Une plateforme web intelligente capable de :​
+​●​ ​Automatiser la présélection des candidats​
+​●​ ​Classer les profils selon un score objectif​
+​●​ ​Offrir une expérience personnalisée aux candidats​
+​●​ ​Optimiser le processus de recrutement via IA et automatisation​
