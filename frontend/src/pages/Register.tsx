@@ -7,6 +7,9 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useAuth } from "@/hooks/useAuth";
+import api from "@/lib/api";
+import { GoogleLogin } from "@react-oauth/google";
 
 type Role = "candidate" | "recruiter" | null;
 
@@ -67,6 +70,8 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const { login } = useAuth();
+  
   const handleStep2Submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -88,10 +93,52 @@ export default function Register() {
       return;
     }
 
-    setLoading(true);
-    await new Promise((r) => setTimeout(r, 1500));
-    setLoading(false);
-    setStep(3);
+    try {
+      setLoading(true);
+      const payload = {
+        firstName,
+        lastName,
+        email,
+        password,
+        phone: "", // Optional field
+        role: role?.toUpperCase(),
+        // Note: For recruiter profile, you would trigger a secondary endpoint to update companyName, industry, website
+      };
+
+      const res = await api.post('/auth/register', payload);
+      const { token, role: userRole, ...userData } = res.data.data;
+      
+      // Save auth locally
+      login(token, { ...userData, role: userRole });
+      
+      setStep(3);
+    } catch (err: any) {
+      setError(err?.response?.data?.message || "Failed to register. Email may be taken.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse: any) => {
+    if (!role) {
+      setError("Please select a role before continuing with Google.");
+      return;
+    }
+    try {
+      setLoading(true);
+      const res = await api.post('/auth/google', { 
+        credential: credentialResponse.credential,
+        role: role.toUpperCase()
+      });
+      
+      const { token, role: userRole, ...userData } = res.data.data;
+      login(token, { ...userData, role: userRole });
+      setStep(3);
+    } catch (err: any) {
+      setError(err?.response?.data?.message || "Google registration failed.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const industries = ["Technology", "Finance", "Healthcare", "Education", "Retail", "Manufacturing", "Media", "Other"];
@@ -191,8 +238,31 @@ export default function Register() {
                 disabled={!role}
                 className="w-full h-11 rounded-xl bg-primary text-primary-foreground font-semibold text-sm glow-cyan hover:shadow-[0_0_30px_rgba(0,212,255,0.4)] transition-all duration-200 disabled:opacity-30 disabled:shadow-none flex items-center justify-center gap-2"
               >
-                Continue <ChevronRight className="w-4 h-4" />
+                Continue with Email <ChevronRight className="w-4 h-4" />
               </button>
+
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-border"></div>
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-surface px-2 text-muted-foreground">Or</span>
+                </div>
+              </div>
+
+              <div className="flex justify-center w-full" onClick={() => { if (!role) setError("Please select a role first."); }}>
+                <div className={cn(!role && "opacity-50 pointer-events-none")}>
+                  <GoogleLogin
+                    onSuccess={handleGoogleSuccess}
+                    onError={() => setError("Google authentication failed")}
+                    useOneTap
+                    theme="filled_black"
+                    shape="rectangular"
+                    text="signup_with"
+                    width="440px"
+                  />
+                </div>
+              </div>
             </div>
           )}
 
