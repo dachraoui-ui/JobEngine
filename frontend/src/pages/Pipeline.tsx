@@ -28,32 +28,32 @@ export default function Pipeline() {
   };
 
   return (
-    <div className="animate-fade-in flex flex-col h-full overflow-hidden absolute inset-0 pt-6 px-6 pb-2">
+    <div className="animate-fade-in flex flex-col h-full overflow-hidden relative pt-6 px-6 pb-2">
       {/* Top Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 shrink-0">
         <Dropdown menu={{ items: [{ key: '1', label: 'Senior React Developer' }] }}>
-          <div className="p-3 cursor-pointer hover:bg-foreground/10 flex items-center justify-between w-[300px] border border-foreground/10 rounded-lg bg-surface transition-colors">
-            <span className="font-bold text-lg text-white">Senior React Developer</span>
+          <div className="p-3 cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 flex items-center justify-between w-[300px] border border-[var(--ant-color-border-secondary)] rounded-lg bg-[var(--ant-color-bg-container)] transition-colors">
+            <span className="font-bold text-lg text-[var(--ant-color-text)]">Senior React Developer</span>
             <DownOutlined className="text-muted-foreground" />
           </div>
         </Dropdown>
         <div className="flex gap-6 text-sm">
-          <div className="flex items-center gap-2 text-muted-foreground"><span className="text-white font-mono text-lg font-bold">23</span> Candidates</div>
-          <div className="flex items-center gap-2 text-muted-foreground"><span className="text-cyan-400 font-mono text-lg font-bold">74%</span> Avg Score</div>
-          <div className="flex items-center gap-2 text-muted-foreground"><span className="text-emerald-400 font-mono text-lg font-bold">5.2d</span> Pipeline Avg</div>
+          <div className="flex items-center gap-2 text-muted-foreground"><span className="text-[var(--ant-color-text)] font-mono text-lg font-bold">23</span> Candidates</div>
+          <div className="flex items-center gap-2 text-muted-foreground"><span className="text-cyan-500 font-mono text-lg font-bold">74%</span> Avg Score</div>
+          <div className="flex items-center gap-2 text-muted-foreground"><span className="text-emerald-500 font-mono text-lg font-bold">5.2d</span> Pipeline Avg</div>
         </div>
       </div>
 
       {/* Kanban Board */}
       <div className="flex gap-4 overflow-x-auto pb-4 h-full scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
         {columns.map(col => (
-          <div key={col.id} className="min-w-[280px] w-[280px] flex flex-col h-full rounded-xl bg-foreground/[0.02] border border-foreground/5 relative overflow-hidden" onDragOver={handleDragOver}>
+          <div key={col.id} className="min-w-[280px] w-[280px] flex flex-col h-full rounded-xl bg-[var(--ant-color-bg-layout)] border border-[var(--ant-color-border-secondary)] relative overflow-hidden" onDragOver={handleDragOver}>
             {/* Accent Strip */}
             <div className={`absolute top-0 left-0 right-0 h-[3px] ${col.glow || ''}`} style={{ backgroundColor: col.color }} />
             
-            <div className="p-4 border-b border-foreground/5 flex justify-between items-center bg-foreground/[0.01]">
-              <h3 className="font-semibold text-white">{col.title}</h3>
-              <span className="bg-foreground/10 text-muted-foreground text-xs px-2 py-0.5 rounded-full font-mono">{col.count}</span>
+            <div className="p-4 border-b border-[var(--ant-color-border-secondary)] flex justify-between items-center bg-[var(--ant-color-bg-container)]">
+              <h3 className="font-semibold text-[var(--ant-color-text)]">{col.title}</h3>
+              <span className="bg-black/5 dark:bg-white/10 text-muted-foreground text-xs px-2 py-0.5 rounded-full font-mono">{col.count}</span>
             </div>
 
             <div className="p-3 flex-1 overflow-y-auto space-y-3">
@@ -63,13 +63,13 @@ export default function Pipeline() {
                   draggable
                   onDragStart={(e) => handleDragStart(e, i)}
                   onClick={() => setSelectedCandidate({ name: "Alex Chen", score: 92, colId: col.id })}
-                  className={`bg-surface border border-foreground/10 rounded-lg p-3 cursor-grab active:cursor-grabbing hover:-translate-y-1 transition-all duration-200 group relative ${col.id === 'rejected' ? 'opacity-70' : ''}`}
+                  className={`bg-[var(--ant-color-bg-container)] border border-[var(--ant-color-border-secondary)] rounded-lg p-3 cursor-grab active:cursor-grabbing hover:-translate-y-1 transition-all duration-200 group relative ${col.id === 'rejected' ? 'opacity-70' : ''}`}
                   style={{ '&:hover': { borderColor: col.color } } as any}
                 >
                   <div className="flex justify-between items-start mb-3">
                     <div className="flex items-center gap-2">
-                       <div className="w-8 h-8 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-xs font-bold shrink-0">AC</div>
-                       <span className="text-sm font-bold text-white shrink-0">Alex Chen</span>
+                       <div className="w-8 h-8 rounded-full bg-cyan-500/10 text-cyan-500 flex items-center justify-center text-xs font-bold shrink-0">AC</div>
+                       <span className="text-sm font-bold text-[var(--ant-color-text)] shrink-0">Alex Chen</span>
                     </div>
                     <PulseOrb score={92 - (i*5)} size="sm" />
                   </div>
@@ -135,15 +135,15 @@ export default function Pipeline() {
 
               <Text type="secondary" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: 1, display: 'block', marginBottom: 16 }}>Pipeline Status</Text>
               
-              <div className="relative border-l border-foreground/10 ml-2 pl-6 space-y-6">
+              <div className="relative border-l border-[var(--ant-color-border-secondary)] ml-2 pl-6 space-y-6">
                 <div className="relative">
                   <span className="absolute -left-[31px] w-3 h-3 rounded-full bg-slate-500 shadow-[0_0_10px_currentColor] top-1" />
-                  <div className="text-sm font-medium text-white mb-0.5">Applied</div>
+                  <div className="text-sm font-medium text-[var(--ant-color-text)] mb-0.5">Applied</div>
                   <div className="text-xs text-muted-foreground/80">Mar 15, 2026</div>
                 </div>
                 <div className="relative">
                   <span className="absolute -left-[31px] w-3 h-3 rounded-full bg-amber-500 shadow-[0_0_10px_currentColor] top-1" />
-                  <div className="text-sm font-medium text-white mb-0.5">Shortlisted</div>
+                  <div className="text-sm font-medium text-[var(--ant-color-text)] mb-0.5">Shortlisted</div>
                   <div className="text-xs text-muted-foreground/80">Mar 18, 2026</div>
                 </div>
                 <div className="relative p-3 rounded-lg border" style={{ backgroundColor: 'rgba(139,92,246,0.1)', borderColor: 'rgba(139,92,246,0.2)', marginLeft: -8, marginTop: -8 }}>
