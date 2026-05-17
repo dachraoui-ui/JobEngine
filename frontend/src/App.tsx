@@ -2,6 +2,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { ConfigProvider, theme as antdTheme } from "antd";
+import { useTheme } from "@/components/ThemeProvider";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -43,10 +45,52 @@ function AdminShell({ children }: { children: React.ReactNode }) {
   return <AdminLayout>{children}</AdminLayout>;
 }
 
+function AntdConfigWrapper({ children }: { children: React.ReactNode }) {
+  const { theme: appTheme } = useTheme();
+  let resolvedTheme = appTheme;
+  if (appTheme === "system") {
+    resolvedTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  }
+  return (
+    <ConfigProvider
+      theme={{
+        algorithm: resolvedTheme === 'dark' ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
+        token: {
+          colorPrimary: '#F97316',
+          colorLink: '#F97316',
+          colorSuccess: '#4ECDC4',
+          colorInfo: '#4ECDC4',
+          borderRadius: 8,
+          fontFamily: '"Plus Jakarta Sans", system-ui, sans-serif',
+          colorBgLayout: resolvedTheme === 'dark' ? undefined : '#F8F9FB',
+          colorBgContainer: resolvedTheme === 'dark' ? '#0F1A2E' : '#FFFFFF',
+        },
+        components: {
+          Menu: {
+            darkItemSelectedBg: '#F97316',
+            darkItemSelectedColor: '#FFFFFF',
+            darkSubMenuItemBg: '#162340',
+          },
+          Button: {
+            colorPrimary: '#F97316',
+            algorithm: true,
+          },
+          Progress: {
+            colorSuccess: '#4ECDC4',
+          },
+        },
+      }}
+    >
+      {children}
+    </ConfigProvider>
+  );
+}
+
 const App = () => (
   <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || "732009230588-your-placeholder-client-id.apps.googleusercontent.com"}>
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="system" storageKey="jobengine-ui-theme">
+        <AntdConfigWrapper>
         <TooltipProvider>
       <Toaster />
       <Sonner />
@@ -86,6 +130,7 @@ const App = () => (
         </AuthProvider>
       </BrowserRouter>
       </TooltipProvider>
+      </AntdConfigWrapper>
     </ThemeProvider>
   </QueryClientProvider>
   </GoogleOAuthProvider>

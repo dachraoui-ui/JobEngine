@@ -202,16 +202,16 @@ function ExpandableAppCard({ app }: { app: any }) {
           <div className="w-full md:w-[300px] flex flex-col justify-between">
             <div className="space-y-4 mb-6">
               <div>
-                <div className="flex justify-between text-xs mb-1"><span className="text-muted-foreground">Skills Match</span><span className="text-emerald-400">92%</span></div>
-                <div className="h-1.5 w-full bg-foreground/5 rounded-full overflow-hidden"><div className="h-full bg-emerald-400 w-[92%]" /></div>
+                <div className="flex justify-between text-xs mb-1"><span className="text-muted-foreground">Skills Match</span><span className="text-primary">92%</span></div>
+                <div className="h-1.5 w-full bg-foreground/5 rounded-full overflow-hidden"><div className="h-full bg-primary w-[92%]" /></div>
               </div>
               <div>
-                <div className="flex justify-between text-xs mb-1"><span className="text-muted-foreground">Experience Match</span><span className="text-emerald-400">85%</span></div>
-                <div className="h-1.5 w-full bg-foreground/5 rounded-full overflow-hidden"><div className="h-full bg-emerald-400 w-[85%]" /></div>
+                <div className="flex justify-between text-xs mb-1"><span className="text-muted-foreground">Experience Match</span><span className="text-primary">85%</span></div>
+                <div className="h-1.5 w-full bg-foreground/5 rounded-full overflow-hidden"><div className="h-full bg-primary w-[85%]" /></div>
               </div>
               <div>
-                <div className="flex justify-between text-xs mb-1"><span className="text-muted-foreground">Culture Fit</span><span className="text-amber-400">78%</span></div>
-                <div className="h-1.5 w-full bg-foreground/5 rounded-full overflow-hidden"><div className="h-full bg-amber-400 w-[78%]" /></div>
+                <div className="flex justify-between text-xs mb-1"><span className="text-muted-foreground">Culture Fit</span><span className="text-primary">78%</span></div>
+                <div className="h-1.5 w-full bg-foreground/5 rounded-full overflow-hidden"><div className="h-full bg-primary w-[78%]" /></div>
               </div>
             </div>
 

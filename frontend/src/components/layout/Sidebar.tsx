@@ -1,127 +1,60 @@
-import { cn } from "@/lib/utils";
-import { NavLink } from "react-router-dom";
-import {
-  LayoutDashboard,
-  Briefcase,
-  Users,
-  GitBranch,
-  BarChart3,
-  Settings,
-  Zap,
-  ChevronLeft,
-  ChevronRight,
-  LogOut,
-} from "lucide-react";
+// Redesigned with Ant Design — logic unchanged
+import { NavLink, useLocation } from "react-router-dom";
+import { DashboardOutlined, AppstoreOutlined, TeamOutlined, BranchesOutlined, BarChartOutlined, SettingOutlined, LogoutOutlined, ThunderboltOutlined } from "@ant-design/icons";
+import { Layout, Menu, Typography } from "antd";
 import { useState } from "react";
 
+const { Sider } = Layout;
+const { Text } = Typography;
+
 const navItems = [
-  { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
-  { icon: Briefcase, label: "Jobs", path: "/jobs" },
-  { icon: Users, label: "Candidates", path: "/candidates" },
-  { icon: GitBranch, label: "Pipeline", path: "/pipeline" },
-  { icon: BarChart3, label: "Analytics", path: "/analytics" },
-  { icon: Settings, label: "Settings", path: "/settings" },
+  { key: "/dashboard", icon: <DashboardOutlined />, label: "Dashboard" },
+  { key: "/jobs", icon: <AppstoreOutlined />, label: "Jobs" },
+  { key: "/candidates", icon: <TeamOutlined />, label: "Candidates" },
+  { key: "/pipeline", icon: <BranchesOutlined />, label: "Pipeline" },
+  { key: "/analytics", icon: <BarChartOutlined />, label: "Analytics" },
+  { key: "/settings", icon: <SettingOutlined />, label: "Settings" },
 ];
 
 export function AppSidebar() {
-  const [expanded, setExpanded] = useState(true);
+  const [collapsed, setCollapsed] = useState(false);
+  const location = useLocation();
 
   return (
-    <>
-      {/* Desktop Sidebar */}
-      <aside className={cn(
-        "hidden md:flex flex-col h-screen bg-sidebar border-r border-sidebar-border fixed left-0 top-0 z-40 transition-all duration-300",
-        expanded ? "w-[260px]" : "w-[72px]"
-      )}>
-        {/* Logo */}
-        <div className="flex items-center h-16 px-4 border-b border-sidebar-border">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center glow-cyan">
-              <Zap className="w-5 h-5 text-primary" />
-            </div>
-            {expanded && (
-              <div className="animate-fade-in">
-                <h1 className="font-bold text-foreground tracking-tighter text-lg">JobEngine</h1>
-              </div>
-            )}
-          </div>
+    <Sider 
+      collapsible 
+      collapsed={collapsed} 
+      onCollapse={(value) => setCollapsed(value)}
+      breakpoint="lg"
+      theme="dark"
+      width={260}
+      style={{ background: '#1B2D4F' }}
+    >
+      <div style={{ padding: '16px', display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+        <div style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(249, 115, 22, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <ThunderboltOutlined style={{ color: '#F97316', fontSize: '20px' }} />
         </div>
-
-        {/* Nav items with constellation lines */}
-        <nav className="flex-1 px-3 py-6 relative">
-          {/* Constellation line */}
-          <div className="absolute left-[34px] top-8 bottom-8 w-px bg-border" style={{ width: expanded ? undefined : undefined }}>
-            <div className="absolute inset-0 bg-gradient-to-b from-primary/20 via-secondary/20 to-transparent" />
-          </div>
-
-          <div className="space-y-1 relative">
-            {navItems.map((item) => (
-              <NavLink
-                key={item.path}
-                to={item.path}
-                end={item.path === "/"}
-                className={({ isActive }) => cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group relative",
-                  isActive
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:text-foreground hover:bg-foreground/5"
-                )}
-              >
-                {({ isActive }) => (
-                  <>
-                    {isActive && (
-                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-primary rounded-r-full glow-cyan" />
-                    )}
-                    <item.icon className={cn("w-5 h-5 shrink-0", isActive && "drop-shadow-[0_0_6px_rgba(0,212,255,0.5)]")} />
-                    {expanded && <span>{item.label}</span>}
-                  </>
-                )}
-              </NavLink>
-            ))}
-          </div>
-
-          <div className="absolute bottom-6 left-3 right-3 space-y-1">
-             <NavLink
-                to="/login"
-                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 group relative"
-              >
-                <LogOut className="w-5 h-5 shrink-0" />
-                {expanded && <span>Logout</span>}
-             </NavLink>
-          </div>
-        </nav>
-
-        {/* Collapse toggle */}
-        <div className="p-3 border-t border-sidebar-border">
-          <button
-            onClick={() => setExpanded(!expanded)}
-            className="flex items-center justify-center w-full h-9 rounded-xl text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-colors"
-          >
-            {expanded ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-          </button>
-        </div>
-      </aside>
-
-      {/* Mobile Bottom Tab Bar */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-sidebar border-t border-sidebar-border flex justify-around py-2 px-1">
-        {navItems.slice(0, 5).map((item) => (
-          <NavLink
-            key={item.path}
-            to={item.path}
-            end={item.path === "/"}
-            className={({ isActive }) => cn(
-              "flex flex-col items-center gap-1 px-3 py-1.5 rounded-lg text-[10px] font-medium transition-colors",
-              isActive ? "text-primary" : "text-muted-foreground"
-            )}
-          >
-            <item.icon className="w-5 h-5" />
-            <span>{item.label}</span>
-          </NavLink>
-        ))}
-      </nav>
-
-      {/* Spacer for sidebar */}
-      <div className={cn("hidden md:block shrink-0 transition-all duration-300", expanded ? "w-[260px]" : "w-[72px]")} />
-    </>
+        {!collapsed && (
+          <div style={{ fontSize: '18px', margin: 0 }}><span style={{ color: '#F97316', fontWeight: 700 }}>Job</span><span style={{ color: '#FFFFFF', fontWeight: 700 }}>Engine</span></div>
+        )}
+      </div>
+      
+      <Menu
+        theme="dark"
+        mode="inline"
+        selectedKeys={[location.pathname]}
+        items={navItems.map(item => ({
+          ...item,
+          label: <NavLink to={item.key}>{item.label}</NavLink>
+        }))}
+      />
+      
+      <div style={{ position: 'absolute', bottom: 60, width: '100%', padding: '16px' }}>
+         <NavLink to="/login" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#ff4d4f', padding: '8px', borderRadius: '8px' }}>
+            <LogoutOutlined style={{ fontSize: '18px' }} />
+            {!collapsed && <span>Logout</span>}
+         </NavLink>
+      </div>
+    </Sider>
   );
 }

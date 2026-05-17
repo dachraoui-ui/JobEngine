@@ -1,86 +1,97 @@
-import { GlassCard } from "@/components/ui/GlassCard";
+// Redesigned with Ant Design — logic unchanged
+import { Card, Typography, Row, Col, Space } from "antd";
 import { Briefcase, FileText, Target, BrainCircuit, ChevronRight } from "lucide-react";
 import { PulseOrb } from "@/components/ui/PulseOrb";
 import { Link } from "react-router-dom";
 
+const { Title, Text } = Typography;
+
 export default function Dashboard() {
   return (
-    <div className="space-y-8 animate-fade-in relative z-10">
+    <div className="space-y-8 animate-fade-in relative z-10 pb-10">
       <div className="flex flex-col gap-1">
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">Welcome back, Neural Talent</h1>
-        <p className="text-muted-foreground">Your AI profile is active. You have 3 new highly compatible job matches today.</p>
+        <Title level={2} style={{ margin: 0, color: 'var(--foreground)' }}>Welcome back, Neural Talent</Title>
+        <Text type="secondary">Your AI profile is active. You have 3 new highly compatible job matches today.</Text>
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <Row gutter={[16, 16]}>
         {[
-          { label: "Profile Strength", value: "88/100", icon: <BrainCircuit className="w-5 h-5 text-primary" />, color: "border-primary/20", bg: "bg-primary/5" },
-          { label: "Active Applications", value: "8", icon: <Briefcase className="w-5 h-5 text-secondary" />, color: "border-secondary/20", bg: "bg-secondary/5" },
-          { label: "Interviews", value: "2", icon: <Target className="w-5 h-5 text-emerald-400" />, color: "border-emerald-500/20", bg: "bg-emerald-500/5" },
-          { label: "Profile Views", value: "45", icon: <FileText className="w-5 h-5 text-amber-400" />, color: "border-amber-500/20", bg: "bg-amber-500/5" },
+          { label: "Profile Strength", value: "88/100", icon: <BrainCircuit className="w-5 h-5 text-primary" />, color: "var(--primary)", bg: "rgba(249, 115, 22, 0.05)" },
+          { label: "Active Applications", value: "8", icon: <Briefcase className="w-5 h-5 text-secondary" />, color: "var(--secondary)", bg: "rgba(139, 92, 246, 0.05)" },
+          { label: "Interviews", value: "2", icon: <Target className="w-5 h-5 text-emerald-400" />, color: "#34d399", bg: "rgba(52, 211, 153, 0.05)" },
+          { label: "Profile Views", value: "45", icon: <FileText className="w-5 h-5 text-amber-400" />, color: "#fbbf24", bg: "rgba(251, 191, 36, 0.05)" },
         ].map((stat, i) => (
-          <GlassCard key={i} className={`p-5 border ${stat.color} ${stat.bg}`}>
-            <div className="flex justify-between items-start mb-2">
-              <span className="text-sm font-medium text-muted-foreground">{stat.label}</span>
-              <div className="p-2 rounded-lg bg-foreground/5 shrink-0">{stat.icon}</div>
-            </div>
-            <span className="text-3xl font-mono font-bold text-white">{stat.value}</span>
-          </GlassCard>
+          <Col xs={24} md={12} lg={6} key={i}>
+            <Card bordered={false} style={{ background: 'var(--surface)', borderColor: `${stat.color}33`, borderWidth: 1, borderStyle: 'solid' }}>
+              <div className="flex justify-between items-start mb-2">
+                <Text type="secondary" style={{ fontSize: 14 }}>{stat.label}</Text>
+                <div className="p-2 rounded-lg shrink-0" style={{ backgroundColor: stat.bg }}>{stat.icon}</div>
+              </div>
+              <span className="text-3xl font-mono font-bold text-white">{stat.value}</span>
+            </Card>
+          </Col>
         ))}
-      </div>
+      </Row>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <Row gutter={[24, 24]}>
         {/* Recommended Matches */}
-        <div className="lg:col-span-2 space-y-4">
-          <div className="flex justify-between items-center mb-2">
-            <h2 className="text-xl font-semibold">Top Neural Matches</h2>
-            <Link to="/candidate/explore" className="text-sm text-primary hover:underline flex items-center">View all <ChevronRight className="w-4 h-4 ml-1" /></Link>
+        <Col xs={24} lg={16}>
+          <div className="space-y-4">
+            <div className="flex justify-between items-center mb-2">
+              <Title level={4} style={{ margin: 0, color: 'var(--foreground)' }}>Top Neural Matches</Title>
+              <Link to="/candidate/explore" className="text-sm text-primary hover:underline flex items-center">View all <ChevronRight className="w-4 h-4 ml-1" /></Link>
+            </div>
+            
+            {[
+              { id: 101, title: "Senior React Developer", company: "TechCorp", location: "Remote", score: 95 },
+              { id: 102, title: "Frontend Lead", company: "DataSync", location: "New York, NY", score: 88 },
+              { id: 103, title: "Full Stack Engineer", company: "Neurolab", location: "Remote", score: 84 },
+            ].map((job) => (
+              <Card key={job.id} bordered={false} hoverable style={{ background: 'var(--surface)' }} bodyStyle={{ padding: 16 }}>
+                <div className="flex items-center justify-between">
+                  <div className="flex gap-4 items-center">
+                    <div className="w-12 h-12 rounded-xl bg-foreground/10 flex items-center justify-center font-bold text-xl text-primary shrink-0">
+                      {job.company.charAt(0)}
+                    </div>
+                    <div>
+                      <Title level={5} style={{ margin: 0, color: 'var(--foreground)' }} className="group-hover:text-primary transition-colors cursor-pointer">{job.title}</Title>
+                      <Text type="secondary" style={{ fontSize: 13 }}>{job.company} • {job.location}</Text>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <PulseOrb score={job.score} size="md" />
+                    <Link to={`/candidate/job/${job.id}`} className="hidden sm:flex text-sm text-muted-foreground hover:text-white transition-colors">View Details</Link>
+                  </div>
+                </div>
+              </Card>
+            ))}
           </div>
-          
-          {[
-            { id: 101, title: "Senior React Developer", company: "TechCorp", location: "Remote", score: 95 },
-            { id: 102, title: "Frontend Lead", company: "DataSync", location: "New York, NY", score: 88 },
-            { id: 103, title: "Full Stack Engineer", company: "Neurolab", location: "Remote", score: 84 },
-          ].map((job) => (
-            <GlassCard key={job.id} className="p-4 flex items-center justify-between group hover:border-primary/50 transition-colors">
-              <div className="flex gap-4 items-center">
-                <div className="w-12 h-12 rounded-xl bg-foreground/10 flex items-center justify-center font-bold text-xl text-primary shrink-0">
-                  {job.company.charAt(0)}
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-white group-hover:text-primary transition-colors cursor-pointer">{job.title}</h3>
-                  <p className="text-sm text-muted-foreground">{job.company} • {job.location}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-4">
-                <PulseOrb score={job.score} size="md" />
-                <Link to={`/candidate/job/${job.id}`} className="hidden sm:flex text-sm text-muted-foreground hover:text-white transition-colors">View Details</Link>
-              </div>
-            </GlassCard>
-          ))}
-        </div>
+        </Col>
 
         {/* Action Center */}
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold mb-2">Action Center</h2>
-          
-          <GlassCard className="p-5 border-amber-500/20 bg-amber-500/5 relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-2 h-full bg-amber-500" />
-            <h3 className="font-semibold text-white mb-1">Interview Scheduled</h3>
-            <p className="text-sm text-muted-foreground mb-3">With DataFlow Systems</p>
-            <p className="text-xs text-amber-400 font-mono">Tomorrow, 10:00 AM</p>
-          </GlassCard>
+        <Col xs={24} lg={8}>
+          <div className="space-y-4">
+            <Title level={4} style={{ margin: 0, marginBottom: 8, color: 'var(--foreground)' }}>Action Center</Title>
+            
+            <Card bordered={false} style={{ background: 'rgba(245, 158, 11, 0.05)', borderColor: 'rgba(245, 158, 11, 0.2)', borderWidth: 1, borderStyle: 'solid', position: 'relative', overflow: 'hidden' }} bodyStyle={{ padding: 20 }}>
+              <div className="absolute top-0 right-0 w-2 h-full bg-amber-500" />
+              <Text strong style={{ display: 'block', color: 'var(--foreground)', marginBottom: 4 }}>Interview Scheduled</Text>
+              <Text type="secondary" style={{ display: 'block', marginBottom: 12 }}>With DataFlow Systems</Text>
+              <Text strong style={{ color: '#fbbf24', fontFamily: 'monospace' }}>Tomorrow, 10:00 AM</Text>
+            </Card>
 
-          <GlassCard className="p-5 border-secondary/20 relative overflow-hidden">
-             <div className="absolute -right-6 -bottom-6 opacity-20">
-              <BrainCircuit className="w-32 h-32 text-secondary" />
-            </div>
-            <h3 className="font-semibold text-white mb-1 relative z-10">AI Pro Tip</h3>
-            <p className="text-sm text-muted-foreground mb-4 relative z-10">Adding "GraphQL" to your skills can increase your match rate by 15% for current open roles.</p>
-            <Link to="/candidate/career-ai" className="text-sm text-secondary hover:underline relative z-10">Explore Career AI →</Link>
-          </GlassCard>
-        </div>
-      </div>
+            <Card bordered={false} style={{ background: 'var(--surface)', borderColor: 'var(--secondary)', borderWidth: 1, borderStyle: 'solid', position: 'relative', overflow: 'hidden' }} bodyStyle={{ padding: 20 }}>
+               <div className="absolute -right-6 -bottom-6 opacity-20">
+                <BrainCircuit className="w-32 h-32 text-secondary" />
+              </div>
+              <Text strong style={{ display: 'block', color: 'var(--foreground)', marginBottom: 4, position: 'relative', zIndex: 10 }}>AI Pro Tip</Text>
+              <Text type="secondary" style={{ display: 'block', marginBottom: 16, position: 'relative', zIndex: 10, fontSize: 13 }}>Adding "GraphQL" to your skills can increase your match rate by 15% for current open roles.</Text>
+              <Link to="/candidate/career-ai" className="text-sm text-secondary hover:underline relative z-10">Explore Career AI →</Link>
+            </Card>
+          </div>
+        </Col>
+      </Row>
     </div>
   );
 }

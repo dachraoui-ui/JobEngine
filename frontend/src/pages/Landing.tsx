@@ -111,7 +111,7 @@ export default function Landing() {
             <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center glow-cyan">
               <Zap className="w-4 h-4 text-primary" />
             </div>
-            <span className="font-bold text-lg tracking-tighter text-foreground">JobEngine</span>
+            <div style={{ fontSize: '18px', margin: 0, display: 'inline-block' }}><span style={{ color: '#F97316', fontWeight: 700 }}>Job</span><span style={{ color: 'var(--foreground)', fontWeight: 700 }}>Engine</span></div>
           </Link>
           <div className="hidden md:flex items-center gap-8">
             <a href="#features" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Features</a>
@@ -351,7 +351,7 @@ export default function Landing() {
           ))}
         </div>
         <div className="max-w-[1200px] mx-auto flex flex-col sm:flex-row items-center justify-between pt-8 border-t border-border gap-4">
-          <p className="text-xs text-muted-foreground">© 2026 JobEngine. All rights reserved.</p>
+          <p className="text-xs text-muted-foreground">© 2026 <span style={{ color: '#F97316', fontWeight: 700 }}>Job</span><span style={{ color: 'var(--foreground)', fontWeight: 700 }}>Engine</span>. All rights reserved.</p>
           <div className="flex items-center gap-4">
             <a href="#" className="text-muted-foreground hover:text-foreground transition-colors"><Github className="w-4 h-4" /></a>
             <a href="#" className="text-muted-foreground hover:text-foreground transition-colors"><Linkedin className="w-4 h-4" /></a>

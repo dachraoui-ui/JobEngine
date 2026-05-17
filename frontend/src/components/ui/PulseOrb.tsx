@@ -8,7 +8,7 @@ interface PulseOrbProps {
 }
 
 const getScoreColor = (score: number) => {
-  if (score >= 80) return { bg: "bg-primary", ring: "bg-primary/40", text: "text-primary", shadow: "shadow-[0_0_16px_rgba(0,212,255,0.4)]" };
+  if (score >= 80) return { bg: "bg-primary", ring: "bg-primary/40", text: "text-primary", shadow: "shadow-[0_0_16px_rgba(249,115,22,0.4)]" };
   if (score >= 60) return { bg: "bg-warning", ring: "bg-warning/40", text: "text-warning", shadow: "shadow-[0_0_16px_rgba(245,158,11,0.4)]" };
   return { bg: "bg-destructive", ring: "bg-destructive/40", text: "text-destructive", shadow: "shadow-[0_0_16px_rgba(244,63,94,0.4)]" };
 };

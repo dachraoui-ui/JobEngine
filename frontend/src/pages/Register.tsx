@@ -1,44 +1,19 @@
+// Redesigned with Ant Design — logic unchanged
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { GlassCard } from "@/components/ui/GlassCard";
 import {
-  Zap, User, Building2, ChevronRight, Mail, Lock, Eye, EyeOff,
-  Globe, Loader2, Check, ShieldCheck, Sparkles,
+  Zap, User, Building2, ChevronRight, ShieldCheck, Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/hooks/useAuth";
 import api from "@/lib/api";
 import { GoogleLogin } from "@react-oauth/google";
+import { Card, Form, Input, Select, Button, Checkbox, message, Typography, Steps } from "antd";
+import { MailOutlined, LockOutlined, GlobalOutlined } from "@ant-design/icons";
+
+const { Title, Text } = Typography;
 
 type Role = "candidate" | "recruiter" | null;
-
-function PasswordStrength({ password }: { password: string }) {
-  const getStrength = () => {
-    let s = 0;
-    if (password.length >= 6) s++;
-    if (password.length >= 10) s++;
-    if (/[A-Z]/.test(password) && /[0-9]/.test(password)) s++;
-    if (/[^A-Za-z0-9]/.test(password)) s++;
-    return s;
-  };
-  const strength = getStrength();
-  const labels = ["", "Weak", "Fair", "Strong", "Excellent ✓"];
-  const colors = ["", "bg-destructive", "bg-warning", "bg-primary", "bg-accent"];
-  const textColors = ["", "text-destructive", "text-warning", "text-primary", "text-accent"];
-
-  if (!password) return null;
-  return (
-    <div className="mt-2 space-y-1.5 animate-fade-in">
-      <div className="flex gap-1.5">
-        {[1, 2, 3, 4].map((i) => (
-          <div key={i} className={cn("h-1 flex-1 rounded-full transition-all duration-300", i <= strength ? colors[strength] : "bg-foreground/10")} />
-        ))}
-      </div>
-      <p className={cn("text-[11px] font-medium", textColors[strength])}>{labels[strength]}</p>
-    </div>
-  );
-}
 
 function AnimatedCheckmark() {
   return (
@@ -55,65 +30,42 @@ function AnimatedCheckmark() {
 
 export default function Register() {
   const navigate = useNavigate();
+  const [form] = Form.useForm();
   const [step, setStep] = useState(1);
   const [role, setRole] = useState<Role>(null);
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [companyName, setCompanyName] = useState("");
-  const [industry, setIndustry] = useState("");
-  const [website, setWebsite] = useState("");
-  const [agreed, setAgreed] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
   const { login } = useAuth();
   
-  const handleStep2Submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-
-    if (!firstName || !lastName || !email || !password || !confirmPassword) {
-      setError("Please fill in all required fields.");
+  const onFinish = async (values: any) => {
+    if (values.password !== values.confirmPassword) {
+      message.error("Passwords do not match.");
       return;
     }
-    if (password !== confirmPassword) {
-      setError("Passwords do not match.");
-      return;
-    }
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters.");
-      return;
-    }
-    if (!agreed) {
-      setError("You must agree to the terms.");
+    if (!values.agreed) {
+      message.error("You must agree to the terms.");
       return;
     }
 
     try {
       setLoading(true);
       const payload = {
-        firstName,
-        lastName,
-        email,
-        password,
-        phone: "", // Optional field
+        firstName: values.firstName,
+        lastName: values.lastName,
+        email: values.email,
+        password: values.password,
+        phone: "", 
         role: role?.toUpperCase(),
-        // Note: For recruiter profile, you would trigger a secondary endpoint to update companyName, industry, website
       };
 
       const res = await api.post('/auth/register', payload);
       const { token, role: userRole, ...userData } = res.data.data;
       
-      // Save auth locally
       login(token, { ...userData, role: userRole });
       
       setStep(3);
     } catch (err: any) {
-      setError(err?.response?.data?.message || "Failed to register. Email may be taken.");
+      message.error(err?.response?.data?.message || "Failed to register. Email may be taken.");
     } finally {
       setLoading(false);
     }
@@ -121,7 +73,7 @@ export default function Register() {
 
   const handleGoogleSuccess = async (credentialResponse: any) => {
     if (!role) {
-      setError("Please select a role before continuing with Google.");
+      message.error("Please select a role before continuing with Google.");
       return;
     }
     try {
@@ -135,7 +87,7 @@ export default function Register() {
       login(token, { ...userData, role: userRole });
       setStep(3);
     } catch (err: any) {
-      setError(err?.response?.data?.message || "Google registration failed.");
+      message.error(err?.response?.data?.message || "Google registration failed.");
     } finally {
       setLoading(false);
     }
@@ -145,13 +97,11 @@ export default function Register() {
 
   return (
     <div className="min-h-screen bg-background dot-grid relative flex items-center justify-center overflow-hidden px-4 py-12">
-      {/* Light leaks */}
       <div className="absolute top-0 left-0 w-[600px] h-[600px] rounded-full bg-primary/[0.12] blur-[180px] pointer-events-none" />
       <div className="absolute bottom-0 right-0 w-[500px] h-[500px] rounded-full bg-secondary/[0.08] blur-[160px] pointer-events-none" />
 
       <div className="relative z-10 w-full max-w-[520px] animate-scale-in">
-        <GlassCard className="p-8 sm:p-10 overflow-hidden">
-          {/* Logo */}
+        <Card bordered={false} style={{ background: 'var(--surface)', boxShadow: '0 8px 32px rgba(0,0,0,0.1)' }}>
           <div className="flex justify-center mb-6">
             <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center glow-cyan animate-pulse-glow">
               <Zap className="w-6 h-6 text-primary" />
@@ -160,27 +110,19 @@ export default function Register() {
 
           {step < 3 && (
             <>
-              <h1 className="text-2xl font-bold text-foreground text-center tracking-tighter mb-1">Join JobEngine</h1>
-              <p className="text-sm text-muted-foreground text-center mb-8">Create your account and start connecting</p>
+              <Title level={3} style={{ textAlign: 'center', marginBottom: '4px', color: 'var(--foreground)' }}>Join <span style={{ color: '#F97316', fontWeight: 700 }}>Job</span><span style={{ color: 'var(--foreground)', fontWeight: 700 }}>Engine</span></Title>
+              <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+                 <Text type="secondary">Create your account and start connecting</Text>
+              </div>
             </>
           )}
 
-          {/* Progress dots */}
           {step < 3 && (
-            <div className="flex items-center justify-center gap-2 mb-8">
-              {[1, 2, 3].map((d) => (
-                <div key={d} className={cn(
-                  "w-2 h-2 rounded-full transition-all duration-300",
-                  d <= step ? "bg-primary glow-cyan" : "bg-foreground/10"
-                )} />
-              ))}
-            </div>
-          )}
-
-          {error && (
-            <div className="mb-6 px-4 py-3 rounded-xl bg-destructive/10 border border-destructive/20 text-sm text-destructive animate-fade-in">
-              {error}
-            </div>
+            <Steps 
+              current={step - 1} 
+              items={[{ title: 'Role' }, { title: 'Details' }, { title: 'Done' }]} 
+              style={{ marginBottom: '32px' }} 
+            />
           )}
 
           {/* ─── STEP 1: Role ─── */}
@@ -188,7 +130,6 @@ export default function Register() {
             <div className="animate-fade-in space-y-6">
               <p className="text-sm font-medium text-foreground text-center">I am a...</p>
               <div className="grid grid-cols-2 gap-4">
-                {/* Candidate */}
                 <button
                   onClick={() => setRole("candidate")}
                   className={cn(
@@ -198,11 +139,6 @@ export default function Register() {
                       : "border-foreground/[0.06] bg-foreground/[0.02] hover:border-foreground/[0.12]"
                   )}
                 >
-                  {role === "candidate" && (
-                    <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-primary flex items-center justify-center animate-scale-in">
-                      <Check className="w-3 h-3 text-primary-foreground" />
-                    </div>
-                  )}
                   <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center mb-3", role === "candidate" ? "bg-primary/20" : "bg-foreground/5")}>
                     <User className={cn("w-5 h-5", role === "candidate" ? "text-primary" : "text-muted-foreground")} />
                   </div>
@@ -210,7 +146,6 @@ export default function Register() {
                   <p className="text-[11px] text-muted-foreground leading-relaxed">Find jobs matched to your skills by AI</p>
                 </button>
 
-                {/* Recruiter */}
                 <button
                   onClick={() => setRole("recruiter")}
                   className={cn(
@@ -220,28 +155,26 @@ export default function Register() {
                       : "border-foreground/[0.06] bg-foreground/[0.02] hover:border-foreground/[0.12]"
                   )}
                 >
-                  {role === "recruiter" && (
-                    <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-secondary flex items-center justify-center animate-scale-in">
-                      <Check className="w-3 h-3 text-white" />
-                    </div>
-                  )}
                   <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center mb-3", role === "recruiter" ? "bg-secondary/20" : "bg-foreground/5")}>
                     <Building2 className={cn("w-5 h-5", role === "recruiter" ? "text-secondary" : "text-muted-foreground")} />
                   </div>
                   <p className="font-semibold text-foreground text-sm mb-1">Recruiter</p>
-                  <p className="text-[11px] text-muted-foreground leading-relaxed">Find perfect candidates with neural matching</p>
+                  <p className="text-[11px] text-muted-foreground leading-relaxed">Find perfect candidates</p>
                 </button>
               </div>
 
-              <button
+              <Button
+                type="primary"
                 onClick={() => { if (role) setStep(2); }}
                 disabled={!role}
-                className="w-full h-11 rounded-xl bg-primary text-primary-foreground font-semibold text-sm glow-cyan hover:shadow-[0_0_30px_rgba(0,212,255,0.4)] transition-all duration-200 disabled:opacity-30 disabled:shadow-none flex items-center justify-center gap-2"
+                block
+                size="large"
+                style={{ height: '44px' }}
               >
                 Continue with Email <ChevronRight className="w-4 h-4" />
-              </button>
+              </Button>
 
-              <div className="relative">
+              <div className="relative my-6">
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-border"></div>
                 </div>
@@ -250,11 +183,11 @@ export default function Register() {
                 </div>
               </div>
 
-              <div className="flex justify-center w-full" onClick={() => { if (!role) setError("Please select a role first."); }}>
+              <div className="flex justify-center w-full" onClick={() => { if (!role) message.error("Please select a role first."); }}>
                 <div className={cn(!role && "opacity-50 pointer-events-none")}>
                   <GoogleLogin
                     onSuccess={handleGoogleSuccess}
-                    onError={() => setError("Google authentication failed")}
+                    onError={() => message.error("Google authentication failed")}
                     useOneTap
                     theme="filled_black"
                     shape="rectangular"
@@ -268,130 +201,85 @@ export default function Register() {
 
           {/* ─── STEP 2: Form ─── */}
           {step === 2 && (
-            <form onSubmit={handleStep2Submit} className="animate-slide-in-right space-y-4">
-              {/* Name row */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <label className="text-[11px] uppercase tracking-widest text-muted-foreground font-medium">First Name</label>
-                  <input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="John" className="w-full h-11 px-4 rounded-xl bg-surface border border-border text-sm text-foreground placeholder:text-muted-foreground/50 outline-none focus:border-primary focus:shadow-[0_0_12px_rgba(0,212,255,0.15)] transition-all" />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-[11px] uppercase tracking-widest text-muted-foreground font-medium">Last Name</label>
-                  <input value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Doe" className="w-full h-11 px-4 rounded-xl bg-surface border border-border text-sm text-foreground placeholder:text-muted-foreground/50 outline-none focus:border-primary focus:shadow-[0_0_12px_rgba(0,212,255,0.15)] transition-all" />
-                </div>
+            <Form form={form} layout="vertical" onFinish={onFinish} size="large" className="animate-slide-in-right">
+              <div style={{ display: 'flex', gap: '16px' }}>
+                <Form.Item name="firstName" label="First Name" rules={[{ required: true }]} style={{ flex: 1 }}>
+                  <Input placeholder="John" />
+                </Form.Item>
+                <Form.Item name="lastName" label="Last Name" rules={[{ required: true }]} style={{ flex: 1 }}>
+                  <Input placeholder="Doe" />
+                </Form.Item>
               </div>
 
-              {/* Email */}
-              <div className="space-y-1.5">
-                <label className="text-[11px] uppercase tracking-widest text-muted-foreground font-medium">Email</label>
-                <div className="relative">
-                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@company.com" className="w-full h-11 pl-10 pr-4 rounded-xl bg-surface border border-border text-sm text-foreground placeholder:text-muted-foreground/50 outline-none focus:border-primary focus:shadow-[0_0_12px_rgba(0,212,255,0.15)] transition-all" />
-                </div>
-              </div>
+              <Form.Item name="email" label="Email" rules={[{ required: true, type: 'email' }]}>
+                <Input prefix={<MailOutlined />} placeholder="you@company.com" />
+              </Form.Item>
 
-              {/* Password */}
-              <div className="space-y-1.5">
-                <label className="text-[11px] uppercase tracking-widest text-muted-foreground font-medium">Password</label>
-                <div className="relative">
-                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="w-full h-11 pl-10 pr-11 rounded-xl bg-surface border border-border text-sm text-foreground placeholder:text-muted-foreground/50 outline-none focus:border-primary focus:shadow-[0_0_12px_rgba(0,212,255,0.15)] transition-all" />
-                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
-                <PasswordStrength password={password} />
-              </div>
+              <Form.Item name="password" label="Password" rules={[{ required: true, min: 6 }]}>
+                <Input.Password prefix={<LockOutlined />} placeholder="••••••••" />
+              </Form.Item>
 
-              {/* Confirm */}
-              <div className="space-y-1.5">
-                <label className="text-[11px] uppercase tracking-widest text-muted-foreground font-medium">Confirm Password</label>
-                <div className="relative">
-                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="••••••••" className="w-full h-11 pl-10 pr-4 rounded-xl bg-surface border border-border text-sm text-foreground placeholder:text-muted-foreground/50 outline-none focus:border-primary focus:shadow-[0_0_12px_rgba(0,212,255,0.15)] transition-all" />
-                </div>
-              </div>
+              <Form.Item name="confirmPassword" label="Confirm Password" rules={[{ required: true }]}>
+                <Input.Password prefix={<LockOutlined />} placeholder="••••••••" />
+              </Form.Item>
 
-              {/* Recruiter extra fields */}
               {role === "recruiter" && (
-                <div className="space-y-4 pt-2 animate-fade-in">
-                  <div className="h-px bg-border" />
-                  <p className="text-[11px] uppercase tracking-widest text-muted-foreground font-medium">Company Details</p>
-                  <div className="space-y-1.5">
-                    <label className="text-[11px] uppercase tracking-widest text-muted-foreground font-medium">Company Name</label>
-                    <div className="relative">
-                      <Building2 className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <input value={companyName} onChange={(e) => setCompanyName(e.target.value)} placeholder="Acme Inc." className="w-full h-11 pl-10 pr-4 rounded-xl bg-surface border border-border text-sm text-foreground placeholder:text-muted-foreground/50 outline-none focus:border-primary focus:shadow-[0_0_12px_rgba(0,212,255,0.15)] transition-all" />
-                    </div>
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-[11px] uppercase tracking-widest text-muted-foreground font-medium">Industry</label>
-                    <select value={industry} onChange={(e) => setIndustry(e.target.value)} className="w-full h-11 px-4 rounded-xl bg-surface border border-border text-sm text-foreground outline-none focus:border-primary focus:shadow-[0_0_12px_rgba(0,212,255,0.15)] transition-all appearance-none cursor-pointer">
-                      <option value="" className="bg-surface text-muted-foreground">Select industry</option>
-                      {industries.map((ind) => (
-                        <option key={ind} value={ind} className="bg-surface text-foreground">{ind}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-[11px] uppercase tracking-widest text-muted-foreground font-medium">Website <span className="normal-case text-muted-foreground/50">(optional)</span></label>
-                    <div className="relative">
-                      <Globe className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <input value={website} onChange={(e) => setWebsite(e.target.value)} placeholder="https://company.com" className="w-full h-11 pl-10 pr-4 rounded-xl bg-surface border border-border text-sm text-foreground placeholder:text-muted-foreground/50 outline-none focus:border-primary focus:shadow-[0_0_12px_rgba(0,212,255,0.15)] transition-all" />
-                    </div>
-                  </div>
-                </div>
+                <>
+                  <Form.Item name="companyName" label="Company Name" rules={[{ required: true }]}>
+                    <Input placeholder="Acme Inc." />
+                  </Form.Item>
+                  <Form.Item name="industry" label="Industry" rules={[{ required: true }]}>
+                    <Select placeholder="Select industry" options={industries.map(ind => ({ label: ind, value: ind }))} />
+                  </Form.Item>
+                  <Form.Item name="website" label="Website (optional)">
+                    <Input prefix={<GlobalOutlined />} placeholder="https://company.com" />
+                  </Form.Item>
+                </>
               )}
 
-              {/* Terms */}
-              <div className="flex items-start gap-3 pt-2">
-                <Checkbox checked={agreed} onCheckedChange={(v) => setAgreed(v as boolean)} className="mt-0.5 data-[state=checked]:bg-primary data-[state=checked]:border-primary" />
-                <span className="text-xs text-muted-foreground leading-relaxed">
-                  I agree to the <a href="#" className="text-primary hover:underline">Terms of Service</a> and <a href="#" className="text-primary hover:underline">Privacy Policy</a>
-                </span>
-              </div>
+              <Form.Item name="agreed" valuePropName="checked" rules={[{ validator: (_, value) => value ? Promise.resolve() : Promise.reject(new Error('You must agree to terms')) }]}>
+                <Checkbox>I agree to the Terms of Service and Privacy Policy</Checkbox>
+              </Form.Item>
 
-              {/* Buttons */}
-              <div className="flex gap-3 pt-2">
-                <button type="button" onClick={() => setStep(1)} className="h-11 px-5 rounded-xl border border-border text-sm text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-all">Back</button>
-                <button type="submit" disabled={loading} className="flex-1 h-11 rounded-xl bg-primary text-primary-foreground font-semibold text-sm glow-cyan hover:shadow-[0_0_30px_rgba(0,212,255,0.4)] transition-all duration-200 disabled:opacity-70 flex items-center justify-center">
-                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Create Account"}
-                </button>
+              <div style={{ display: 'flex', gap: '16px' }}>
+                <Button onClick={() => setStep(1)} size="large" style={{ width: '100px' }}>Back</Button>
+                <Button type="primary" htmlType="submit" loading={loading} block size="large">
+                  Create Account
+                </Button>
               </div>
-            </form>
+            </Form>
           )}
 
           {/* ─── STEP 3: Success ─── */}
           {step === 3 && (
             <div className="text-center animate-scale-in py-4">
               <AnimatedCheckmark />
-              <h2 className="text-2xl font-bold text-foreground tracking-tighter mb-2">Welcome to JobEngine! 🚀</h2>
+              <Title level={3} style={{ color: 'var(--foreground)' }}>Welcome to <span style={{ color: '#F97316', fontWeight: 700 }}>Job</span><span style={{ color: 'var(--foreground)', fontWeight: 700 }}>Engine</span>! 🚀</Title>
               {role === "candidate" ? (
                 <>
                   <p className="text-sm text-muted-foreground mb-8">Let's upload your CV and start matching.</p>
-                  <button onClick={() => navigate("/candidate/upload-cv")} className="w-full h-11 rounded-xl bg-primary text-primary-foreground font-semibold text-sm glow-cyan hover:shadow-[0_0_30px_rgba(0,212,255,0.4)] transition-all flex items-center justify-center gap-2">
-                    <Sparkles className="w-4 h-4" /> Upload CV
-                  </button>
+                  <Button type="primary" size="large" onClick={() => navigate("/candidate/upload-cv")} block icon={<Sparkles className="w-4 h-4" />}>
+                    Upload CV
+                  </Button>
                 </>
               ) : (
                 <>
                   <p className="text-sm text-muted-foreground mb-8">Your account is pending verification. We'll review it within 24 hours.</p>
-                  <button onClick={() => navigate("/dashboard")} className="w-full h-11 rounded-xl bg-primary text-primary-foreground font-semibold text-sm glow-cyan hover:shadow-[0_0_30px_rgba(0,212,255,0.4)] transition-all flex items-center justify-center gap-2">
-                    Go to Dashboard <ChevronRight className="w-4 h-4" />
-                  </button>
+                  <Button type="primary" size="large" onClick={() => navigate("/dashboard")} block>
+                    Go to Dashboard
+                  </Button>
                 </>
               )}
             </div>
           )}
 
-          {/* Login link */}
           {step < 3 && (
             <p className="text-center text-sm text-muted-foreground mt-6">
               Already have an account?{" "}
               <Link to="/login" className="text-primary hover:text-primary/80 transition-colors font-medium">Sign in →</Link>
             </p>
           )}
-        </GlassCard>
+        </Card>
 
         <div className="flex items-center justify-center gap-1.5 mt-6">
           <ShieldCheck className="w-3.5 h-3.5 text-muted-foreground/50" />

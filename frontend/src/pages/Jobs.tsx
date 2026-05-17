@@ -1,9 +1,12 @@
+// Redesigned with Ant Design — logic unchanged
 import { useState } from "react";
-import { GlassCard } from "@/components/ui/GlassCard";
+import { Button, Card, Typography, Space, Row, Col, Segmented, Tag, Switch, Tooltip, Modal, Steps, Input, Select, Checkbox } from "antd";
+import { PlusOutlined, TeamOutlined, EyeOutlined, EditOutlined, DeleteOutlined, ArrowRightOutlined, CheckOutlined } from "@ant-design/icons";
 import { PulseOrb } from "@/components/ui/PulseOrb";
-import { Button } from "@/components/ui/button";
-import { Plus, Users, Eye, Pencil, Trash2, ArrowRight, Briefcase, MapPin, Check, ChevronRight } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { MapPin, Briefcase } from "lucide-react";
+
+const { Title, Text } = Typography;
+const { TextArea } = Input;
 
 const mockJobs = [
   { id: 1, title: "Senior React Developer", type: "Full-Time", location: "Remote", level: "Senior", skills: ["React", "TypeScript", "Node.js", "+2 more"], posted: "5 days ago", closes: "10 days", applicants: 23, status: "Active" },
@@ -23,125 +26,134 @@ export default function Jobs() {
     <div className="space-y-8 animate-fade-in pb-10">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">Command Center</h1>
-          <p className="text-muted-foreground mt-1">5 Active Missions</p>
+          <Title level={2} style={{ margin: 0, color: 'var(--foreground)' }}>Command Center</Title>
+          <Text type="secondary">5 Active Missions</Text>
         </div>
         <Button 
+          type="primary" 
+          icon={<PlusOutlined />} 
           onClick={() => setCreateModalOpen(true)}
-          className="bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-semibold shadow-[0_0_15px_rgba(0,212,255,0.4)]"
         >
-          <Plus className="w-5 h-5 mr-2" /> New Job
+          New Job
         </Button>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <GlassCard className="p-4 flex items-center gap-4">
-          <PulseOrb score={80} size="sm" />
-          <div>
-            <div className="text-2xl font-mono font-bold text-white">8</div>
-            <div className="text-xs text-muted-foreground">Total Jobs</div>
-          </div>
-        </GlassCard>
-        <GlassCard className="p-4 flex items-center gap-4">
-          <div className="relative">
-            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-400 rounded-full animate-ping" />
-            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-400 rounded-full" />
-            <PulseOrb score={90} size="sm" />
-          </div>
-          <div>
-            <div className="text-2xl font-mono font-bold text-white">5</div>
-            <div className="text-xs text-muted-foreground">Active</div>
-          </div>
-        </GlassCard>
-        <GlassCard className="p-4 flex items-center gap-4">
-          <div className="w-10 h-10 rounded-full bg-violet-500/20 border border-violet-500/30 flex items-center justify-center">
-            <Users className="w-5 h-5 text-violet-400" />
-          </div>
-          <div>
-            <div className="text-2xl font-mono font-bold text-white">127</div>
-            <div className="text-xs text-muted-foreground">Total Applicants</div>
-          </div>
-        </GlassCard>
-        <GlassCard className="p-4 flex items-center gap-4">
-          <PulseOrb score={74} size="sm" />
-          <div>
-            <div className="text-2xl font-mono font-bold text-white">74%</div>
-            <div className="text-xs text-muted-foreground">Avg Match Score</div>
-          </div>
-        </GlassCard>
-      </div>
+      <Row gutter={[16, 16]}>
+        <Col xs={12} md={6}>
+          <Card bordered={false} style={{ background: 'var(--surface)' }} bodyStyle={{ padding: 16, display: 'flex', alignItems: 'center', gap: 16 }}>
+            <PulseOrb score={80} size="sm" />
+            <div>
+              <div style={{ fontSize: 24, fontWeight: 'bold', fontFamily: 'monospace', color: 'var(--foreground)' }}>8</div>
+              <Text type="secondary" style={{ fontSize: 12 }}>Total Jobs</Text>
+            </div>
+          </Card>
+        </Col>
+        <Col xs={12} md={6}>
+          <Card bordered={false} style={{ background: 'var(--surface)' }} bodyStyle={{ padding: 16, display: 'flex', alignItems: 'center', gap: 16 }}>
+            <div className="relative">
+              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-400 rounded-full animate-ping" />
+              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-400 rounded-full" />
+              <PulseOrb score={90} size="sm" />
+            </div>
+            <div>
+              <div style={{ fontSize: 24, fontWeight: 'bold', fontFamily: 'monospace', color: 'var(--foreground)' }}>5</div>
+              <Text type="secondary" style={{ fontSize: 12 }}>Active</Text>
+            </div>
+          </Card>
+        </Col>
+        <Col xs={12} md={6}>
+          <Card bordered={false} style={{ background: 'var(--surface)' }} bodyStyle={{ padding: 16, display: 'flex', alignItems: 'center', gap: 16 }}>
+            <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(114,46,209,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <TeamOutlined style={{ fontSize: 20, color: '#722ed1' }} />
+            </div>
+            <div>
+              <div style={{ fontSize: 24, fontWeight: 'bold', fontFamily: 'monospace', color: 'var(--foreground)' }}>127</div>
+              <Text type="secondary" style={{ fontSize: 12 }}>Total Applicants</Text>
+            </div>
+          </Card>
+        </Col>
+        <Col xs={12} md={6}>
+          <Card bordered={false} style={{ background: 'var(--surface)' }} bodyStyle={{ padding: 16, display: 'flex', alignItems: 'center', gap: 16 }}>
+            <PulseOrb score={74} size="sm" />
+            <div>
+              <div style={{ fontSize: 24, fontWeight: 'bold', fontFamily: 'monospace', color: 'var(--foreground)' }}>74%</div>
+              <Text type="secondary" style={{ fontSize: 12 }}>Avg Match Score</Text>
+            </div>
+          </Card>
+        </Col>
+      </Row>
 
-      <div className="flex bg-foreground/5 border border-foreground/10 w-fit rounded-lg p-1">
-        {["Active", "Draft", "Closed"].map(tab => (
-          <button
-            key={tab}
-            onClick={() => setFilter(tab)}
-            className={`px-6 py-2 rounded-md text-sm font-medium transition-all ${filter === tab ? "bg-cyan-500/20 text-cyan-400" : "text-muted-foreground hover:text-white"}`}
-          >
-            {tab} <span className="ml-1 opacity-50">({mockJobs.filter(j => j.status === tab).length})</span>
-          </button>
-        ))}
+      <div>
+        <Segmented 
+          options={['Active', 'Draft', 'Closed']} 
+          value={filter} 
+          onChange={(val) => setFilter(val as string)} 
+          size="large"
+        />
       </div>
 
       <div className="space-y-4">
         {filteredJobs.map(job => (
-          <GlassCard key={job.id} className="p-5 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-6 hover:border-cyan-500/30 transition-colors">
-            {/* Left Section */}
-            <div className="flex-1 space-y-3">
-              <h3 className="text-lg font-bold text-white">{job.title}</h3>
-              <div className="flex flex-wrap gap-2 text-xs">
-                <span className="px-2 py-1 bg-cyan-500/10 text-cyan-400 rounded-full font-medium">{job.location}</span>
-                <span className="px-2 py-1 bg-violet-500/10 text-violet-400 rounded-full font-medium">{job.type}</span>
-                <span className="px-2 py-1 bg-amber-500/10 text-amber-400 rounded-full font-medium">{job.level}</span>
+          <Card key={job.id} bordered={false} hoverable style={{ background: 'var(--surface)' }} bodyStyle={{ padding: 20 }}>
+            <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-6">
+              {/* Left Section */}
+              <div className="flex-1 space-y-3">
+                <Title level={4} style={{ margin: 0, color: 'var(--foreground)' }}>{job.title}</Title>
+                <Space wrap size={[0, 8]}>
+                  <Tag color="cyan" bordered={false}>{job.location}</Tag>
+                  <Tag color="purple" bordered={false}>{job.type}</Tag>
+                  <Tag color="orange" bordered={false}>{job.level}</Tag>
+                </Space>
+                <div style={{ marginTop: 8 }}>
+                  <Space wrap size={[4, 4]}>
+                    {job.skills.map(s => <Tag key={s}>{s}</Tag>)}
+                  </Space>
+                </div>
+                <Text type="secondary" style={{ fontSize: 12, display: 'block', marginTop: 8 }}>
+                  Posted {job.posted} • Closes in {job.closes}
+                </Text>
               </div>
-              <div className="flex flex-wrap gap-1.5">
-                {job.skills.map(s => (
-                  <span key={s} className="px-2 py-0.5 bg-foreground/5 border border-foreground/10 rounded text-xs text-muted-foreground">{s}</span>
-                ))}
-              </div>
-              <p className="text-xs text-muted-foreground/80">Posted {job.posted} • Closes in {job.closes}</p>
-            </div>
 
-            {/* Center Metrics (Only for active/closed) */}
-            <div className="flex flex-col items-center justify-center px-4 lg:border-x lg:border-foreground/10">
-              <div className="flex items-center gap-2 mb-2">
-                <Users className="w-4 h-4 text-muted-foreground" />
-                <span className="text-2xl font-mono font-bold text-white">{job.applicants}</span>
+              {/* Center Metrics */}
+              <div className="flex flex-col items-center justify-center px-4 lg:border-x lg:border-foreground/10" style={{ borderColor: 'var(--border)' }}>
+                <Space align="center" style={{ marginBottom: 8 }}>
+                  <TeamOutlined style={{ color: 'var(--muted-foreground)' }} />
+                  <span style={{ fontSize: 24, fontWeight: 'bold', fontFamily: 'monospace', color: 'var(--foreground)' }}>{job.applicants}</span>
+                </Space>
+                <div className="flex items-end gap-1 h-6 shrink-0">
+                  <Tooltip title="0-20 score"><div className="w-1.5 bg-rose-500/50 rounded-t h-[20%]" /></Tooltip>
+                  <Tooltip title="20-40 score"><div className="w-1.5 bg-amber-500/50 rounded-t h-[40%]" /></Tooltip>
+                  <Tooltip title="40-60 score"><div className="w-1.5 bg-emerald-500/50 rounded-t h-[80%]" /></Tooltip>
+                  <Tooltip title="60-80 score"><div className="w-1.5 bg-cyan-500/50 rounded-t h-[60%]" /></Tooltip>
+                  <Tooltip title="80-100 score"><div className="w-1.5 bg-violet-500/80 rounded-t h-[100%] shadow-[0_0_5px_rgba(139,92,246,0.5)]" /></Tooltip>
+                </div>
+                <Text type="secondary" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: 1, marginTop: 4 }}>Score Dist</Text>
               </div>
-              <div className="flex items-end gap-1 h-6 shrink-0">
-                <div className="w-1.5 bg-rose-500/50 rounded-t h-[20%]" title="0-20 score" />
-                <div className="w-1.5 bg-amber-500/50 rounded-t h-[40%]" title="20-40 score" />
-                <div className="w-1.5 bg-emerald-500/50 rounded-t h-[80%]" title="40-60 score" />
-                <div className="w-1.5 bg-cyan-500/50 rounded-t h-[60%]" title="60-80 score" />
-                <div className="w-1.5 bg-violet-500/80 rounded-t h-[100%] shadow-[0_0_5px_rgba(139,92,246,0.5)]" title="80-100 score" />
-              </div>
-              <span className="text-[10px] text-muted-foreground/80 mt-1 uppercase tracking-wider">Score Dist</span>
-            </div>
 
-            {/* Right Actions */}
-            <div className="flex flex-col items-end gap-4 min-w-[200px]">
-              <div className="flex items-center gap-3">
-                <span className="text-xs text-muted-foreground">{job.status}</span>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" className="sr-only peer" checked={job.status === 'Active'} onChange={() => {}} />
-                  <div className="w-9 h-5 bg-foreground/10 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-cyan-500 shadow-[0_0_10px_rgba(0,212,255,0.2)]"></div>
-                </label>
+              {/* Right Actions */}
+              <div className="flex flex-col items-end gap-4 min-w-[200px]">
+                <Space align="center">
+                  <Text type="secondary" style={{ fontSize: 12 }}>{job.status}</Text>
+                  <Switch checked={job.status === 'Active'} />
+                </Space>
+                <Space>
+                  <Button type="text" icon={<EyeOutlined />} shape="circle" />
+                  <Button type="text" icon={<EditOutlined />} shape="circle" />
+                  <Button type="text" danger icon={<DeleteOutlined />} shape="circle" />
+                </Space>
+                {job.status !== 'Draft' && (
+                  <Button block type="primary" ghost style={{ marginTop: 8 }}>
+                    Open Pipeline <ArrowRightOutlined />
+                  </Button>
+                )}
               </div>
-              <div className="flex gap-2">
-                <button className="w-8 h-8 rounded-full bg-foreground/5 border border-foreground/10 flex items-center justify-center hover:bg-foreground/10 text-muted-foreground transition-colors"><Eye className="w-4 h-4" /></button>
-                <button className="w-8 h-8 rounded-full bg-foreground/5 border border-foreground/10 flex items-center justify-center hover:bg-foreground/10 text-muted-foreground transition-colors"><Pencil className="w-4 h-4" /></button>
-                <button className="w-8 h-8 rounded-full bg-foreground/5 border border-foreground/10 flex items-center justify-center hover:bg-rose-500/20 hover:text-rose-400 hover:border-rose-500/30 text-muted-foreground transition-colors"><Trash2 className="w-4 h-4" /></button>
-              </div>
-              {job.status !== 'Draft' && (
-                <Button variant="outline" className="w-full border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/10 mt-2 text-xs">
-                  Open Pipeline <ArrowRight className="w-3 h-3 ml-1" />
-                </Button>
-              )}
             </div>
-          </GlassCard>
+          </Card>
         ))}
         {filteredJobs.length === 0 && (
-          <div className="text-center py-12 text-muted-foreground/80">No {filter.toLowerCase()} jobs found.</div>
+          <div className="text-center py-12">
+            <Text type="secondary">No {filter.toLowerCase()} jobs found.</Text>
+          </div>
         )}
       </div>
 
@@ -151,147 +163,136 @@ export default function Jobs() {
 }
 
 function CreateJobModal({ open, onOpenChange }: { open: boolean, onOpenChange: (open: boolean) => void }) {
-  const [step, setStep] = useState(1);
-  const totalSteps = 4;
+  const [current, setCurrent] = useState(0);
 
-  const nextStep = () => setStep(s => Math.min(s + 1, totalSteps));
-  const prevStep = () => setStep(s => Math.max(s - 1, 1));
+  const next = () => setCurrent(current + 1);
+  const prev = () => setCurrent(current - 1);
+
+  const steps = [
+    { title: 'Basics' },
+    { title: 'Skills' },
+    { title: 'Culture' },
+    { title: 'Review' }
+  ];
 
   return (
-    <Dialog open={open} onOpenChange={(val) => { onOpenChange(val); if (!val) setTimeout(() => setStep(1), 300); }}>
-      <DialogContent className="max-w-[640px] bg-[#0A0A0A]/95 border-foreground/10 backdrop-blur-xl p-0 overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.5)]">
-        <div className="p-6">
-          {/* Step Indicator */}
-          <div className="flex justify-center mb-8 relative">
-            <div className="absolute top-1/2 left-1/4 right-1/4 h-[1px] bg-foreground/10 -z-10" />
-            <div className="flex justify-between w-1/2">
-              {[1, 2, 3, 4].map(i => (
-                <div key={i} className={`w-3 h-3 rounded-full transition-all duration-300 ${step === i ? 'bg-cyan-400 shadow-[0_0_10px_rgba(0,212,255,0.8)] scale-125' : step > i ? 'bg-cyan-400/50' : 'bg-slate-700'}`} />
-              ))}
-            </div>
-          </div>
+    <Modal
+      open={open}
+      onCancel={() => { onOpenChange(false); setTimeout(() => setCurrent(0), 300); }}
+      footer={null}
+      width={640}
+      destroyOnClose
+      style={{ top: 40 }}
+    >
+      <div style={{ padding: '16px 0 24px 0' }}>
+        <Steps current={current} items={steps} size="small" style={{ marginBottom: 32 }} />
 
-          <div className="min-h-[350px]">
-            {step === 1 && (
-              <div className="space-y-6 animate-in slide-in-from-right-4">
-                <div>
-                  <h2 className="text-xl font-bold text-white mb-1">The Basics</h2>
-                  <p className="text-sm text-muted-foreground mb-4">Core details about the position.</p>
-                </div>
-                <div className="space-y-4">
-                  <div>
-                    <input type="text" placeholder="Job Title (e.g. Senior Frontend Engineer)" className="w-full bg-foreground/5 border border-foreground/10 rounded-lg px-4 py-3 text-white placeholder:text-muted-foreground/80 focus:outline-none focus:border-cyan-500/50" />
-                  </div>
-                  <div>
-                    <textarea placeholder="Job Description..." rows={4} className="w-full bg-foreground/5 border border-foreground/10 rounded-lg px-4 py-3 text-white placeholder:text-muted-foreground/80 focus:outline-none focus:border-cyan-500/50 resize-none" />
-                  </div>
-                  <div className="flex gap-4">
-                    <div className="flex-1 relative">
-                      <MapPin className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/80" />
-                      <input type="text" placeholder="Location" className="w-full bg-foreground/5 border border-foreground/10 rounded-lg pl-9 pr-4 py-2.5 text-white placeholder:text-muted-foreground/80 focus:outline-none focus:border-cyan-500/50" />
-                    </div>
-                    <label className="flex items-center gap-2 px-4 border border-foreground/10 bg-foreground/5 rounded-lg cursor-pointer hover:bg-foreground/10 transition-colors">
-                      <input type="checkbox" className="accent-cyan-500 w-4 h-4" defaultChecked />
-                      <span className="text-sm text-muted-foreground">Remote OK</span>
-                    </label>
-                  </div>
-                  <div className="grid grid-cols-3 gap-2">
-                     <button className="border border-foreground/10 bg-foreground/5 px-2 py-2 rounded text-sm text-muted-foreground hover:bg-foreground/10 hover:border-foreground/20">Part-Time</button>
-                     <button className="border border-cyan-500/50 bg-cyan-500/10 px-2 py-2 rounded text-sm text-cyan-400 shadow-[inset_0_0_10px_rgba(0,212,255,0.1)]">Full-Time</button>
-                     <button className="border border-foreground/10 bg-foreground/5 px-2 py-2 rounded text-sm text-muted-foreground hover:bg-foreground/10 hover:border-foreground/20">Internship</button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {step === 2 && (
-              <div className="space-y-6 animate-in slide-in-from-right-4">
-                <div>
-                  <h2 className="text-xl font-bold text-white mb-1">Required Skills</h2>
-                  <p className="text-sm text-muted-foreground mb-4">Define what makes a great candidate.</p>
-                </div>
-                <div className="space-y-6">
-                  <div className="space-y-3">
-                    <label className="text-sm text-muted-foreground font-medium">Must-Have Skills</label>
-                    <input type="text" placeholder="Start typing a skill..." className="w-full bg-foreground/5 border border-foreground/10 rounded-lg px-4 py-2.5 text-white placeholder:text-muted-foreground/80 focus:outline-none focus:border-cyan-500/50" />
-                    <div className="flex flex-wrap gap-2">
-                       <span className="pl-3 pr-1 py-1 bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 rounded-full text-xs flex items-center gap-1">React <button className="hover:bg-foreground/20 rounded-full p-0.5"><Plus className="w-3 h-3 rotate-45" /></button></span>
-                       <span className="pl-3 pr-1 py-1 bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 rounded-full text-xs flex items-center gap-1">TypeScript <button className="hover:bg-foreground/20 rounded-full p-0.5"><Plus className="w-3 h-3 rotate-45" /></button></span>
-                    </div>
-                  </div>
-                  <div className="space-y-3 border-t border-foreground/10 pt-4">
-                    <label className="text-sm text-muted-foreground font-medium">Nice-to-Have</label>
-                    <input type="text" placeholder="Optional skills..." className="w-full bg-foreground/5 border border-foreground/10 rounded-lg px-4 py-2.5 text-white placeholder:text-muted-foreground/80 focus:outline-none focus:border-violet-500/50" />
-                    <div className="flex flex-wrap gap-2">
-                       <span className="pl-3 pr-1 py-1 bg-violet-500/20 border border-violet-500/30 text-violet-300 rounded-full text-xs flex items-center gap-1">GraphQL <button className="hover:bg-foreground/20 rounded-full p-0.5"><Plus className="w-3 h-3 rotate-45" /></button></span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {step === 3 && (
-              <div className="space-y-6 animate-in slide-in-from-right-4">
-                <div>
-                  <h2 className="text-xl font-bold text-white mb-1">Culture & Values</h2>
-                  <p className="text-sm text-muted-foreground mb-4">Select the traits that fit your team. (Max 6)</p>
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {["Innovation", "Teamwork", "Diversity", "Work-Life Balance", "Growth", "Transparency", "Remote-First", "Fast-Paced", "Mentorship"].map((v, i) => {
-                    const isSelected = i === 0 || i === 1 || i === 6;
-                    return (
-                      <button key={v} className={`px-3 py-3 rounded-lg text-sm transition-all border flex items-center justify-between ${isSelected ? 'bg-cyan-500/10 border-cyan-500/50 text-cyan-300 shadow-[inset_0_0_15px_rgba(0,212,255,0.1)]' : 'bg-foreground/5 border-foreground/10 text-muted-foreground hover:border-foreground/20'}`}>
-                        {v} {isSelected && <Check className="w-4 h-4 ml-2" />}
-                      </button>
-                    )
-                  })}
-                </div>
-              </div>
-            )}
-
-            {step === 4 && (
-              <div className="space-y-6 animate-in slide-in-from-right-4">
-                 <div>
-                  <h2 className="text-xl font-bold text-white mb-1">Review & Publish</h2>
-                  <p className="text-sm text-muted-foreground mb-4">Final check before going live.</p>
-                </div>
-                <GlassCard className="p-5 bg-foreground/[0.02]">
-                  <h3 className="text-lg font-bold text-white mb-2">Senior Frontend Engineer</h3>
-                  <div className="flex gap-4 text-xs text-muted-foreground mb-4 pb-4 border-b border-foreground/10">
-                    <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> Remote</span>
-                    <span className="flex items-center gap-1"><Briefcase className="w-3 h-3" /> Full-Time</span>
-                  </div>
-                  <div className="mb-4">
-                    <p className="text-xs text-muted-foreground/80 uppercase tracking-widest mb-2 font-semibold">Skills Required</p>
-                    <div className="flex gap-2"><span className="text-cyan-400 bg-cyan-400/10 px-2 py-0.5 rounded text-xs">React</span></div>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground/80 uppercase tracking-widest mb-2 font-semibold">Culture Match</p>
-                    <div className="flex gap-2 text-xs text-muted-foreground">Innovation • Teamwork • Remote-First</div>
-                  </div>
-                </GlassCard>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Action Footer */}
-        <div className="bg-foreground/5 border-t border-foreground/10 p-4 flex justify-between">
-            {step > 1 ? (
-              <Button variant="ghost" onClick={prevStep} className="text-muted-foreground hover:text-white">Back</Button>
-            ) : <div/>}
-
-            <div className="flex gap-3">
-              {step === 4 && <Button variant="ghost" onClick={() => onOpenChange(false)} className="text-muted-foreground hover:text-white">Save as Draft</Button>}
+        <div style={{ minHeight: 300 }}>
+          {current === 0 && (
+            <div className="animate-in slide-in-from-right-4">
+              <Title level={4} style={{ marginTop: 0 }}>The Basics</Title>
+              <Text type="secondary" style={{ display: 'block', marginBottom: 24 }}>Core details about the position.</Text>
               
-              {step < totalSteps ? (
-                <Button onClick={nextStep} className="bg-white text-slate-900 hover:bg-slate-200">Next <ChevronRight className="w-4 h-4 ml-1" /></Button>
-              ) : (
-                <Button onClick={() => onOpenChange(false)} className="bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-bold shadow-[0_0_20px_rgba(0,212,255,0.5)]">Publish Job ✨</Button>
-              )}
+              <div className="space-y-4">
+                <Input size="large" placeholder="Job Title (e.g. Senior Frontend Engineer)" />
+                <TextArea rows={4} placeholder="Job Description..." />
+                <Row gutter={16}>
+                  <Col span={16}>
+                    <Input size="large" prefix={<MapPin size={16} />} placeholder="Location" />
+                  </Col>
+                  <Col span={8}>
+                    <div style={{ display: 'flex', alignItems: 'center', height: '100%', paddingLeft: 8 }}>
+                      <Checkbox defaultChecked>Remote OK</Checkbox>
+                    </div>
+                  </Col>
+                </Row>
+                <Segmented block options={['Part-Time', 'Full-Time', 'Internship']} defaultValue="Full-Time" size="large" />
+              </div>
             </div>
+          )}
+
+          {current === 1 && (
+            <div className="animate-in slide-in-from-right-4">
+              <Title level={4} style={{ marginTop: 0 }}>Required Skills</Title>
+              <Text type="secondary" style={{ display: 'block', marginBottom: 24 }}>Define what makes a great candidate.</Text>
+              
+              <div className="space-y-6">
+                <div>
+                  <Text strong style={{ display: 'block', marginBottom: 8 }}>Must-Have Skills</Text>
+                  <Select mode="tags" style={{ width: '100%' }} size="large" placeholder="Start typing a skill..." defaultValue={['React', 'TypeScript']} />
+                </div>
+                <div>
+                  <Text strong style={{ display: 'block', marginBottom: 8 }}>Nice-to-Have</Text>
+                  <Select mode="tags" style={{ width: '100%' }} size="large" placeholder="Optional skills..." defaultValue={['GraphQL']} />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {current === 2 && (
+            <div className="animate-in slide-in-from-right-4">
+              <Title level={4} style={{ marginTop: 0 }}>Culture & Values</Title>
+              <Text type="secondary" style={{ display: 'block', marginBottom: 24 }}>Select the traits that fit your team. (Max 6)</Text>
+              
+              <Row gutter={[12, 12]}>
+                {["Innovation", "Teamwork", "Diversity", "Work-Life Balance", "Growth", "Transparency", "Remote-First", "Fast-Paced", "Mentorship"].map((v, i) => {
+                  const isSelected = i === 0 || i === 1 || i === 6;
+                  return (
+                    <Col span={8} key={v}>
+                      <Card 
+                        size="small" 
+                        hoverable 
+                        style={{ 
+                          textAlign: 'center', 
+                          borderColor: isSelected ? '#F97316' : undefined,
+                          background: isSelected ? 'rgba(249,115,22,0.05)' : undefined 
+                        }}
+                      >
+                        <Text strong={isSelected} style={{ color: isSelected ? '#F97316' : undefined }}>{v}</Text>
+                        {isSelected && <CheckOutlined style={{ color: '#F97316', marginLeft: 8 }} />}
+                      </Card>
+                    </Col>
+                  );
+                })}
+              </Row>
+            </div>
+          )}
+
+          {current === 3 && (
+            <div className="animate-in slide-in-from-right-4">
+              <Title level={4} style={{ marginTop: 0 }}>Review & Publish</Title>
+              <Text type="secondary" style={{ display: 'block', marginBottom: 24 }}>Final check before going live.</Text>
+              
+              <Card style={{ background: 'rgba(0,0,0,0.02)' }}>
+                <Title level={5}>Senior Frontend Engineer</Title>
+                <Space style={{ marginBottom: 16 }}>
+                  <Tag icon={<MapPin size={12} />} bordered={false}>Remote</Tag>
+                  <Tag icon={<Briefcase size={12} />} bordered={false}>Full-Time</Tag>
+                </Space>
+                
+                <div style={{ marginBottom: 16 }}>
+                  <Text type="secondary" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: 1, display: 'block', marginBottom: 8 }}>Skills Required</Text>
+                  <Space><Tag color="blue">React</Tag><Tag color="blue">TypeScript</Tag></Space>
+                </div>
+                
+                <div>
+                  <Text type="secondary" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: 1, display: 'block', marginBottom: 8 }}>Culture Match</Text>
+                  <Text type="secondary" style={{ fontSize: 13 }}>Innovation • Teamwork • Remote-First</Text>
+                </div>
+              </Card>
+            </div>
+          )}
         </div>
-      </DialogContent>
-    </Dialog>
+
+        <div style={{ marginTop: 32, display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--border)', paddingTop: 16 }}>
+          {current > 0 ? <Button onClick={prev}>Back</Button> : <div />}
+          <Space>
+            {current === 3 && <Button>Save as Draft</Button>}
+            {current < steps.length - 1 && <Button type="primary" onClick={next}>Next <ArrowRightOutlined /></Button>}
+            {current === steps.length - 1 && <Button type="primary" onClick={() => onOpenChange(false)}>Publish Job ✨</Button>}
+          </Space>
+        </div>
+      </div>
+    </Modal>
   );
 }

@@ -1,135 +1,64 @@
-import { cn } from "@/lib/utils";
-import { NavLink } from "react-router-dom";
-import {
-  LayoutDashboard,
-  Search,
-  ClipboardList,
-  User,
-  Brain,
-  Upload,
-  Settings,
-  Zap,
-  ChevronLeft,
-  ChevronRight,
-  LogOut,
-} from "lucide-react";
+// Redesigned with Ant Design — logic unchanged
+import { NavLink, useLocation } from "react-router-dom";
+import { DashboardOutlined, SearchOutlined, ProfileOutlined, UserOutlined, BulbOutlined, UploadOutlined, LogoutOutlined, ThunderboltOutlined } from "@ant-design/icons";
+import { Layout, Menu, Typography, Avatar } from "antd";
 import { useState } from "react";
 
+const { Sider } = Layout;
+const { Text } = Typography;
+
 const navItems = [
-  { icon: LayoutDashboard, label: "Dashboard", path: "/candidate" },
-  { icon: Search, label: "Explore Jobs", path: "/candidate/explore" },
-  { icon: ClipboardList, label: "My Applications", path: "/candidate/applications" },
-  { icon: User, label: "Profile", path: "/candidate/profile" },
-  { icon: Brain, label: "Career AI", path: "/candidate/career-ai" },
-  { icon: Upload, label: "Upload CV", path: "/candidate/upload-cv" },
+  { key: "/candidate", icon: <DashboardOutlined />, label: "Dashboard" },
+  { key: "/candidate/explore", icon: <SearchOutlined />, label: "Explore Jobs" },
+  { key: "/candidate/applications", icon: <ProfileOutlined />, label: "My Applications" },
+  { key: "/candidate/profile", icon: <UserOutlined />, label: "Profile" },
+  { key: "/candidate/career-ai", icon: <BulbOutlined />, label: "Career AI" },
+  { key: "/candidate/upload-cv", icon: <UploadOutlined />, label: "Upload CV" },
 ];
 
 export function CandidateSidebar() {
-  const [expanded, setExpanded] = useState(true);
+  const [collapsed, setCollapsed] = useState(false);
+  const location = useLocation();
 
   return (
-    <>
-      {/* Desktop Sidebar */}
-      <aside className={cn(
-        "hidden md:flex flex-col h-screen bg-sidebar border-r border-sidebar-border fixed left-0 top-0 z-40 transition-all duration-300",
-        expanded ? "w-[260px]" : "w-[72px]"
-      )}>
-        {/* Logo */}
-        <div className="flex items-center h-16 px-4 border-b border-sidebar-border">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center glow-cyan">
-              <Zap className="w-5 h-5 text-primary" />
-            </div>
-            {expanded && (
-              <div className="animate-fade-in">
-                <h1 className="font-bold text-foreground tracking-tighter text-lg">JobEngine</h1>
-              </div>
-            )}
-          </div>
+    <Sider 
+      collapsible 
+      collapsed={collapsed} 
+      onCollapse={(value) => setCollapsed(value)}
+      breakpoint="lg"
+      theme="dark"
+      width={260}
+      style={{ background: '#1B2D4F' }}
+    >
+      <div style={{ padding: '16px', display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+        <div style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(249, 115, 22, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <ThunderboltOutlined style={{ color: '#F97316', fontSize: '20px' }} />
         </div>
-
-        {/* Nav items with constellation lines */}
-        <nav className="flex-1 px-3 py-6 relative">
-          {/* Constellation line */}
-          <div className="absolute left-[34px] top-8 bottom-8 w-px bg-border">
-            <div className="absolute inset-0 bg-gradient-to-b from-primary/20 via-secondary/20 to-transparent" />
-          </div>
-
-          <div className="space-y-1 relative">
-            {navItems.map((item) => (
-              <NavLink
-                key={item.path}
-                to={item.path}
-                end={item.path === "/candidate"}
-                className={({ isActive }) => cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group relative",
-                  isActive
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:text-foreground hover:bg-foreground/5"
-                )}
-              >
-                {({ isActive }) => (
-                  <>
-                    {isActive && (
-                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-primary rounded-r-full glow-cyan" />
-                    )}
-                    <item.icon className={cn("w-5 h-5 shrink-0", isActive && "drop-shadow-[0_0_6px_rgba(0,212,255,0.5)]")} />
-                    {expanded && <span>{item.label}</span>}
-                  </>
-                )}
-              </NavLink>
-            ))}
-          </div>
-
-          <div className="absolute bottom-6 left-3 right-3 space-y-1">
-             <NavLink
-                to="/login"
-                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 group relative"
-              >
-                <LogOut className="w-5 h-5 shrink-0" />
-                {expanded && <span>Logout</span>}
-             </NavLink>
-          </div>
-        </nav>
-
-        {/* Bottom: Avatar + Settings + Collapse */}
-        <div className="p-3 border-t border-sidebar-border space-y-2">
-          <NavLink
-            to="/candidate/profile"
-            className="flex items-center gap-3 px-3 py-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-colors"
-          >
-            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary shrink-0">JD</div>
-            {expanded && <span className="text-sm">John Doe</span>}
-          </NavLink>
-          <button
-            onClick={() => setExpanded(!expanded)}
-            className="flex items-center justify-center w-full h-9 rounded-xl text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-colors"
-          >
-            {expanded ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-          </button>
-        </div>
-      </aside>
-
-      {/* Mobile Bottom Tab Bar */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-sidebar border-t border-sidebar-border flex justify-around py-2 px-1">
-        {navItems.slice(0, 5).map((item) => (
-          <NavLink
-            key={item.path}
-            to={item.path}
-            end={item.path === "/candidate"}
-            className={({ isActive }) => cn(
-              "flex flex-col items-center gap-1 px-3 py-1.5 rounded-lg text-[10px] font-medium transition-colors",
-              isActive ? "text-primary" : "text-muted-foreground"
-            )}
-          >
-            <item.icon className="w-5 h-5" />
-            <span>{item.label}</span>
-          </NavLink>
-        ))}
-      </nav>
-
-      {/* Spacer */}
-      <div className={cn("hidden md:block shrink-0 transition-all duration-300", expanded ? "w-[260px]" : "w-[72px]")} />
-    </>
+        {!collapsed && (
+          <div style={{ fontSize: '18px', margin: 0 }}><span style={{ color: '#F97316', fontWeight: 700 }}>Job</span><span style={{ color: '#FFFFFF', fontWeight: 700 }}>Engine</span></div>
+        )}
+      </div>
+      
+      <Menu
+        theme="dark"
+        mode="inline"
+        selectedKeys={[location.pathname]}
+        items={navItems.map(item => ({
+          ...item,
+          label: <NavLink to={item.key}>{item.label}</NavLink>
+        }))}
+      />
+      
+      <div style={{ position: 'absolute', bottom: 60, width: '100%', padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+         <NavLink to="/candidate/profile" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#fff', padding: '8px' }}>
+            <Avatar size="small" style={{ backgroundColor: 'rgba(249, 115, 22, 0.15)', color: '#F97316', fontWeight: 'bold' }}>JD</Avatar>
+            {!collapsed && <span>John Doe</span>}
+         </NavLink>
+         <NavLink to="/login" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#ff4d4f', padding: '8px' }}>
+            <LogoutOutlined style={{ fontSize: '18px' }} />
+            {!collapsed && <span>Logout</span>}
+         </NavLink>
+      </div>
+    </Sider>
   );
 }

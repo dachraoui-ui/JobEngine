@@ -1,14 +1,16 @@
-import { GlassCard } from "@/components/ui/GlassCard";
+// Redesigned with Ant Design — logic unchanged
+import { Card, Typography, Space, Row, Col, Progress, List, Avatar } from "antd";
+import { Briefcase, Users, CalendarDays, TrendingUp, UserPlus, Calendar, ArrowRight, CheckCircle } from "lucide-react";
 import { PulseOrb } from "@/components/ui/PulseOrb";
 import { candidates, activities, pipelineStages } from "@/data/mockData";
-import { Briefcase, Users, CalendarDays, TrendingUp, UserPlus, Calendar, ArrowRight, CheckCircle } from "lucide-react";
-import { cn } from "@/lib/utils";
+
+const { Title, Text } = Typography;
 
 const stats = [
-  { label: "Open Positions", value: "12", icon: Briefcase, change: "+3 this week", color: "text-primary" },
-  { label: "Active Candidates", value: "156", icon: Users, change: "+24 this week", color: "text-secondary" },
-  { label: "Interviews Today", value: "8", icon: CalendarDays, change: "3 remaining", color: "text-warning" },
-  { label: "Hire Rate", value: "68%", icon: TrendingUp, change: "+5% vs last month", color: "text-accent" },
+  { label: "Open Positions", value: "12", icon: Briefcase, change: "+3 this week", color: "#F97316" },
+  { label: "Active Candidates", value: "156", icon: Users, change: "+24 this week", color: "#722ed1" },
+  { label: "Interviews Today", value: "8", icon: CalendarDays, change: "3 remaining", color: "#faad14" },
+  { label: "Hire Rate", value: "68%", icon: TrendingUp, change: "+5% vs last month", color: "#52c41a" },
 ];
 
 const activityIcons: Record<string, typeof UserPlus> = {
@@ -22,107 +24,113 @@ export default function Dashboard() {
   const topCandidates = candidates.filter(c => c.score >= 80).slice(0, 4);
 
   return (
-    <div className="space-y-8 animate-fade-in">
-      {/* Header */}
+    <div className="space-y-8 animate-fade-in pb-10">
       <div>
-        <h1 className="text-3xl font-bold tracking-tighter text-foreground">Dashboard</h1>
-        <p className="text-muted-foreground mt-1">Welcome back. Here's your hiring overview.</p>
+        <Title level={2} style={{ margin: 0, color: 'var(--foreground)' }}>Dashboard</Title>
+        <Text type="secondary">Welcome back. Here's your hiring overview.</Text>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <Row gutter={[16, 16]}>
         {stats.map((stat) => (
-          <GlassCard key={stat.label} hover className="p-5">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">{stat.label}</p>
-                <p className={cn("text-3xl font-bold font-mono mt-1", stat.color)}>{stat.value}</p>
-                <p className="text-xs text-muted-foreground mt-2">{stat.change}</p>
-              </div>
-              <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center bg-foreground/5", stat.color)}>
-                <stat.icon className="w-5 h-5" />
-              </div>
-            </div>
-          </GlassCard>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* AI Match Scores */}
-        <GlassCard className="lg:col-span-2 p-6">
-          <h2 className="text-lg font-semibold text-foreground mb-1">Top AI Matches</h2>
-          <p className="text-sm text-muted-foreground mb-6">Highest-scoring candidates across all open roles</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {topCandidates.map((c) => (
-              <div key={c.id} className="flex items-center gap-4 p-4 rounded-xl bg-foreground/[0.02] border border-foreground/[0.04] hover:border-primary/20 transition-colors">
-                <PulseOrb score={c.score} size="md" />
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-foreground truncate">{c.name}</p>
-                  <p className="text-sm text-muted-foreground truncate">{c.role}</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary">{c.status}</span>
-                  </div>
+          <Col xs={24} sm={12} lg={6} key={stat.label}>
+            <Card bordered={false} hoverable style={{ background: 'var(--surface)', height: '100%' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                  <Text type="secondary" style={{ fontSize: 13 }}>{stat.label}</Text>
+                  <div style={{ fontSize: 28, fontWeight: 'bold', fontFamily: 'monospace', color: stat.color, marginTop: 4 }}>{stat.value}</div>
+                  <Text type="secondary" style={{ fontSize: 12, marginTop: 8, display: 'block' }}>{stat.change}</Text>
                 </div>
+                <Avatar style={{ backgroundColor: `${stat.color}15`, color: stat.color }} icon={<stat.icon size={18} />} />
               </div>
-            ))}
-          </div>
-        </GlassCard>
+            </Card>
+          </Col>
+        ))}
+      </Row>
 
-        {/* Pipeline Funnel */}
-        <GlassCard className="p-6">
-          <h2 className="text-lg font-semibold text-foreground mb-1">Pipeline</h2>
-          <p className="text-sm text-muted-foreground mb-6">Candidates per stage</p>
-          <div className="space-y-3">
-            {pipelineStages.map((stage, i) => {
-              const maxCount = pipelineStages[0].count;
-              const width = Math.max((stage.count / maxCount) * 100, 12);
-              return (
-                <div key={stage.id} className="space-y-1.5">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">{stage.label}</span>
-                    <span className="font-mono text-foreground">{stage.count}</span>
-                  </div>
-                  <div className="h-2 rounded-full bg-foreground/5">
-                    <div
-                      className={cn(
-                        "h-full rounded-full transition-all duration-500",
-                        i === 0 ? "bg-primary" : i === 1 ? "bg-secondary" : i === 2 ? "bg-warning" : "bg-accent"
-                      )}
-                      style={{ width: `${width}%` }}
+      <Row gutter={[24, 24]}>
+        <Col xs={24} lg={16}>
+          <Card bordered={false} style={{ background: 'var(--surface)', height: '100%' }}>
+            <Title level={5} style={{ margin: 0, color: 'var(--foreground)' }}>Top AI Matches</Title>
+            <Text type="secondary" style={{ fontSize: 13, display: 'block', marginBottom: 24 }}>Highest-scoring candidates across all open roles</Text>
+            
+            <Row gutter={[16, 16]}>
+              {topCandidates.map((c) => (
+                <Col xs={24} sm={12} key={c.id}>
+                  <Card bordered size="small" hoverable style={{ background: 'rgba(0,0,0,0.02)', borderColor: 'var(--border)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                      <PulseOrb score={c.score} size="md" />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <Text strong style={{ color: 'var(--foreground)', display: 'block' }} ellipsis>{c.name}</Text>
+                        <Text type="secondary" style={{ fontSize: 13, display: 'block' }} ellipsis>{c.role}</Text>
+                        <div style={{ marginTop: 4 }}>
+                          <Text style={{ fontSize: 11, background: 'rgba(249,115,22,0.1)', color: '#F97316', padding: '2px 8px', borderRadius: 12 }}>{c.status}</Text>
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                </Col>
+              ))}
+            </Row>
+          </Card>
+        </Col>
+
+        <Col xs={24} lg={8}>
+          <Card bordered={false} style={{ background: 'var(--surface)', height: '100%' }}>
+            <Title level={5} style={{ margin: 0, color: 'var(--foreground)' }}>Pipeline</Title>
+            <Text type="secondary" style={{ fontSize: 13, display: 'block', marginBottom: 24 }}>Candidates per stage</Text>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {pipelineStages.map((stage, i) => {
+                const maxCount = pipelineStages[0].count;
+                const percent = (stage.count / maxCount) * 100;
+                const colors = ['#F97316', '#722ed1', '#faad14', '#52c41a'];
+                
+                return (
+                  <div key={stage.id}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, fontSize: 13 }}>
+                      <Text type="secondary">{stage.label}</Text>
+                      <Text strong style={{ fontFamily: 'monospace' }}>{stage.count}</Text>
+                    </div>
+                    <Progress 
+                      percent={percent} 
+                      showInfo={false} 
+                      strokeColor={colors[i] || '#F97316'} 
+                      trailColor="rgba(255,255,255,0.05)"
+                      size="small"
                     />
                   </div>
-                </div>
-              );
-            })}
-          </div>
-        </GlassCard>
-      </div>
+                );
+              })}
+            </div>
+          </Card>
+        </Col>
+      </Row>
 
-      {/* Recent Activity */}
-      <GlassCard className="p-6">
-        <h2 className="text-lg font-semibold text-foreground mb-6">Recent Activity</h2>
-        <div className="space-y-4">
-          {activities.map((activity) => {
+      <Card bordered={false} style={{ background: 'var(--surface)' }}>
+        <Title level={5} style={{ margin: 0, marginBottom: 16, color: 'var(--foreground)' }}>Recent Activity</Title>
+        <List
+          itemLayout="horizontal"
+          dataSource={activities}
+          renderItem={(activity) => {
             const Icon = activityIcons[activity.icon] || ArrowRight;
+            let color = '#F97316';
+            if (activity.type === 'hired') color = '#52c41a';
+            if (activity.type === 'interview') color = '#faad14';
+
             return (
-              <div key={activity.id} className="flex items-start gap-4 group">
-                <div className={cn(
-                  "w-8 h-8 rounded-lg flex items-center justify-center shrink-0",
-                  activity.type === "hired" ? "bg-accent/10 text-accent" :
-                  activity.type === "interview" ? "bg-warning/10 text-warning" :
-                  "bg-primary/10 text-primary"
-                )}>
-                  <Icon className="w-4 h-4" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm text-foreground">{activity.message}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{activity.time}</p>
-                </div>
-              </div>
+              <List.Item style={{ borderBottomColor: 'var(--border)' }}>
+                <List.Item.Meta
+                  avatar={
+                    <Avatar style={{ backgroundColor: `${color}15`, color: color }} icon={<Icon size={16} />} shape="square" />
+                  }
+                  title={<Text style={{ color: 'var(--foreground)', fontSize: 14 }}>{activity.message}</Text>}
+                  description={<Text type="secondary" style={{ fontSize: 12 }}>{activity.time}</Text>}
+                />
+              </List.Item>
             );
-          })}
-        </div>
-      </GlassCard>
+          }}
+        />
+      </Card>
     </div>
   );
 }

@@ -1,20 +1,21 @@
+// Redesigned with Ant Design — logic unchanged
 import { useState } from "react";
-import { GlassCard } from "@/components/ui/GlassCard";
+import { Modal, Button, Typography, Tag, Space, Dropdown, Row, Col } from "antd";
+import { MailOutlined, CalendarOutlined, EyeOutlined, ArrowRightOutlined, FileTextOutlined, DownOutlined, ThunderboltOutlined, CloseOutlined } from "@ant-design/icons";
 import { PulseOrb } from "@/components/ui/PulseOrb";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Mail, Calendar, X, Eye, ArrowRight, FileText, ChevronDown } from "lucide-react";
+
+const { Title, Text } = Typography;
 
 export default function Pipeline() {
   const [draggedCard, setDraggedCard] = useState<number | null>(null);
   const [selectedCandidate, setSelectedCandidate] = useState<any>(null);
 
   const columns = [
-    { id: "applied", title: "Applied", count: 8, color: "bg-slate-500", glow: "" },
-    { id: "shortlisted", title: "Shortlisted", count: 5, color: "bg-amber-500", glow: "shadow-[0_0_10px_rgba(245,158,11,0.5)]" },
-    { id: "interview", title: "Interview", count: 3, color: "bg-violet-500", glow: "shadow-[0_0_10px_rgba(139,92,246,0.5)]" },
-    { id: "rejected", title: "Rejected", count: 4, color: "bg-rose-500", glow: "shadow-[0_0_10px_rgba(244,63,94,0.3)]" },
-    { id: "hired", title: "Hired", count: 1, color: "bg-emerald-500", glow: "shadow-[0_0_15px_rgba(52,211,153,0.6)]" },
+    { id: "applied", title: "Applied", count: 8, color: "#94a3b8", bg: "rgba(148,163,184,0.1)", border: "rgba(148,163,184,0.5)" },
+    { id: "shortlisted", title: "Shortlisted", count: 5, color: "#f59e0b", bg: "rgba(245,158,11,0.1)", border: "rgba(245,158,11,0.5)", glow: "shadow-[0_0_10px_rgba(245,158,11,0.5)]" },
+    { id: "interview", title: "Interview", count: 3, color: "#8b5cf6", bg: "rgba(139,92,246,0.1)", border: "rgba(139,92,246,0.5)", glow: "shadow-[0_0_10px_rgba(139,92,246,0.5)]" },
+    { id: "rejected", title: "Rejected", count: 4, color: "#f43f5e", bg: "rgba(244,63,94,0.1)", border: "rgba(244,63,94,0.5)", glow: "shadow-[0_0_10px_rgba(244,63,94,0.3)]" },
+    { id: "hired", title: "Hired", count: 1, color: "#10b981", bg: "rgba(16,185,129,0.1)", border: "rgba(16,185,129,0.5)", glow: "shadow-[0_0_15px_rgba(16,185,129,0.6)]" },
   ];
 
   const handleDragStart = (e: React.DragEvent, cardId: number) => {
@@ -30,10 +31,12 @@ export default function Pipeline() {
     <div className="animate-fade-in flex flex-col h-full overflow-hidden absolute inset-0 pt-6 px-6 pb-2">
       {/* Top Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 shrink-0">
-        <GlassCard className="p-2 px-4 cursor-pointer hover:bg-foreground/10 flex items-center justify-between w-[300px]">
-          <span className="font-bold text-lg text-white">Senior React Developer</span>
-          <ChevronDown className="w-5 h-5 text-muted-foreground" />
-        </GlassCard>
+        <Dropdown menu={{ items: [{ key: '1', label: 'Senior React Developer' }] }}>
+          <div className="p-3 cursor-pointer hover:bg-foreground/10 flex items-center justify-between w-[300px] border border-foreground/10 rounded-lg bg-surface transition-colors">
+            <span className="font-bold text-lg text-white">Senior React Developer</span>
+            <DownOutlined className="text-muted-foreground" />
+          </div>
+        </Dropdown>
         <div className="flex gap-6 text-sm">
           <div className="flex items-center gap-2 text-muted-foreground"><span className="text-white font-mono text-lg font-bold">23</span> Candidates</div>
           <div className="flex items-center gap-2 text-muted-foreground"><span className="text-cyan-400 font-mono text-lg font-bold">74%</span> Avg Score</div>
@@ -46,7 +49,7 @@ export default function Pipeline() {
         {columns.map(col => (
           <div key={col.id} className="min-w-[280px] w-[280px] flex flex-col h-full rounded-xl bg-foreground/[0.02] border border-foreground/5 relative overflow-hidden" onDragOver={handleDragOver}>
             {/* Accent Strip */}
-            <div className={`absolute top-0 left-0 right-0 h-[3px] ${col.color} ${col.glow}`} />
+            <div className={`absolute top-0 left-0 right-0 h-[3px] ${col.glow || ''}`} style={{ backgroundColor: col.color }} />
             
             <div className="p-4 border-b border-foreground/5 flex justify-between items-center bg-foreground/[0.01]">
               <h3 className="font-semibold text-white">{col.title}</h3>
@@ -54,14 +57,14 @@ export default function Pipeline() {
             </div>
 
             <div className="p-3 flex-1 overflow-y-auto space-y-3">
-              {/* Fake candidate mapping based on column for realistic data feel */}
               {[...Array(col.count)].map((_, i) => (
                 <div 
                   key={`${col.id}-${i}`}
                   draggable
                   onDragStart={(e) => handleDragStart(e, i)}
                   onClick={() => setSelectedCandidate({ name: "Alex Chen", score: 92, colId: col.id })}
-                  className={`bg-foreground/5 border border-foreground/10 rounded-lg p-3 cursor-grab active:cursor-grabbing hover:-translate-y-1 transition-all duration-200 group relative ${col.id === 'rejected' ? 'opacity-70' : ''} hover:border-${col.color.split('-')[1]}-500/50 hover:shadow-[0_4px_20px_rgba(0,0,0,0.3)]`}
+                  className={`bg-surface border border-foreground/10 rounded-lg p-3 cursor-grab active:cursor-grabbing hover:-translate-y-1 transition-all duration-200 group relative ${col.id === 'rejected' ? 'opacity-70' : ''}`}
+                  style={{ '&:hover': { borderColor: col.color } } as any}
                 >
                   <div className="flex justify-between items-start mb-3">
                     <div className="flex items-center gap-2">
@@ -72,23 +75,21 @@ export default function Pipeline() {
                   </div>
                   
                   <div className="flex flex-wrap gap-1 mb-3">
-                    <span className="bg-foreground/5 border border-foreground/10 px-1.5 py-0.5 rounded text-[10px] text-muted-foreground">React</span>
-                    <span className="bg-foreground/5 border border-foreground/10 px-1.5 py-0.5 rounded text-[10px] text-muted-foreground">TS</span>
+                    <Tag bordered={false}>React</Tag>
+                    <Tag bordered={false}>TS</Tag>
                   </div>
 
                   {col.id === 'interview' && (
-                    <div className="mb-2 text-[11px] text-violet-400 bg-violet-500/10 py-1 px-2 rounded-md flex items-center border border-violet-500/20">
+                    <div className="mb-2 text-[11px] py-1 px-2 rounded-md flex items-center border" style={{ color: '#b37feb', backgroundColor: 'rgba(114,46,209,0.1)', borderColor: 'rgba(114,46,209,0.2)' }}>
                       📅 Mar 22, 2:00 PM
                     </div>
                   )}
 
                   <div className="text-[11px] text-muted-foreground/80 flex justify-between items-center">
                     Applied 3d ago
-                    
-                    {/* Hover actions */}
                     <div className="hidden group-hover:flex gap-1">
-                       <button className="p-1 hover:text-white transition-colors" title="Quick View"><Eye className="w-3.5 h-3.5"/></button>
-                       <button className="p-1 hover:text-white transition-colors" title="Email"><Mail className="w-3.5 h-3.5"/></button>
+                       <Button type="text" size="small" icon={<EyeOutlined />} style={{ color: 'var(--muted-foreground)' }} />
+                       <Button type="text" size="small" icon={<MailOutlined />} style={{ color: 'var(--muted-foreground)' }} />
                     </div>
                   </div>
 
@@ -108,102 +109,106 @@ export default function Pipeline() {
         ))}
       </div>
 
-      {/* Candidate Modal */}
-      {selectedCandidate && (
-        <Dialog open={!!selectedCandidate} onOpenChange={() => setSelectedCandidate(null)}>
-          <DialogContent className="max-w-[720px] bg-[#0A0A0A]/95 border-foreground/10 backdrop-blur-xl p-0 overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.5)]">
-             <div className="flex flex-col md:flex-row">
-               {/* Left Section */}
-               <div className="w-full md:w-[60%] p-6 border-b md:border-b-0 md:border-r border-foreground/10 relative">
-                  <button onClick={() => setSelectedCandidate(null)} className="absolute top-4 right-4 text-muted-foreground/80 hover:text-white"><X className="w-5 h-5"/></button>
-                  
-                  <div className="flex gap-4 items-center mb-6">
-                    <div className="w-16 h-16 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-2xl font-bold border border-cyan-500/30">AC</div>
-                    <div>
-                      <h2 className="text-xl font-bold text-white">Alex Chen</h2>
-                      <div className="flex gap-3 text-sm text-muted-foreground mt-1">
-                        <span>alex.chen@example.com</span>
-                      </div>
-                    </div>
-                  </div>
+      <Modal
+        open={!!selectedCandidate}
+        onCancel={() => setSelectedCandidate(null)}
+        footer={null}
+        width={720}
+        closeIcon={<CloseOutlined style={{ color: 'var(--muted-foreground)' }} />}
+        style={{ top: 40 }}
+        bodyStyle={{ padding: 0, overflow: 'hidden', background: 'var(--surface)' }}
+      >
+        {selectedCandidate && (
+          <div className="flex flex-col md:flex-row">
+            <div className="w-full md:w-[60%] p-6 border-b md:border-b-0 md:border-r border-foreground/10 relative">
+              <div className="flex gap-4 items-center mb-6">
+                <div className="w-16 h-16 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-2xl font-bold border border-cyan-500/30">AC</div>
+                <div>
+                  <Title level={4} style={{ margin: 0, color: 'var(--foreground)' }}>Alex Chen</Title>
+                  <Text type="secondary" style={{ fontSize: 13 }}>alex.chen@example.com</Text>
+                </div>
+              </div>
 
-                  <Button variant="outline" className="w-full border-foreground/20 text-white hover:bg-foreground/10 mb-8">
-                    <FileText className="w-4 h-4 mr-2" /> Download Full CV
-                  </Button>
+              <Button block icon={<FileTextOutlined />} style={{ marginBottom: 32 }}>
+                Download Full CV
+              </Button>
 
-                  {/* Vertical Timeline Status */}
-                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-widest mb-4">Pipeline Status</h3>
-                  <div className="relative border-l border-foreground/10 ml-2 pl-6 space-y-6">
-                     <div className="relative">
-                        <span className="absolute -left-[31px] w-3 h-3 rounded-full bg-slate-500 shadow-[0_0_10px_currentColor] top-1" />
-                        <p className="text-sm font-medium text-white mb-0.5">Applied</p>
-                        <p className="text-xs text-muted-foreground/80">Mar 15, 2026</p>
-                     </div>
-                     <div className="relative">
-                        <span className="absolute -left-[31px] w-3 h-3 rounded-full bg-amber-500 shadow-[0_0_10px_currentColor] top-1" />
-                        <p className="text-sm font-medium text-white mb-0.5">Shortlisted</p>
-                        <p className="text-xs text-muted-foreground/80">Mar 18, 2026</p>
-                     </div>
-                     <div className="relative p-3 bg-violet-500/10 rounded-lg border border-violet-500/20 -ml-2 -mt-2">
-                        <span className="absolute -left-[24px] w-3 h-3 rounded-full bg-violet-500 shadow-[0_0_10px_currentColor] top-4 animate-pulse" />
-                        <p className="text-sm font-medium text-violet-300 mb-0.5">Interview</p>
-                        <p className="text-xs text-violet-400">Action Required</p>
-                     </div>
-                  </div>
+              <Text type="secondary" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: 1, display: 'block', marginBottom: 16 }}>Pipeline Status</Text>
+              
+              <div className="relative border-l border-foreground/10 ml-2 pl-6 space-y-6">
+                <div className="relative">
+                  <span className="absolute -left-[31px] w-3 h-3 rounded-full bg-slate-500 shadow-[0_0_10px_currentColor] top-1" />
+                  <div className="text-sm font-medium text-white mb-0.5">Applied</div>
+                  <div className="text-xs text-muted-foreground/80">Mar 15, 2026</div>
+                </div>
+                <div className="relative">
+                  <span className="absolute -left-[31px] w-3 h-3 rounded-full bg-amber-500 shadow-[0_0_10px_currentColor] top-1" />
+                  <div className="text-sm font-medium text-white mb-0.5">Shortlisted</div>
+                  <div className="text-xs text-muted-foreground/80">Mar 18, 2026</div>
+                </div>
+                <div className="relative p-3 rounded-lg border" style={{ backgroundColor: 'rgba(139,92,246,0.1)', borderColor: 'rgba(139,92,246,0.2)', marginLeft: -8, marginTop: -8 }}>
+                  <span className="absolute -left-[24px] w-3 h-3 rounded-full bg-violet-500 shadow-[0_0_10px_currentColor] top-4 animate-pulse" />
+                  <div className="text-sm font-medium mb-0.5" style={{ color: '#d3adf7' }}>Interview</div>
+                  <div className="text-xs" style={{ color: '#b37feb' }}>Action Required</div>
+                </div>
+              </div>
 
-                  {/* Actions */}
-                  <div className="grid grid-cols-2 gap-3 mt-8">
-                    <Button className="col-span-2 bg-emerald-500 hover:bg-emerald-400 text-emerald-950 font-bold shadow-[0_0_15px_rgba(52,211,153,0.4)]">Move to Hired ✨</Button>
-                    <Button variant="outline" className="border-violet-500/50 text-violet-400 hover:bg-violet-500/10"><Calendar className="w-4 h-4 mr-2"/> Schedule</Button>
-                    <Button variant="outline" className="border-rose-500/50 text-rose-400 hover:bg-rose-500/10">Reject</Button>
-                  </div>
-               </div>
+              <Row gutter={[12, 12]} style={{ marginTop: 32 }}>
+                <Col span={24}>
+                  <Button type="primary" block style={{ background: '#10b981', borderColor: '#10b981' }} icon={<ThunderboltOutlined />}>Move to Hired ✨</Button>
+                </Col>
+                <Col span={12}>
+                  <Button block icon={<CalendarOutlined />}>Schedule</Button>
+                </Col>
+                <Col span={12}>
+                  <Button danger block>Reject</Button>
+                </Col>
+              </Row>
+            </div>
 
-               {/* Right Section */}
-               <div className="w-full md:w-[40%] bg-foreground/[0.02] p-6 flex flex-col items-center">
-                  <div className="text-center mb-8">
-                     <p className="text-xs text-muted-foreground uppercase tracking-widest mb-4 font-semibold">AI Match Analysis</p>
-                     <PulseOrb score={92} size="lg" className="mx-auto" />
-                  </div>
+            <div className="w-full md:w-[40%] bg-foreground/[0.02] p-6 flex flex-col items-center">
+              <div className="text-center mb-8">
+                <Text type="secondary" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: 1, display: 'block', marginBottom: 16 }}>AI Match Analysis</Text>
+                <PulseOrb score={92} size="lg" className="mx-auto" />
+              </div>
 
-                  <div className="w-full space-y-4 mb-8">
-                     <div>
-                        <div className="flex justify-between text-xs mb-1"><span className="text-muted-foreground">Skills Match</span><span className="text-emerald-400">95%</span></div>
-                        <div className="h-1.5 w-full bg-black/40 rounded-full overflow-hidden"><div className="h-full bg-emerald-400 w-[95%]" /></div>
-                     </div>
-                     <div>
-                        <div className="flex justify-between text-xs mb-1"><span className="text-muted-foreground">Experience</span><span className="text-emerald-400">90%</span></div>
-                        <div className="h-1.5 w-full bg-black/40 rounded-full overflow-hidden"><div className="h-full bg-emerald-400 w-[90%]" /></div>
-                     </div>
-                     <div>
-                        <div className="flex justify-between text-xs mb-1"><span className="text-muted-foreground">Culture Fit</span><span className="text-amber-400">82%</span></div>
-                        <div className="h-1.5 w-full bg-black/40 rounded-full overflow-hidden"><div className="h-full bg-amber-400 w-[82%]" /></div>
-                     </div>
-                  </div>
+              <div className="w-full space-y-4 mb-8">
+                <div>
+                  <div className="flex justify-between text-xs mb-1"><span className="text-muted-foreground">Skills Match</span><span className="text-emerald-400">95%</span></div>
+                  <div className="h-1.5 w-full bg-black/40 rounded-full overflow-hidden"><div className="h-full bg-emerald-400 w-[95%]" /></div>
+                </div>
+                <div>
+                  <div className="flex justify-between text-xs mb-1"><span className="text-muted-foreground">Experience</span><span className="text-emerald-400">90%</span></div>
+                  <div className="h-1.5 w-full bg-black/40 rounded-full overflow-hidden"><div className="h-full bg-emerald-400 w-[90%]" /></div>
+                </div>
+                <div>
+                  <div className="flex justify-between text-xs mb-1"><span className="text-muted-foreground">Culture Fit</span><span className="text-amber-400">82%</span></div>
+                  <div className="h-1.5 w-full bg-black/40 rounded-full overflow-hidden"><div className="h-full bg-amber-400 w-[82%]" /></div>
+                </div>
+              </div>
 
-                  <div className="w-full space-y-4 flex-1">
-                     <div>
-                        <p className="text-xs text-muted-foreground mb-2">Matched Skills</p>
-                        <div className="flex flex-wrap gap-2">
-                           <span className="bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded text-xs border border-emerald-500/20">React ✓</span>
-                           <span className="bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded text-xs border border-emerald-500/20">TypeScript ✓</span>
-                           <span className="bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded text-xs border border-emerald-500/20">Node.js ✓</span>
-                        </div>
-                     </div>
-                     <div>
-                        <p className="text-xs text-muted-foreground mb-2">Missing Skills</p>
-                        <div className="flex flex-wrap gap-2">
-                           <span className="bg-rose-500/10 text-rose-400 px-2 py-1 rounded text-xs border border-rose-500/20">GraphQL ✗</span>
-                        </div>
-                     </div>
-                  </div>
+              <div className="w-full space-y-4 flex-1">
+                <div>
+                  <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 8 }}>Matched Skills</Text>
+                  <Space wrap size={[4, 4]}>
+                    <Tag color="success">React ✓</Tag>
+                    <Tag color="success">TypeScript ✓</Tag>
+                    <Tag color="success">Node.js ✓</Tag>
+                  </Space>
+                </div>
+                <div>
+                  <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 8 }}>Missing Skills</Text>
+                  <Space wrap size={[4, 4]}>
+                    <Tag color="error">GraphQL ✗</Tag>
+                  </Space>
+                </div>
+              </div>
 
-                  <a href="#" className="flex items-center text-sm text-cyan-400 hover:underline mt-4">View Full Profile <ArrowRight className="w-4 h-4 ml-1" /></a>
-               </div>
-             </div>
-          </DialogContent>
-        </Dialog>
-      )}
+              <Button type="link" style={{ marginTop: 16 }}>View Full Profile <ArrowRightOutlined /></Button>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }

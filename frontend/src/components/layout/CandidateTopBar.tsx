@@ -1,26 +1,29 @@
-import { Bell, Search } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+// Redesigned with Ant Design — logic unchanged
+import { Layout, Input, Button, Badge, Avatar, Space, Typography } from "antd";
+import { SearchOutlined, BellOutlined } from "@ant-design/icons";
 import { ThemeToggle } from "@/components/ThemeToggle";
+
+const { Header } = Layout;
+const { Title } = Typography;
 
 export function CandidateTopBar({ title }: { title?: string }) {
   return (
-    <header className="h-16 flex items-center justify-between px-4 md:px-8 shrink-0 relative z-10">
-      <h2 className="text-xl font-bold text-foreground tracking-tighter">{title || "Dashboard"}</h2>
-      <div className="flex items-center gap-3">
-        <div className="hidden sm:flex items-center h-9 px-3 gap-2 rounded-xl glass-card text-sm text-muted-foreground cursor-pointer hover:border-foreground/10 transition-colors">
-          <Search className="w-4 h-4" />
-          <span>Search...</span>
-          <kbd className="text-[10px] px-1.5 py-0.5 rounded bg-foreground/5 border border-foreground/10 font-mono">⌘K</kbd>
-        </div>
+    <Header style={{ background: 'transparent', padding: '0 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <Title level={4} style={{ margin: 0, color: 'var(--foreground)' }}>{title || "Dashboard"}</Title>
+      <Space size="large" style={{ display: 'flex', alignItems: 'center' }}>
+        <Input 
+          prefix={<SearchOutlined />} 
+          placeholder="Search... ⌘K" 
+          style={{ width: 200, borderRadius: 8 }}
+        />
         <ThemeToggle />
-        <button className="relative w-9 h-9 rounded-xl flex items-center justify-center hover:bg-foreground/5 transition-colors text-muted-foreground">
-          <Bell className="w-4 h-4" />
-          <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-primary animate-pulse" />
-        </button>
-        <Avatar className="w-8 h-8 cursor-pointer">
-          <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">JD</AvatarFallback>
+        <Badge dot color="#F97316">
+          <Button type="text" icon={<BellOutlined style={{ fontSize: '20px' }} />} />
+        </Badge>
+        <Avatar style={{ backgroundColor: 'rgba(249, 115, 22, 0.15)', color: '#F97316', fontWeight: 'bold' }}>
+          JD
         </Avatar>
-      </div>
-    </header>
+      </Space>
+    </Header>
   );
 }

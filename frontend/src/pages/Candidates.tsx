@@ -1,24 +1,21 @@
+// Redesigned with Ant Design — logic unchanged
 import { useState } from "react";
-import { GlassCard } from "@/components/ui/GlassCard";
+import { Card, Button, Typography, Tag, Space, Input, Segmented, Row, Col, Checkbox, Slider, Drawer, Progress } from "antd";
+import { SearchOutlined, CloseOutlined, DownloadOutlined, PlusOutlined, LayoutOutlined, UnorderedListOutlined, GlobalOutlined, LockOutlined, MailOutlined, ThunderboltOutlined } from "@ant-design/icons";
 import { PulseOrb } from "@/components/ui/PulseOrb";
-import { Button } from "@/components/ui/button";
-import { Search, X, Download, Plus, SlidersHorizontal, LayoutGrid, List, Globe, Lock, Mail, Sparkles } from "lucide-react";
+
+const { Title, Text } = Typography;
 
 // ─── Mock Data ──────────────────────────────────────────────────────────────
 const SKILL_COLORS: Record<string, string> = {
-  React: "border-cyan-500/50 text-cyan-400 bg-cyan-500/10",
-  TypeScript: "border-cyan-500/50 text-cyan-400 bg-cyan-500/10",
-  "Node.js": "border-cyan-500/50 text-cyan-400 bg-cyan-500/10",
-  Python: "border-violet-500/50 text-violet-400 bg-violet-500/10",
-  Docker: "border-emerald-500/50 text-emerald-400 bg-emerald-500/10",
-  AWS: "border-emerald-500/50 text-emerald-400 bg-emerald-500/10",
-  GraphQL: "border-amber-500/50 text-amber-400 bg-amber-500/10",
+  React: "cyan",
+  TypeScript: "cyan",
+  "Node.js": "cyan",
+  Python: "purple",
+  Docker: "green",
+  AWS: "green",
+  GraphQL: "orange",
 };
-
-const skillPillClass = (skill: string, matched: string[]) =>
-  matched.includes(skill)
-    ? `${SKILL_COLORS[skill] ?? "border-cyan-500/50 text-cyan-400 bg-cyan-500/10"} border-l-2`
-    : "border-foreground/10 text-muted-foreground bg-foreground/5";
 
 const mockCandidates = [
   {
@@ -82,16 +79,7 @@ const mockCandidates = [
 const MATCHED_SKILLS = ["React", "TypeScript", "Node.js"];
 
 // ─── Sub-components ──────────────────────────────────────────────────────────
-function SkillPill({ skill, matched }: { skill: string; matched: string[] }) {
-  return (
-    <span className={`px-2 py-0.5 rounded border text-xs font-medium ${skillPillClass(skill, matched)}`}>
-      {skill}
-    </span>
-  );
-}
-
 function DetailPanel({ candidate, onClose }: { candidate: typeof mockCandidates[0]; onClose: () => void }) {
-  const allSkills = Object.values(candidate.skills).flat();
   return (
     <div className="w-full h-full flex flex-col overflow-y-auto">
       {/* Header */}
@@ -101,86 +89,83 @@ function DetailPanel({ candidate, onClose }: { candidate: typeof mockCandidates[
             {candidate.initials}
           </div>
           <div>
-            <h2 className="text-xl font-bold text-white mb-1">{candidate.name}</h2>
-            <p className="text-sm text-muted-foreground">{candidate.role}</p>
-            <div className="flex items-center gap-2 mt-2">
-              {candidate.visibility === "Public"
-                ? <span className="flex items-center gap-1 text-xs text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20"><Globe className="w-3 h-3" /> Public</span>
-                : <span className="flex items-center gap-1 text-xs text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20"><Lock className="w-3 h-3" /> Verified Only</span>
-              }
-            </div>
+            <Title level={3} style={{ margin: 0, color: 'var(--foreground)' }}>{candidate.name}</Title>
+            <Text type="secondary" style={{ display: 'block', marginBottom: 8 }}>{candidate.role}</Text>
+            {candidate.visibility === "Public"
+              ? <Tag icon={<GlobalOutlined />} color="success" bordered={false}>Public</Tag>
+              : <Tag icon={<LockOutlined />} color="warning" bordered={false}>Verified Only</Tag>
+            }
           </div>
         </div>
-        <button onClick={onClose} className="text-muted-foreground/80 hover:text-white transition-colors p-1.5 rounded-full hover:bg-foreground/10">
-          <X className="w-5 h-5" />
-        </button>
       </div>
 
       {/* Score */}
-      <div className="bg-foreground/5 border border-foreground/10 rounded-xl p-4 mb-6">
-        <p className="text-xs uppercase tracking-widest text-muted-foreground/80 mb-3 font-semibold">AI Match Score</p>
+      <Card bordered={false} style={{ background: 'rgba(0,0,0,0.02)', marginBottom: 24 }}>
+        <Text type="secondary" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: 1, display: 'block', marginBottom: 16 }}>AI Match Score</Text>
         <div className="flex items-center gap-4">
           <PulseOrb score={candidate.score} size="lg" />
           <div className="flex-1 space-y-3">
             {[["Skills Match", 95], ["Experience", 88], ["Culture Fit", 80]].map(([label, pct]) => (
               <div key={label as string}>
                 <div className="flex justify-between text-xs mb-1">
-                  <span className="text-muted-foreground">{label}</span>
-                  <span className="text-emerald-400">{pct}%</span>
+                  <Text type="secondary">{label as string}</Text>
+                  <span style={{ color: (pct as number) >= 75 ? '#F97316' : (pct as number) >= 50 ? '#4ECDC4' : '#ff4d4f' }}>{pct}%</span>
                 </div>
-                <div className="h-1.5 w-full bg-black/40 rounded-full overflow-hidden">
-                  <div className="h-full bg-emerald-400 rounded-full" style={{ width: `${pct}%` }} />
-                </div>
+                <Progress percent={pct as number} showInfo={false} strokeColor={(pct as number) >= 75 ? '#F97316' : (pct as number) >= 50 ? '#4ECDC4' : '#ff4d4f'} trailColor="rgba(0,0,0,0.2)" size="small" />
               </div>
             ))}
           </div>
         </div>
-      </div>
+      </Card>
 
       {/* Skills by Category */}
       <div className="space-y-4 mb-6">
-        <p className="text-xs uppercase tracking-widest text-muted-foreground/80 font-semibold">Skills</p>
+        <Text type="secondary" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: 1, display: 'block', marginBottom: 8 }}>Skills</Text>
         {Object.entries(candidate.skills).map(([category, skills]) => skills.length > 0 && (
           <div key={category}>
-            <p className={`text-xs font-semibold mb-2 ${category === "Frontend" ? "text-cyan-400" : category === "Backend" ? "text-violet-400" : "text-emerald-400"}`}>
+            <Text strong style={{ display: 'block', marginBottom: 8, color: category === "Frontend" ? '#F97316' : category === "Backend" ? '#8B5CF6' : '#10b981' }}>
               {category}
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {skills.map(s => <SkillPill key={s} skill={s} matched={MATCHED_SKILLS} />)}
-            </div>
+            </Text>
+            <Space wrap size={[0, 8]}>
+              {skills.map(s => (
+                <Tag key={s} color={MATCHED_SKILLS.includes(s) ? SKILL_COLORS[s] || 'blue' : 'default'} bordered={!MATCHED_SKILLS.includes(s)}>
+                  {s}
+                </Tag>
+              ))}
+            </Space>
           </div>
         ))}
       </div>
 
       {/* Experience & Education */}
-      <div className="bg-foreground/5 border border-foreground/10 rounded-xl p-4 mb-6 space-y-3">
-        <div>
-          <p className="text-xs uppercase tracking-widest text-muted-foreground/80 mb-1 font-semibold">Experience</p>
-          <p className="text-sm text-white font-mono">{candidate.experience}</p>
+      <Card bordered={false} style={{ background: 'rgba(0,0,0,0.02)', marginBottom: 24 }}>
+        <div style={{ marginBottom: 16 }}>
+          <Text type="secondary" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: 1, display: 'block', marginBottom: 4 }}>Experience</Text>
+          <Text strong style={{ fontFamily: 'monospace' }}>{candidate.experience}</Text>
         </div>
         <div>
-          <p className="text-xs uppercase tracking-widest text-muted-foreground/80 mb-1 font-semibold">Education</p>
-          <p className="text-sm text-muted-foreground">{candidate.education}</p>
+          <Text type="secondary" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: 1, display: 'block', marginBottom: 4 }}>Education</Text>
+          <Text type="secondary">{candidate.education}</Text>
         </div>
-      </div>
+      </Card>
 
       {/* Culture Values */}
       <div className="mb-8">
-        <p className="text-xs uppercase tracking-widest text-muted-foreground/80 mb-3 font-semibold">Culture Values</p>
-        <div className="flex flex-wrap gap-2">
+        <Text type="secondary" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: 1, display: 'block', marginBottom: 12 }}>Culture Values</Text>
+        <Space wrap>
           {candidate.values.map(v => (
-            <span key={v} className="px-3 py-1 bg-violet-500/10 text-violet-300 rounded-full border border-violet-500/20 text-xs">{v}</span>
+            <Tag key={v} color="purple" bordered={false}>{v}</Tag>
           ))}
-        </div>
+        </Space>
       </div>
 
       {/* Actions */}
       <div className="space-y-3 mt-auto">
-        <Button variant="outline" className="w-full border-foreground/20 text-white hover:bg-foreground/10">
-          <Download className="w-4 h-4 mr-2" /> Download CV
+        <Button block icon={<DownloadOutlined />}>
+          Download CV
         </Button>
-        <Button className="w-full bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-bold shadow-[0_0_20px_rgba(0,212,255,0.4)]">
-          <Sparkles className="w-4 h-4 mr-2" /> Invite to Apply
+        <Button block type="primary" icon={<ThunderboltOutlined />}>
+          Invite to Apply
         </Button>
       </div>
     </div>
@@ -189,7 +174,7 @@ function DetailPanel({ candidate, onClose }: { candidate: typeof mockCandidates[
 
 // ─── Main Component ──────────────────────────────────────────────────────────
 export default function Candidates() {
-  const [searchSkills] = useState(["React", "TypeScript", "Node.js"]);
+  const [searchSkills, setSearchSkills] = useState(["React", "TypeScript", "Node.js"]);
   const [minScore, setMinScore] = useState(70);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [view, setView] = useState<"grid" | "list">("grid");
@@ -210,114 +195,77 @@ export default function Candidates() {
         {/* Header */}
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Search className="w-7 h-7 text-cyan-400" />
-            <h1 className="text-3xl font-bold tracking-tight text-foreground">Neural Scanner</h1>
+            <SearchOutlined className="text-3xl text-cyan-400" />
+            <Title level={2} style={{ margin: 0, color: 'var(--foreground)' }}>Neural Scanner</Title>
           </div>
-          <p className="text-muted-foreground ml-9">Discover and connect with top talent</p>
+          <Text type="secondary" style={{ marginLeft: 36 }}>Discover and connect with top talent</Text>
         </div>
 
         {/* Search Panel */}
-        <GlassCard className="p-6 border-primary/20" glow glowColor="cyan">
-          <p className="text-xs uppercase tracking-widest text-muted-foreground font-semibold mb-4">Scan for candidates matching...</p>
+        <Card bordered={false} style={{ background: 'var(--surface)' }} bodyStyle={{ padding: 24 }}>
+          <Text type="secondary" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: 1, display: 'block', marginBottom: 16 }}>Scan for candidates matching...</Text>
 
           {/* Skills Tag Input */}
-          <div className="flex flex-wrap gap-2 mb-4 bg-foreground/5 border border-foreground/10 rounded-lg p-3">
+          <div className="flex flex-wrap gap-2 mb-6 p-3 rounded-lg border" style={{ borderColor: 'var(--border)', background: 'rgba(0,0,0,0.02)' }}>
             {searchSkills.map(skill => (
-              <span key={skill} className="flex items-center gap-1.5 pl-3 pr-1.5 py-1 bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 rounded-full text-sm">
+              <Tag key={skill} closable onClose={() => setSearchSkills(searchSkills.filter(s => s !== skill))} color="cyan" bordered={false} style={{ padding: '4px 12px', fontSize: 14 }}>
                 {skill}
-                <button className="hover:bg-foreground/20 rounded-full p-0.5"><X className="w-3 h-3" /></button>
-              </span>
+              </Tag>
             ))}
-            <input
-              type="text"
+            <Input
+              variant="borderless"
               placeholder="+ Add skill..."
-              className="flex-1 min-w-[120px] bg-transparent text-white placeholder:text-slate-600 focus:outline-none text-sm"
+              style={{ width: 120 }}
             />
           </div>
 
           {/* Filters Row */}
-          <div className="flex flex-wrap gap-6 items-start md:items-center">
-            {/* Experience */}
-            <div>
-              <p className="text-xs text-muted-foreground/80 mb-2 font-medium uppercase tracking-widest">Experience</p>
-              <div className="flex gap-4">
-                {["Junior", "Mid", "Senior"].map((lvl, i) => (
-                  <label key={lvl} className="flex items-center gap-2 cursor-pointer text-sm text-muted-foreground hover:text-white">
-                    <input
-                      type="checkbox"
-                      defaultChecked={i > 0}
-                      className="accent-cyan-500 w-4 h-4 rounded"
-                    />
-                    {lvl}
-                  </label>
-                ))}
-              </div>
-            </div>
+          <Row gutter={[24, 24]} align="middle">
+            <Col>
+              <Text type="secondary" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: 1, display: 'block', marginBottom: 8 }}>Experience</Text>
+              <Space size="large">
+                <Checkbox>Junior</Checkbox>
+                <Checkbox defaultChecked>Mid</Checkbox>
+                <Checkbox defaultChecked>Senior</Checkbox>
+              </Space>
+            </Col>
 
-            {/* Score Slider */}
-            <div className="flex-1 min-w-[180px]">
-              <div className="flex justify-between mb-2">
-                <p className="text-xs text-muted-foreground/80 font-medium uppercase tracking-widest">Min Score</p>
-                <span className="text-xs text-cyan-400 font-mono font-bold">{minScore}</span>
+            <Col flex="auto" style={{ minWidth: 200 }}>
+              <div className="flex justify-between mb-1">
+                <Text type="secondary" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: 1 }}>Min Score</Text>
+                <Text strong style={{ color: '#F97316', fontFamily: 'monospace' }}>{minScore}</Text>
               </div>
-              <input
-                type="range" min={0} max={100} value={minScore}
-                onChange={e => setMinScore(Number(e.target.value))}
-                className="w-full h-1.5 rounded-full appearance-none bg-foreground/10 cursor-pointer accent-cyan-400"
-                style={{ accentColor: '#00D4FF' }}
-              />
-            </div>
+              <Slider min={0} max={100} value={minScore} onChange={setMinScore} trackStyle={{ background: '#F97316' }} />
+            </Col>
 
-            {/* Availability */}
-            <div>
-              <p className="text-xs text-muted-foreground/80 mb-2 font-medium uppercase tracking-widest">Availability</p>
-              <div className="flex bg-foreground/5 border border-foreground/10 rounded-lg p-0.5">
-                {["All", "Active", "Open"].map((opt, i) => (
-                  <button key={opt} className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${i === 2 ? "bg-cyan-500/20 text-cyan-400" : "text-muted-foreground hover:text-white"}`}>
-                    {opt}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
+            <Col>
+              <Text type="secondary" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: 1, display: 'block', marginBottom: 8 }}>Availability</Text>
+              <Segmented options={['All', 'Active', 'Open']} defaultValue="Open" />
+            </Col>
+          </Row>
 
           {/* Scan Actions */}
-          <div className="flex gap-3 mt-5 pt-5 border-t border-foreground/10">
-            <Button
-              onClick={() => setScanned(true)}
-              className="bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-bold px-8 shadow-[0_0_20px_rgba(0,212,255,0.4)]"
-            >
-              <Search className="w-4 h-4 mr-2" /> Scan 🔍
+          <div style={{ marginTop: 24, paddingTop: 24, borderTop: '1px solid var(--border)', display: 'flex', gap: 12 }}>
+            <Button type="primary" icon={<SearchOutlined />} onClick={() => setScanned(true)}>
+              Scan
             </Button>
-            <Button variant="ghost" className="text-muted-foreground hover:text-white hover:bg-foreground/10">
-              Clear
-            </Button>
+            <Button type="text">Clear</Button>
           </div>
-        </GlassCard>
+        </Card>
 
         {/* Results Bar */}
         {scanned && (
           <div className="flex items-center justify-between flex-wrap gap-4">
-            <p className="text-muted-foreground">
-              <span className="text-white font-bold font-mono">{sorted.length}</span> candidates found
-            </p>
-            <div className="flex items-center gap-3">
-              <div className="flex bg-foreground/5 border border-foreground/10 rounded-lg p-0.5">
-                {["Best Match", "Experience", "Recent"].map(s => (
-                  <button
-                    key={s}
-                    onClick={() => setSort(s)}
-                    className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${sort === s ? "bg-foreground/10 text-white" : "text-muted-foreground hover:text-white"}`}
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
-              <div className="flex bg-foreground/5 border border-foreground/10 rounded-lg p-0.5">
-                <button onClick={() => setView("grid")} className={`p-1.5 rounded transition-colors ${view === "grid" ? "bg-foreground/10 text-white" : "text-muted-foreground"}`}><LayoutGrid className="w-4 h-4" /></button>
-                <button onClick={() => setView("list")} className={`p-1.5 rounded transition-colors ${view === "list" ? "bg-foreground/10 text-white" : "text-muted-foreground"}`}><List className="w-4 h-4" /></button>
-              </div>
-            </div>
+            <Text type="secondary">
+              <Text strong style={{ color: 'var(--foreground)', fontFamily: 'monospace' }}>{sorted.length}</Text> candidates found
+            </Text>
+            <Space>
+              <Segmented options={['Best Match', 'Experience', 'Recent']} value={sort} onChange={setSort} />
+              <Segmented options={[
+                { value: 'grid', icon: <LayoutOutlined /> },
+                { value: 'list', icon: <UnorderedListOutlined /> }
+              ]} value={view} onChange={setView as any} />
+            </Space>
           </div>
         )}
 
@@ -327,52 +275,58 @@ export default function Candidates() {
             {sorted.map(candidate => {
               const allSkills = Object.values(candidate.skills).flat().slice(0, 5);
               const isSelected = selectedId === candidate.id;
+              
               return (
-                <GlassCard
+                <Card
                   key={candidate.id}
-                  className={`p-5 flex gap-4 cursor-pointer transition-all duration-200 hover:border-cyan-500/30 hover:-translate-y-0.5 ${isSelected ? "border-cyan-500/50 shadow-[0_0_20px_rgba(0,212,255,0.1)]" : ""}`}
+                  bordered={false}
+                  hoverable
+                  style={{ 
+                    background: 'var(--surface)', 
+                    borderColor: isSelected ? '#F97316' : 'transparent',
+                    borderWidth: 1,
+                    borderStyle: 'solid'
+                  }}
+                  bodyStyle={{ padding: 20 }}
                   onClick={() => setSelectedId(isSelected ? null : candidate.id)}
                 >
-                  {/* Avatar */}
-                  <div className={`w-14 h-14 rounded-full ${candidate.avatarColor} flex items-center justify-center text-xl font-bold border border-foreground/10 shrink-0`}>
-                    {candidate.initials}
-                  </div>
-
-                  {/* Content */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex justify-between items-start gap-2 mb-1">
-                      <div>
-                        <h3 className="text-lg font-bold text-white leading-tight">{candidate.name}</h3>
-                        <p className="text-sm text-muted-foreground">{candidate.role}</p>
-                      </div>
-                      <div className="flex flex-col items-end gap-2 shrink-0">
-                        <PulseOrb score={candidate.score} size="md" />
-                        {candidate.visibility === "Public"
-                          ? <span className="flex items-center gap-1 text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20"><Globe className="w-2.5 h-2.5" /> Public</span>
-                          : <span className="flex items-center gap-1 text-[10px] text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20"><Lock className="w-2.5 h-2.5" /> Verified</span>
-                        }
-                      </div>
+                  <div className="flex gap-4">
+                    <div className={`w-14 h-14 rounded-full ${candidate.avatarColor} flex items-center justify-center text-xl font-bold border border-foreground/10 shrink-0`}>
+                      {candidate.initials}
                     </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-start gap-2 mb-1">
+                        <div>
+                          <Title level={5} style={{ margin: 0, color: 'var(--foreground)' }}>{candidate.name}</Title>
+                          <Text type="secondary" style={{ fontSize: 13 }}>{candidate.role}</Text>
+                        </div>
+                        <div className="flex flex-col items-end gap-2 shrink-0">
+                          <PulseOrb score={candidate.score} size="md" />
+                          {candidate.visibility === "Public"
+                            ? <Tag icon={<GlobalOutlined />} color="success" bordered={false} style={{ margin: 0, fontSize: 10 }}>Public</Tag>
+                            : <Tag icon={<LockOutlined />} color="warning" bordered={false} style={{ margin: 0, fontSize: 10 }}>Verified</Tag>
+                          }
+                        </div>
+                      </div>
 
-                    <p className="text-sm font-mono text-cyan-400 mb-1">{candidate.experience} experience</p>
-                    <p className="text-xs text-muted-foreground/80 mb-3">{candidate.education}</p>
+                      <Text strong style={{ color: '#F97316', fontFamily: 'monospace', fontSize: 13, display: 'block', marginBottom: 4 }}>{candidate.experience} experience</Text>
+                      <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 12 }}>{candidate.education}</Text>
 
-                    {/* Skills */}
-                    <div className="flex flex-wrap gap-1.5 mb-4">
-                      {allSkills.map(skill => <SkillPill key={skill} skill={skill} matched={MATCHED_SKILLS} />)}
-                    </div>
+                      <Space wrap size={[0, 8]} style={{ marginBottom: 16 }}>
+                        {allSkills.map(skill => (
+                          <Tag key={skill} color={MATCHED_SKILLS.includes(skill) ? SKILL_COLORS[skill] || 'blue' : 'default'} bordered={!MATCHED_SKILLS.includes(skill)}>
+                            {skill}
+                          </Tag>
+                        ))}
+                      </Space>
 
-                    {/* Actions */}
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="sm" className="border-foreground/20 text-muted-foreground hover:bg-foreground/10 text-xs">
-                        View Profile
-                      </Button>
-                      <Button size="sm" className="bg-transparent border border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/10 text-xs">
-                        <Mail className="w-3.5 h-3.5 mr-1.5" /> Invite to Apply
-                      </Button>
+                      <Space>
+                        <Button size="small">View Profile</Button>
+                        <Button size="small" type="primary" ghost icon={<MailOutlined />}>Invite to Apply</Button>
+                      </Space>
                     </div>
                   </div>
-                </GlassCard>
+                </Card>
               );
             })}
           </div>
@@ -383,9 +337,9 @@ export default function Candidates() {
       <div className={`shrink-0 transition-all duration-300 ease-in-out overflow-hidden ${selectedCandidate ? "w-[440px] opacity-100 pl-6" : "w-0 opacity-0"}`}>
         {selectedCandidate && (
           <div className="w-[440px] sticky top-0 h-[calc(100vh-6rem)] overflow-y-auto">
-            <GlassCard className="p-6 h-full border-foreground/10 shadow-[-20px_0_60px_rgba(0,0,0,0.3)]">
+            <Card bordered={false} style={{ background: 'var(--surface)', height: '100%', boxShadow: '-20px 0 60px rgba(0,0,0,0.3)' }} bodyStyle={{ padding: 24, height: '100%' }}>
               <DetailPanel candidate={selectedCandidate} onClose={() => setSelectedId(null)} />
-            </GlassCard>
+            </Card>
           </div>
         )}
       </div>
