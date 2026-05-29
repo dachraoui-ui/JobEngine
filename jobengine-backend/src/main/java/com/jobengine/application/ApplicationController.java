@@ -2,8 +2,8 @@ package com.jobengine.application;
 
 import com.jobengine.common.ApiResponse;
 import com.jobengine.common.ApplicationStatus;
+import com.jobengine.common.AuthUtils;
 import com.jobengine.user.User;
-import com.jobengine.user.UserRepository;
 import com.jobengine.webhook.WebhookService;
 
 
@@ -25,7 +25,7 @@ import java.util.Map;
 public class ApplicationController {
 
     private final ApplicationService applicationService;
-    private final UserRepository userRepository;
+    private final AuthUtils authUtils;
     private final WebhookService webhookService;
 
     @PostMapping
@@ -33,7 +33,7 @@ public class ApplicationController {
     public ResponseEntity<ApiResponse<Application>> applyToJob(
             @RequestBody Map<String, String> body,
             @AuthenticationPrincipal UserDetails userDetails) {
-        User user = getUserFromDetails(userDetails);
+        User user = authUtils.getUserFromDetails(userDetails);
         String jobId = body.get("jobId");
         String cvId = body.get("cvId");
 
@@ -53,7 +53,7 @@ public class ApplicationController {
     @GetMapping
     public ResponseEntity<ApiResponse<List<Application>>> getApplications(
             @AuthenticationPrincipal UserDetails userDetails) {
-        User user = getUserFromDetails(userDetails);
+        User user = authUtils.getUserFromDetails(userDetails);
         List<Application> applications = applicationService.getApplicationsByCandidateId(user.getId());
         return ResponseEntity.ok(ApiResponse.success(applications));
     }
@@ -75,7 +75,7 @@ public class ApplicationController {
             @PathVariable String id,
             @Valid @RequestBody StatusUpdateRequest request,
             @AuthenticationPrincipal UserDetails userDetails) {
-        User user = getUserFromDetails(userDetails);
+        User user = authUtils.getUserFromDetails(userDetails);
         Application updated = applicationService.updateStatus(id, request.getStatus(), user.getId());
 
         // Send webhook to n8n
@@ -95,8 +95,15 @@ public class ApplicationController {
         return ResponseEntity.ok(ApiResponse.success(applicationService.getPipelineByJobId(jobId)));
     }
 
-    private User getUserFromDetails(UserDetails userDetails) {
-        return userRepository.findByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    @PostMapping("/recruiter-add")
+    @PreAuthorize("hasRole('RECRUITER')")
+    public ResponseEntity<ApiResponse<Application>> recruiterAddToJob(
+            @RequestBody Map<String, String> body) {
+        String candidateId = body.get("candidateId");
+        String jobId = body.get("jobId");
+        Application application = applicationService.recruiterAddToJob(candidateId, jobId);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.created(application, "Candidate assigned to job successfully"));
     }
+
 }

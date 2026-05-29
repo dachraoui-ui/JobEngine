@@ -23,6 +23,12 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success(userService.getAllUsers()));
     }
 
+    @GetMapping("/candidates")
+    @PreAuthorize("hasRole('RECRUITER') or hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<List<CandidateResponse>>> getCandidates() {
+        return ResponseEntity.ok(ApiResponse.success(userService.getCandidates()));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<UserResponse>> getUserById(@PathVariable String id) {
         return ResponseEntity.ok(ApiResponse.success(userService.getUserById(id)));

@@ -24,7 +24,7 @@ export default function Dashboard() {
               <span className="text-sm font-medium text-muted-foreground">{stat.label}</span>
               <div className="p-2 rounded-lg bg-foreground/5 shrink-0">{stat.icon}</div>
             </div>
-            <span className="text-3xl font-mono font-bold text-white">{stat.value}</span>
+            <span className="text-3xl font-mono font-bold text-foreground">{stat.value}</span>
           </GlassCard>
         ))}
       </div>
@@ -48,13 +48,13 @@ export default function Dashboard() {
                   {job.company.charAt(0)}
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-white group-hover:text-primary transition-colors cursor-pointer">{job.title}</h3>
+                  <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors cursor-pointer">{job.title}</h3>
                   <p className="text-sm text-muted-foreground">{job.company} • {job.location}</p>
                 </div>
               </div>
               <div className="flex items-center gap-4">
                 <PulseOrb score={job.score} size="md" />
-                <Link to={`/candidate/job/${job.id}`} className="hidden sm:flex text-sm text-muted-foreground hover:text-white transition-colors">View Details</Link>
+                <Link to={`/candidate/job/${job.id}`} className="hidden sm:flex text-sm text-muted-foreground hover:text-foreground transition-colors">View Details</Link>
               </div>
             </GlassCard>
           ))}
@@ -66,7 +66,7 @@ export default function Dashboard() {
           
           <GlassCard className="p-5 border-amber-500/20 bg-amber-500/5 relative overflow-hidden group">
             <div className="absolute top-0 right-0 w-2 h-full bg-amber-500" />
-            <h3 className="font-semibold text-white mb-1">Interview Scheduled</h3>
+            <h3 className="font-semibold text-foreground mb-1">Interview Scheduled</h3>
             <p className="text-sm text-muted-foreground mb-3">With DataFlow Systems</p>
             <p className="text-xs text-amber-400 font-mono">Tomorrow, 10:00 AM</p>
           </GlassCard>
@@ -75,7 +75,7 @@ export default function Dashboard() {
              <div className="absolute -right-6 -bottom-6 opacity-20">
               <BrainCircuit className="w-32 h-32 text-secondary" />
             </div>
-            <h3 className="font-semibold text-white mb-1 relative z-10">AI Pro Tip</h3>
+            <h3 className="font-semibold text-foreground mb-1 relative z-10">AI Pro Tip</h3>
             <p className="text-sm text-muted-foreground mb-4 relative z-10">Adding "GraphQL" to your skills can increase your match rate by 15% for current open roles.</p>
             <Link to="/candidate/career-ai" className="text-sm text-secondary hover:underline relative z-10">Explore Career AI →</Link>
           </GlassCard>

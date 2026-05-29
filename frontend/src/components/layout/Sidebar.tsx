@@ -7,111 +7,127 @@ import {
   GitBranch,
   BarChart3,
   Settings,
-  Zap,
   ChevronLeft,
   ChevronRight,
   LogOut,
 } from "lucide-react";
 import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
 
 const navItems = [
-  { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
-  { icon: Briefcase, label: "Jobs", path: "/jobs" },
-  { icon: Users, label: "Candidates", path: "/candidates" },
-  { icon: GitBranch, label: "Pipeline", path: "/pipeline" },
-  { icon: BarChart3, label: "Analytics", path: "/analytics" },
-  { icon: Settings, label: "Settings", path: "/settings" },
+  { icon: LayoutDashboard, label: "Dashboard",  path: "/dashboard" },
+  { icon: Briefcase,       label: "Jobs",        path: "/jobs" },
+  { icon: Users,           label: "Candidates",  path: "/candidates" },
+  { icon: GitBranch,       label: "Pipeline",    path: "/pipeline" },
+  { icon: BarChart3,       label: "Analytics",   path: "/analytics" },
+  { icon: Settings,        label: "Settings",    path: "/settings" },
 ];
+
+/* ── Inline JobEngine logo wordmark ── */
+function LogoMark({ expanded }: { expanded: boolean }) {
+  return (
+    <div className="flex items-center gap-2.5">
+      {/* Icon: magnifying glass style */}
+      <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shrink-0 shadow-md shadow-primary/30">
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+          <circle cx="8.5" cy="8.5" r="5.5" stroke="white" strokeWidth="2"/>
+          <path d="M13.5 13.5L17 17" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+        </svg>
+      </div>
+      {expanded && (
+        <div className="animate-fade-in">
+          <span className="font-extrabold text-[18px] leading-none">
+            <span className="text-primary">Job</span>
+            <span className="text-foreground">Engine</span>
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function AppSidebar() {
   const [expanded, setExpanded] = useState(true);
+  const { logout } = useAuth();
 
   return (
     <>
-      {/* Desktop Sidebar */}
+      {/* ── Desktop Sidebar ── */}
       <aside className={cn(
         "hidden md:flex flex-col h-screen bg-sidebar border-r border-sidebar-border fixed left-0 top-0 z-40 transition-all duration-300",
-        expanded ? "w-[260px]" : "w-[72px]"
+        expanded ? "w-[240px]" : "w-[68px]"
       )}>
+
         {/* Logo */}
         <div className="flex items-center h-16 px-4 border-b border-sidebar-border">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center glow-cyan">
-              <Zap className="w-5 h-5 text-primary" />
-            </div>
-            {expanded && (
-              <div className="animate-fade-in">
-                <h1 className="font-bold text-foreground tracking-tighter text-lg">JobEngine</h1>
-              </div>
-            )}
-          </div>
+          <LogoMark expanded={expanded} />
         </div>
 
-        {/* Nav items with constellation lines */}
-        <nav className="flex-1 px-3 py-6 relative">
-          {/* Constellation line */}
-          <div className="absolute left-[34px] top-8 bottom-8 w-px bg-border" style={{ width: expanded ? undefined : undefined }}>
-            <div className="absolute inset-0 bg-gradient-to-b from-primary/20 via-secondary/20 to-transparent" />
-          </div>
-
-          <div className="space-y-1 relative">
+        {/* Nav */}
+        <nav className="flex-1 px-2.5 py-5 overflow-y-auto">
+          <div className="space-y-0.5">
             {navItems.map((item) => (
               <NavLink
                 key={item.path}
                 to={item.path}
-                end={item.path === "/"}
+                end={item.path === "/dashboard"}
                 className={({ isActive }) => cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group relative",
+                  "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 relative",
                   isActive
                     ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:text-foreground hover:bg-foreground/5"
+                    : "text-sidebar-foreground hover:text-foreground hover:bg-sidebar-accent"
                 )}
               >
                 {({ isActive }) => (
                   <>
-                    {isActive && (
-                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-primary rounded-r-full glow-cyan" />
-                    )}
-                    <item.icon className={cn("w-5 h-5 shrink-0", isActive && "drop-shadow-[0_0_6px_rgba(0,212,255,0.5)]")} />
-                    {expanded && <span>{item.label}</span>}
+                    {isActive && <span className="nav-active-bar" />}
+                    <item.icon className={cn(
+                      "w-[18px] h-[18px] shrink-0 transition-colors",
+                      isActive ? "text-primary" : ""
+                    )} />
+                    {expanded && <span className="truncate">{item.label}</span>}
                   </>
                 )}
               </NavLink>
             ))}
           </div>
 
-          <div className="absolute bottom-6 left-3 right-3 space-y-1">
-             <NavLink
-                to="/login"
-                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 group relative"
-              >
-                <LogOut className="w-5 h-5 shrink-0" />
-                {expanded && <span>Logout</span>}
-             </NavLink>
+          {/* Logout at bottom of nav area */}
+          <div className="mt-4 pt-4 border-t border-sidebar-border">
+            <button
+              onClick={logout}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-destructive/70 hover:text-destructive hover:bg-destructive/10"
+            >
+              <LogOut className="w-[18px] h-[18px] shrink-0" />
+              {expanded && <span>Logout</span>}
+            </button>
           </div>
         </nav>
 
         {/* Collapse toggle */}
-        <div className="p-3 border-t border-sidebar-border">
+        <div className="p-2.5 border-t border-sidebar-border">
           <button
             onClick={() => setExpanded(!expanded)}
-            className="flex items-center justify-center w-full h-9 rounded-xl text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-colors"
+            className="flex items-center justify-center w-full h-9 rounded-xl text-sidebar-foreground hover:text-foreground hover:bg-sidebar-accent transition-colors"
           >
-            {expanded ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+            {expanded
+              ? <ChevronLeft className="w-4 h-4" />
+              : <ChevronRight className="w-4 h-4" />
+            }
           </button>
         </div>
       </aside>
 
-      {/* Mobile Bottom Tab Bar */}
+      {/* ── Mobile Bottom Tab Bar ── */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-sidebar border-t border-sidebar-border flex justify-around py-2 px-1">
         {navItems.slice(0, 5).map((item) => (
           <NavLink
             key={item.path}
             to={item.path}
-            end={item.path === "/"}
+            end={item.path === "/dashboard"}
             className={({ isActive }) => cn(
               "flex flex-col items-center gap-1 px-3 py-1.5 rounded-lg text-[10px] font-medium transition-colors",
-              isActive ? "text-primary" : "text-muted-foreground"
+              isActive ? "text-primary" : "text-sidebar-foreground"
             )}
           >
             <item.icon className="w-5 h-5" />
@@ -120,8 +136,8 @@ export function AppSidebar() {
         ))}
       </nav>
 
-      {/* Spacer for sidebar */}
-      <div className={cn("hidden md:block shrink-0 transition-all duration-300", expanded ? "w-[260px]" : "w-[72px]")} />
+      {/* Spacer */}
+      <div className={cn("hidden md:block shrink-0 transition-all duration-300", expanded ? "w-[240px]" : "w-[68px]")} />
     </>
   );
 }

@@ -131,7 +131,7 @@ function ExpandableAppCard({ app }: { app: any }) {
               <span>•</span>
               <span>Applied {app.appliedDate}</span>
             </div>
-            <h3 className="text-lg font-semibold text-white mb-2">{app.title}</h3>
+            <h3 className="text-lg font-semibold text-foreground mb-2">{app.title}</h3>
             <div className="flex flex-wrap gap-2">
               <span className="px-2 py-0.5 bg-foreground/5 border border-foreground/10 rounded text-xs text-muted-foreground">React</span>
               <span className="px-2 py-0.5 bg-foreground/5 border border-foreground/10 rounded text-xs text-muted-foreground">TypeScript</span>
@@ -154,14 +154,14 @@ function ExpandableAppCard({ app }: { app: any }) {
           <div className="flex-1 relative border-l border-foreground/10 ml-2 pl-6 space-y-6 py-2">
             <div className="relative">
               <span className="absolute -left-[31px] w-3 h-3 rounded-full bg-primary shadow-[0_0_10px_currentColor] top-1" />
-              <p className="text-sm font-medium text-white mb-0.5">Applied</p>
+              <p className="text-sm font-medium text-foreground mb-0.5">Applied</p>
               <p className="text-xs text-muted-foreground">Mar 15, 2026</p>
             </div>
             
             {(app.status === "Shortlisted" || app.status === "Interview" || app.status === "Hired") && (
               <div className="relative">
                 <span className="absolute -left-[31px] w-3 h-3 rounded-full bg-amber-400 shadow-[0_0_10px_currentColor] top-1" />
-                <p className="text-sm font-medium text-white mb-0.5">Shortlisted by recruiter</p>
+                <p className="text-sm font-medium text-foreground mb-0.5">Shortlisted by recruiter</p>
                 <p className="text-xs text-muted-foreground">Mar 18, 2026</p>
               </div>
             )}
@@ -216,7 +216,7 @@ function ExpandableAppCard({ app }: { app: any }) {
             </div>
 
             <div className="flex gap-3">
-              <Button variant="outline" className="flex-1 basis-1/2 border-foreground/10 text-white hover:bg-foreground/10">View Job</Button>
+              <Button variant="outline" className="flex-1 basis-1/2 border-border text-foreground hover:bg-foreground/10">View Job</Button>
               {app.status !== "Rejected" && app.status !== "Hired" && (
                 <Button variant="ghost" className="flex-1 basis-1/2 text-rose-400 hover:text-rose-300 hover:bg-rose-500/10">Withdraw</Button>
               )}

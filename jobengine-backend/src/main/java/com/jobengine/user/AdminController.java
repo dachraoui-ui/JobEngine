@@ -24,6 +24,7 @@ public class AdminController {
     private final UserRepository userRepository;
     private final JobRepository jobRepository;
     private final ApplicationRepository applicationRepository;
+    private final SystemSettingsRepository systemSettingsRepository;
 
     @GetMapping("/dashboard")
     public ResponseEntity<ApiResponse<Map<String, Object>>> getDashboardStats() {
@@ -32,7 +33,58 @@ public class AdminController {
         stats.put("totalJobs", jobRepository.count());
         stats.put("totalApplications", applicationRepository.count());
         stats.put("pendingRecruiters", userService.getPendingRecruiters().size());
+
+        // Role breakdown
+        long candidateCount = userRepository.findAll().stream()
+                .filter(u -> u.getRole() == com.jobengine.common.Role.CANDIDATE)
+                .count();
+        long recruiterCount = userRepository.findAll().stream()
+                .filter(u -> u.getRole() == com.jobengine.common.Role.RECRUITER)
+                .count();
+        stats.put("candidateCount", candidateCount);
+        stats.put("recruiterCount", recruiterCount);
+
+        // Status breakdown
+        Map<String, Long> statusBreakdown = applicationRepository.findAll().stream()
+                .collect(java.util.stream.Collectors.groupingBy(
+                        a -> a.getStatus().name(),
+                        java.util.stream.Collectors.counting()
+                ));
+        stats.put("statusBreakdown", statusBreakdown);
+
         return ResponseEntity.ok(ApiResponse.success(stats));
+    }
+
+    @GetMapping("/settings")
+    public ResponseEntity<ApiResponse<SystemSettings>> getSettings() {
+        SystemSettings settings = systemSettingsRepository.findById("GLOBAL")
+                .orElseGet(() -> {
+                    SystemSettings defaultSettings = SystemSettings.builder()
+                            .id("GLOBAL")
+                            .matchingThreshold(60.0)
+                            .autoRejectScore(40.0)
+                            .autoRejectEnabled(false)
+                            .build();
+                    return systemSettingsRepository.save(defaultSettings);
+                });
+        return ResponseEntity.ok(ApiResponse.success(settings));
+    }
+
+    @PutMapping("/settings")
+    public ResponseEntity<ApiResponse<SystemSettings>> updateSettings(@RequestBody SystemSettings updates) {
+        SystemSettings settings = systemSettingsRepository.findById("GLOBAL")
+                .orElseGet(() -> SystemSettings.builder().id("GLOBAL").build());
+
+        if (updates.getMatchingThreshold() > 0) {
+            settings.setMatchingThreshold(updates.getMatchingThreshold());
+        }
+        if (updates.getAutoRejectScore() > 0) {
+            settings.setAutoRejectScore(updates.getAutoRejectScore());
+        }
+        settings.setAutoRejectEnabled(updates.isAutoRejectEnabled());
+
+        SystemSettings saved = systemSettingsRepository.save(settings);
+        return ResponseEntity.ok(ApiResponse.success(saved, "System settings updated successfully"));
     }
 
     @GetMapping("/pending-recruiters")

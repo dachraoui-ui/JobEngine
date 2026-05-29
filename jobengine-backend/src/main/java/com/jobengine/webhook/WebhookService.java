@@ -23,7 +23,7 @@ public class WebhookService {
     @Value("${n8n.webhook.base-url}")
     private String n8nBaseUrl;
 
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
 
     public void sendStatusChangeWebhook(Map<String, Object> payload) {
         sendWebhook("/status-change", payload);

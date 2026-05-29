@@ -2,6 +2,7 @@ package com.jobengine.job;
 
 import com.jobengine.common.ExperienceLevel;
 import com.jobengine.common.JobType;
+import com.jobengine.common.JobStatus;
 
 
 import jakarta.validation.constraints.NotBlank;
@@ -38,4 +39,6 @@ public class JobRequest {
     private List<String> companyValues;
 
     private LocalDateTime deadline;
+
+    private JobStatus status;
 }

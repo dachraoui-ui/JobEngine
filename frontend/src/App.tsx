@@ -28,6 +28,7 @@ import AdminUsers from "./pages/admin/Users";
 import AdminDashboard from "./pages/admin/Dashboard";
 import RecruiterProfile from "./pages/recruiter/Profile";
 import { AuthProvider } from "@/hooks/useAuth";
+import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -53,8 +54,8 @@ const App = () => (
       
       {/* Global Ambient Light Leaks */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-[-1]">
-        <div className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-cyan-500/10 rounded-full blur-[120px]" />
-        <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-violet-600/10 rounded-full blur-[120px]" />
+        <div className="absolute top-[-15%] left-[-5%] w-[700px] h-[700px] bg-primary/8 rounded-full blur-[160px]" />
+        <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-accent/6 rounded-full blur-[150px]" />
       </div>
 
       <BrowserRouter>
@@ -64,23 +65,23 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             {/* Recruiter dashboard */}
-            <Route path="/dashboard" element={<DashboardShell><Index /></DashboardShell>} />
-            <Route path="/jobs" element={<DashboardShell><Jobs /></DashboardShell>} />
-            <Route path="/candidates" element={<DashboardShell><Candidates /></DashboardShell>} />
-            <Route path="/pipeline" element={<DashboardShell><Pipeline /></DashboardShell>} />
-            <Route path="/analytics" element={<DashboardShell><Analytics /></DashboardShell>} />
-            <Route path="/recruiter/profile" element={<DashboardShell><RecruiterProfile /></DashboardShell>} />
+            <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['RECRUITER']}><DashboardShell><Index /></DashboardShell></ProtectedRoute>} />
+            <Route path="/jobs" element={<ProtectedRoute allowedRoles={['RECRUITER']}><DashboardShell><Jobs /></DashboardShell></ProtectedRoute>} />
+            <Route path="/candidates" element={<ProtectedRoute allowedRoles={['RECRUITER']}><DashboardShell><Candidates /></DashboardShell></ProtectedRoute>} />
+            <Route path="/pipeline" element={<ProtectedRoute allowedRoles={['RECRUITER']}><DashboardShell><Pipeline /></DashboardShell></ProtectedRoute>} />
+            <Route path="/analytics" element={<ProtectedRoute allowedRoles={['RECRUITER']}><DashboardShell><Analytics /></DashboardShell></ProtectedRoute>} />
+            <Route path="/recruiter/profile" element={<ProtectedRoute allowedRoles={['RECRUITER']}><DashboardShell><RecruiterProfile /></DashboardShell></ProtectedRoute>} />
             {/* Admin section */}
-            <Route path="/admin" element={<AdminShell><AdminDashboard /></AdminShell>} />
-            <Route path="/admin/users" element={<AdminShell><AdminUsers /></AdminShell>} />
+            <Route path="/admin" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminShell><AdminDashboard /></AdminShell></ProtectedRoute>} />
+            <Route path="/admin/users" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminShell><AdminUsers /></AdminShell></ProtectedRoute>} />
             {/* Candidate dashboard */}
-            <Route path="/candidate" element={<CandidateShell title="Dashboard"><Dashboard /></CandidateShell>} />
-            <Route path="/candidate/explore" element={<CandidateShell title="Explore Jobs"><ExploreJobs /></CandidateShell>} />
-            <Route path="/candidate/job/:id" element={<CandidateShell title="Job Details"><JobDetail /></CandidateShell>} />
-            <Route path="/candidate/applications" element={<CandidateShell title="My Applications"><Applications /></CandidateShell>} />
-            <Route path="/candidate/profile" element={<CandidateShell title="Profile"><Profile /></CandidateShell>} />
-            <Route path="/candidate/career-ai" element={<CandidateShell title="Career AI"><CareerAI /></CandidateShell>} />
-            <Route path="/candidate/upload-cv" element={<CandidateShell title="Upload CV"><UploadCV /></CandidateShell>} />
+            <Route path="/candidate" element={<ProtectedRoute allowedRoles={['CANDIDATE']}><CandidateShell title="Dashboard"><Dashboard /></CandidateShell></ProtectedRoute>} />
+            <Route path="/candidate/explore" element={<ProtectedRoute allowedRoles={['CANDIDATE']}><CandidateShell title="Explore Jobs"><ExploreJobs /></CandidateShell></ProtectedRoute>} />
+            <Route path="/candidate/job/:id" element={<ProtectedRoute allowedRoles={['CANDIDATE']}><CandidateShell title="Job Details"><JobDetail /></CandidateShell></ProtectedRoute>} />
+            <Route path="/candidate/applications" element={<ProtectedRoute allowedRoles={['CANDIDATE']}><CandidateShell title="My Applications"><Applications /></CandidateShell></ProtectedRoute>} />
+            <Route path="/candidate/profile" element={<ProtectedRoute allowedRoles={['CANDIDATE']}><CandidateShell title="Profile"><Profile /></CandidateShell></ProtectedRoute>} />
+            <Route path="/candidate/career-ai" element={<ProtectedRoute allowedRoles={['CANDIDATE']}><CandidateShell title="Career AI"><CareerAI /></CandidateShell></ProtectedRoute>} />
+            <Route path="/candidate/upload-cv" element={<ProtectedRoute allowedRoles={['CANDIDATE']}><CandidateShell title="Upload CV"><UploadCV /></CandidateShell></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>

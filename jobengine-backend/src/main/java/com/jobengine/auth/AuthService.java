@@ -32,6 +32,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final AuthenticationManager authenticationManager;
+    private final RefreshTokenService refreshTokenService;
 
     public AuthResponse register(RegisterRequest request) {
         // Check if email already exists
@@ -73,11 +74,13 @@ public class AuthService {
             recruiterProfileRepository.save(profile);
         }
 
-        // Generate JWT
+        // Generate JWT and Refresh Token
         String token = jwtTokenProvider.generateToken(savedUser.getEmail());
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(savedUser.getId());
 
         return AuthResponse.builder()
                 .token(token)
+                .refreshToken(refreshToken.getToken())
                 .userId(savedUser.getId())
                 .email(savedUser.getEmail())
                 .firstName(savedUser.getFirstName())
@@ -97,8 +100,11 @@ public class AuthService {
             User user = userRepository.findByEmail(request.getEmail())
                     .orElseThrow(() -> new UnauthorizedException("Invalid credentials"));
 
+            RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getId());
+
             return AuthResponse.builder()
                     .token(token)
+                    .refreshToken(refreshToken.getToken())
                     .userId(user.getId())
                     .email(user.getEmail())
                     .firstName(user.getFirstName())
@@ -126,6 +132,14 @@ public class AuthService {
                 String email = payload.getEmail();
                 
                 User user = userRepository.findByEmail(email).orElse(null);
+                
+                if (Boolean.TRUE.equals(request.getIsRegistration()) && user != null) {
+                    throw new DuplicateResourceException("This email already has an account. Please try to login.");
+                }
+                
+                if (Boolean.FALSE.equals(request.getIsRegistration()) && user == null) {
+                    throw new UnauthorizedException("No account found. Please register.");
+                }
                 
                 if (user == null) {
                     if (request.getRole() == null) {
@@ -158,9 +172,11 @@ public class AuthService {
                 }
                 
                 String token = jwtTokenProvider.generateToken(user.getEmail());
+                RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getId());
                 
                 return AuthResponse.builder()
                         .token(token)
+                        .refreshToken(refreshToken.getToken())
                         .userId(user.getId())
                         .email(user.getEmail())
                         .firstName(user.getFirstName())
@@ -190,5 +206,39 @@ public class AuthService {
                 .isActive(user.isActive())
                 .createdAt(user.getCreatedAt())
                 .build();
+    }
+
+    public AuthResponse refreshToken(TokenRefreshRequest request) {
+        return refreshTokenService.findByToken(request.getRefreshToken())
+                .map(refreshTokenService::verifyExpiration)
+                .map(RefreshToken::getUserId)
+                .map(userId -> userRepository.findById(userId)
+                        .orElseThrow(() -> new UnauthorizedException("User not found")))
+                .map(user -> {
+                    String token = jwtTokenProvider.generateToken(user.getEmail());
+                    return AuthResponse.builder()
+                            .token(token)
+                            .refreshToken(request.getRefreshToken())
+                            .userId(user.getId())
+                            .email(user.getEmail())
+                            .firstName(user.getFirstName())
+                            .lastName(user.getLastName())
+                            .role(user.getRole())
+                            .build();
+                })
+                .orElseThrow(() -> new UnauthorizedException("Refresh token is not in database!"));
+    }
+
+    public void changePassword(String email, ChangePasswordRequest request) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UnauthorizedException("User not found"));
+
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("Incorrect old password");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        user.setUpdatedAt(LocalDateTime.now());
+        userRepository.save(user);
     }
 }

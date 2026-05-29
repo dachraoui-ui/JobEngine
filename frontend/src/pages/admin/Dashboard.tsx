@@ -123,7 +123,7 @@ export default function AdminDashboard() {
             <Button size="sm" className="bg-amber-500 hover:bg-amber-400 text-amber-950 font-bold text-xs">
               Review Now <ChevronRight className="w-4 h-4 ml-1" />
             </Button>
-            <button onClick={() => setAlertDismissed(true)} className="text-muted-foreground/80 hover:text-white text-xs">Dismiss</button>
+            <button onClick={() => setAlertDismissed(true)} className="text-muted-foreground/80 hover:text-foreground text-xs">Dismiss</button>
           </div>
         </div>
       )}
@@ -140,7 +140,7 @@ export default function AdminDashboard() {
               </span>
             </div>
             <div>
-              <div className="text-2xl font-mono font-bold text-white">{m.value}</div>
+              <div className="text-2xl font-mono font-bold text-foreground">{m.value}</div>
               <div className="text-xs text-muted-foreground mt-0.5">{m.label}</div>
             </div>
           </GlassCard>
@@ -153,7 +153,7 @@ export default function AdminDashboard() {
         <GlassCard className="p-6 lg:col-span-2">
           <div className="flex justify-between items-center mb-6">
             <div>
-              <h2 className="text-lg font-semibold text-white">User Growth</h2>
+              <h2 className="text-lg font-semibold text-foreground">User Growth</h2>
               <p className="text-xs text-muted-foreground mt-0.5">Last 6 months</p>
             </div>
             <div className="flex gap-4 text-xs text-muted-foreground">
@@ -188,7 +188,7 @@ export default function AdminDashboard() {
         {/* Donut Chart — Distribution */}
         <GlassCard className="p-6">
           <div className="mb-4">
-            <h2 className="text-lg font-semibold text-white">Distribution</h2>
+            <h2 className="text-lg font-semibold text-foreground">Distribution</h2>
             <p className="text-xs text-muted-foreground mt-0.5">User type breakdown</p>
           </div>
           <div className="h-[180px] relative">
@@ -204,7 +204,7 @@ export default function AdminDashboard() {
             </ResponsiveContainer>
             {/* Center text */}
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <span className="text-2xl font-mono font-bold text-white">1,247</span>
+              <span className="text-2xl font-mono font-bold text-foreground">1,247</span>
               <span className="text-xs text-muted-foreground">Total</span>
             </div>
           </div>
@@ -215,7 +215,7 @@ export default function AdminDashboard() {
                   <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: d.color }} />
                   {d.name}
                 </span>
-                <span className="font-mono text-white">{d.value}</span>
+                <span className="font-mono text-foreground">{d.value}</span>
               </div>
             ))}
           </div>
@@ -227,7 +227,7 @@ export default function AdminDashboard() {
         {/* Bar Chart — Weekly Applications */}
         <GlassCard className="p-6">
           <div className="mb-6">
-            <h2 className="text-lg font-semibold text-white">Weekly Applications</h2>
+            <h2 className="text-lg font-semibold text-foreground">Weekly Applications</h2>
             <p className="text-xs text-muted-foreground mt-0.5">Last 8 weeks</p>
           </div>
           <div className="h-[200px]">
@@ -247,7 +247,7 @@ export default function AdminDashboard() {
         {/* Horizontal Bar Chart — Top Skills */}
         <GlassCard className="p-6">
           <div className="mb-6">
-            <h2 className="text-lg font-semibold text-white">Top Skills in Demand</h2>
+            <h2 className="text-lg font-semibold text-foreground">Top Skills in Demand</h2>
             <p className="text-xs text-muted-foreground mt-0.5">Across all active job postings</p>
           </div>
           <div className="space-y-4 mt-2">
@@ -255,7 +255,7 @@ export default function AdminDashboard() {
               <div key={item.skill}>
                 <div className="flex justify-between items-center mb-1.5 text-sm">
                   <span className="text-muted-foreground font-medium">{item.skill}</span>
-                  <span className="font-mono text-white font-bold">{item.count}</span>
+                  <span className="font-mono text-foreground font-bold">{item.count}</span>
                 </div>
                 <div className="h-2 w-full bg-foreground/5 rounded-full overflow-hidden">
                   <div
@@ -277,7 +277,7 @@ export default function AdminDashboard() {
       <GlassCard className="p-0 overflow-hidden">
         <div className="flex justify-between items-center px-6 py-4 border-b border-foreground/10">
           <div>
-            <h2 className="text-lg font-semibold text-white">Recent Activity</h2>
+            <h2 className="text-lg font-semibold text-foreground">Recent Activity</h2>
             <p className="text-xs text-muted-foreground mt-0.5">Latest platform events</p>
           </div>
           <a href="#" className="flex items-center text-sm text-cyan-400 hover:text-cyan-300 transition-colors">
@@ -300,10 +300,10 @@ export default function AdminDashboard() {
                 <tr key={i} className="border-b border-foreground/[0.04] hover:bg-foreground/[0.03] transition-colors group">
                   <td className="px-6 py-3.5">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-foreground/10 flex items-center justify-center font-bold text-xs text-white shrink-0">
+                      <div className="w-8 h-8 rounded-full bg-foreground/10 flex items-center justify-center font-bold text-xs text-foreground shrink-0">
                         {row.user.split(" ").map(w => w[0]).join("").slice(0, 2)}
                       </div>
-                      <span className="font-medium text-white whitespace-nowrap">{row.user}</span>
+                      <span className="font-medium text-foreground whitespace-nowrap">{row.user}</span>
                     </div>
                   </td>
                   <td className="px-4 py-3.5 text-muted-foreground hidden md:table-cell">{row.action}</td>

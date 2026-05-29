@@ -20,7 +20,7 @@ export default function Profile() {
             <div className="w-24 h-24 rounded-full bg-primary/20 border-2 border-primary/50 flex items-center justify-center mb-4 shadow-[0_0_20px_rgba(0,212,255,0.2)]">
               <span className="text-3xl font-bold text-primary">NT</span>
             </div>
-            <h2 className="text-xl font-bold text-white">Neural Talent</h2>
+            <h2 className="text-xl font-bold text-foreground">Neural Talent</h2>
             <p className="text-sm text-muted-foreground mb-4">Software Engineer</p>
             <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 w-fit cursor-pointer">
               🌐 Public Profile
@@ -31,16 +31,16 @@ export default function Profile() {
         <div className="md:col-span-2 space-y-6">
           {/* Personal Info */}
           <GlassCard className="p-6">
-            <h3 className="text-lg font-semibold mb-4 text-white">Basic Information</h3>
+            <h3 className="text-lg font-semibold mb-4 text-foreground">Basic Information</h3>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-sm text-muted-foreground">First Name</label>
-                  <Input defaultValue="Neural" className="bg-foreground/5 border-foreground/10 text-white focus:border-primary/50" />
+                  <Input defaultValue="Neural" className="bg-foreground/5 border-foreground/10 text-foreground focus:border-primary/50" />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm text-muted-foreground">Last Name</label>
-                  <Input defaultValue="Talent" className="bg-foreground/5 border-foreground/10 text-white focus:border-primary/50" />
+                  <Input defaultValue="Talent" className="bg-foreground/5 border-foreground/10 text-foreground focus:border-primary/50" />
                 </div>
               </div>
               <div className="space-y-2">
@@ -49,7 +49,7 @@ export default function Profile() {
               </div>
               <div className="space-y-2">
                 <label className="text-sm text-muted-foreground">Professional Summary</label>
-                <Textarea defaultValue="Passionate software engineer focused on building scalable web applications. AI and neural networks enthusiast." className="bg-foreground/5 border-foreground/10 text-white focus:border-primary/50 h-24" />
+                <Textarea defaultValue="Passionate software engineer focused on building scalable web applications. AI and neural networks enthusiast." className="bg-foreground/5 border-foreground/10 text-foreground focus:border-primary/50 h-24" />
               </div>
             </div>
             <Button className="mt-6 bg-primary text-black hover:bg-primary/90 glow-shadow">Save Changes</Button>
@@ -59,7 +59,7 @@ export default function Profile() {
           <GlassCard className="p-6 border-secondary/20 relative overflow-hidden">
              <div className="absolute w-full h-1 bg-gradient-to-r from-primary to-secondary top-0 left-0" />
             <div className="flex justify-between items-center mb-4">
-               <h3 className="text-lg font-semibold text-white">Neural Skills</h3>
+               <h3 className="text-lg font-semibold text-foreground">Neural Skills</h3>
                <span className="text-xs text-secondary bg-secondary/10 px-2 py-1 rounded">Auto-synced with CV</span>
             </div>
             

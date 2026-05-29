@@ -90,7 +90,7 @@ export default function UploadCV() {
             <div className={`p-4 rounded-full mb-4 transition-all duration-300 ${dragActive ? 'scale-125 bg-cyan-500/20 shadow-[0_0_20px_rgba(0,212,255,0.3)]' : 'bg-foreground/5'}`}>
               <UploadCloud className={`w-10 h-10 ${dragActive ? 'text-cyan-300 animate-pulse' : 'text-cyan-400'}`} />
             </div>
-            <h3 className="text-xl font-bold text-white mb-2">Drop your CV into the neural network</h3>
+            <h3 className="text-xl font-bold text-foreground mb-2">Drop your CV into the neural network</h3>
             <div className="flex items-center gap-4 text-muted-foreground w-full max-w-[240px] mb-4">
               <div className="h-px bg-foreground/10 flex-1" />
               <span className="text-xs uppercase tracking-widest font-semibold">or</span>
@@ -125,7 +125,7 @@ export default function UploadCV() {
 
           <div className="relative z-10 w-full max-w-[400px]">
              <div className="flex items-center justify-between mb-8 pb-4 border-b border-foreground/10">
-                <span className="text-white font-medium flex items-center gap-2"><FileText className="text-cyan-400 w-5 h-5"/> resume_ahmed.pdf</span>
+                <span className="text-foreground font-medium flex items-center gap-2"><FileText className="text-cyan-400 w-5 h-5"/> resume_ahmed.pdf</span>
                 <span className="text-muted-foreground text-sm font-mono">2.4 MB</span>
              </div>
 
@@ -183,9 +183,9 @@ export default function UploadCV() {
                   <div className="w-10 h-10 rounded-full bg-cyan-500/20 flex items-center justify-center border border-cyan-500/30">
                      <Sparkles className="w-5 h-5 text-cyan-400" />
                   </div>
-                  <h2 className="text-2xl font-bold text-white tracking-tight">Neural Profile Generated</h2>
+                  <h2 className="text-2xl font-bold text-foreground tracking-tight">Neural Profile Generated</h2>
                 </div>
-                <p className="text-muted-foreground ml-13">Successfully extracted from <span className="text-white font-mono bg-foreground/5 px-2 py-0.5 rounded">resume_ahmed.pdf</span></p>
+                <p className="text-muted-foreground ml-13">Successfully extracted from <span className="text-foreground font-mono bg-foreground/5 px-2 py-0.5 rounded">resume_ahmed.pdf</span></p>
               </div>
               <div className="flex flex-col flex-end text-center shrink-0">
                  <p className="text-[10px] text-muted-foreground/80 uppercase tracking-widest font-semibold mb-2">CV Strength</p>
@@ -198,7 +198,7 @@ export default function UploadCV() {
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
                    <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Detected Skills</h3>
-                   <button onClick={() => setIsEditing(!isEditing)} className={`text-xs flex items-center gap-1 font-medium transition-colors ${isEditing ? 'text-cyan-400' : 'text-muted-foreground/80 hover:text-white'}`}>
+                   <button onClick={() => setIsEditing(!isEditing)} className={`text-xs flex items-center gap-1 font-medium transition-colors ${isEditing ? 'text-cyan-400' : 'text-muted-foreground/80 hover:text-foreground'}`}>
                       <Edit2 className="w-3 h-3" /> {isEditing ? "Done" : "Edit"}
                    </button>
                 </div>
@@ -223,7 +223,7 @@ export default function UploadCV() {
                     </div>
                   ))}
                   {isEditing && (
-                    <button className="px-4 py-2 bg-transparent border border-dashed border-foreground/20 rounded-full text-sm text-muted-foreground hover:text-white hover:border-foreground/40 xl-self-start transition-colors h-[38px]">
+                    <button className="px-4 py-2 bg-transparent border border-dashed border-foreground/20 rounded-full text-sm text-muted-foreground hover:text-foreground hover:border-foreground/40 xl-self-start transition-colors h-[38px]">
                       + Add Skill
                     </button>
                   )}
@@ -244,9 +244,9 @@ export default function UploadCV() {
                 <div>
                   <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Education</h3>
                   {isEditing ? (
-                     <input type="text" defaultValue="BS Computer Science — INSAT" className="bg-foreground/5 border border-foreground/20 rounded-lg p-2 text-white w-full focus:outline-none focus:border-foreground/40" />
+                     <input type="text" defaultValue="BS Computer Science — INSAT" className="bg-foreground/5 border border-foreground/20 rounded-lg p-2 text-foreground w-full focus:outline-none focus:border-foreground/40" />
                   ) : (
-                     <div className="bg-foreground/5 rounded-lg p-3 border border-transparent text-white truncate">BS Computer Science — INSAT</div>
+                     <div className="bg-foreground/5 rounded-lg p-3 border border-transparent text-foreground truncate">BS Computer Science — INSAT</div>
                   )}
                 </div>
               </div>
@@ -266,7 +266,7 @@ export default function UploadCV() {
               <Button className="flex-1 bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-bold shadow-[0_0_20px_rgba(0,212,255,0.4)]">
                  Save Neural Profile
               </Button>
-              <Button variant="ghost" onClick={() => { setUploadState("idle"); setIsEditing(false); }} className="text-muted-foreground hover:text-white">
+              <Button variant="ghost" onClick={() => { setUploadState("idle"); setIsEditing(false); }} className="text-muted-foreground hover:text-foreground">
                  Scrap & Re-scan CV
               </Button>
             </div>
@@ -276,7 +276,7 @@ export default function UploadCV() {
 
       {/* Archives Section */}
       <div className="mt-12">
-        <h3 className="text-lg font-bold text-white mb-4">Your Neural Archives</h3>
+        <h3 className="text-lg font-bold text-foreground mb-4">Your Neural Archives</h3>
         <GlassCard className="p-0 overflow-hidden text-sm">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between p-4 border-b border-foreground/5 hover:bg-foreground/5 transition-colors group">
             <div className="flex items-center gap-3">
@@ -284,7 +284,7 @@ export default function UploadCV() {
                  <FileText className="w-5 h-5 text-cyan-400" />
               </div>
               <div className="mb-2 md:mb-0">
-                <p className="font-medium text-white mb-0.5">resume_ahmed_2026.pdf</p>
+                <p className="font-medium text-foreground mb-0.5">resume_ahmed_2026.pdf</p>
                 <div className="flex items-center gap-2">
                    <p className="text-xs text-muted-foreground/80 font-mono">2.4 MB</p>
                    <span className="w-1 h-1 rounded-full bg-slate-600"/>
@@ -297,7 +297,7 @@ export default function UploadCV() {
                 <Star className="w-3 h-3 fill-emerald-400" /> Active
               </span>
               <div className="flex gap-2">
-                 <button className="text-muted-foreground hover:text-white p-2 hover:bg-foreground/10 rounded-full transition-colors"><Download className="w-4 h-4" /></button>
+                 <button className="text-muted-foreground hover:text-foreground p-2 hover:bg-foreground/10 rounded-full transition-colors"><Download className="w-4 h-4" /></button>
                  <button className="text-muted-foreground hover:text-rose-400 p-2 hover:bg-rose-500/20 rounded-full transition-colors"><Trash2 className="w-4 h-4" /></button>
               </div>
             </div>
@@ -318,9 +318,9 @@ export default function UploadCV() {
               </div>
             </div>
             <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end mt-2 md:mt-0">
-              <button className="text-muted-foreground hover:text-white text-xs font-semibold px-3 py-1.5 border border-foreground/10 hover:border-foreground/30 rounded-md transition-colors">Set Active ⭐</button>
+              <button className="text-muted-foreground hover:text-foreground text-xs font-semibold px-3 py-1.5 border border-foreground/10 hover:border-foreground/30 rounded-md transition-colors">Set Active ⭐</button>
               <div className="flex gap-2">
-                 <button className="text-muted-foreground hover:text-white p-2 hover:bg-foreground/10 rounded-full transition-colors"><Download className="w-4 h-4" /></button>
+                 <button className="text-muted-foreground hover:text-foreground p-2 hover:bg-foreground/10 rounded-full transition-colors"><Download className="w-4 h-4" /></button>
                  <button className="text-muted-foreground hover:text-rose-400 p-2 hover:bg-rose-500/20 rounded-full transition-colors"><Trash2 className="w-4 h-4" /></button>
               </div>
             </div>

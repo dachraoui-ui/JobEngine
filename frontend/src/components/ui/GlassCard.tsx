@@ -6,23 +6,36 @@ interface GlassCardProps extends React.HTMLAttributes<HTMLDivElement> {
   className?: string;
   hover?: boolean;
   glow?: boolean;
-  glowColor?: "cyan" | "violet" | "mint";
+  glowColor?: "primary" | "accent" | "cyan" | "violet" | "mint";
 }
 
-export function GlassCard({ children, className, hover = false, glow = false, glowColor = "cyan", ...props }: GlassCardProps) {
-  const glowClasses = {
-    cyan: "glow-cyan",
-    violet: "glow-violet",
-    mint: "glow-mint",
+export function GlassCard({
+  children,
+  className,
+  hover = false,
+  glow = false,
+  glowColor = "primary",
+  ...props
+}: GlassCardProps) {
+  // Map legacy color names to new ones
+  const glowClasses: Record<string, string> = {
+    primary: "glow-primary",
+    accent:  "glow-accent",
+    cyan:    "glow-primary",   // legacy alias → orange primary glow
+    violet:  "glow-accent",    // legacy alias → teal accent glow
+    mint:    "glow-accent",    // legacy alias → teal accent glow
   };
 
   return (
-    <div className={cn(
-      hover ? "glass-card-hover" : "glass-card",
-      glow && glowClasses[glowColor],
-      "p-6",
-      className
-    )}>
+    <div
+      className={cn(
+        hover ? "glass-card-hover" : "glass-card",
+        glow && glowClasses[glowColor],
+        "p-6",
+        className
+      )}
+      {...props}
+    >
       {children}
     </div>
   );

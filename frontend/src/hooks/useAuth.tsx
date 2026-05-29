@@ -12,7 +12,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   token: string | null;
-  login: (token: string, user: User) => void;
+  login: (token: string, refreshToken: string, user: User) => void;
   logout: () => void;
   isAuthenticated: boolean;
   isLoading: boolean;
@@ -34,15 +34,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setToken(storedToken);
       setUser(JSON.parse(storedUser));
       
-      // Optionally verify token validity with backend here:
-      // api.get('/auth/me').then(res => setUser(res.data.data)).catch(logout);
+      // Verify token validity with backend
+      api.get('/auth/me').then(res => {
+        setUser(res.data.data);
+      }).catch(() => {
+        // Interceptor will handle refresh. If refresh fails, it clears storage
+      });
     }
     
     setIsLoading(false);
   }, []);
 
-  const login = (newToken: string, newUser: User) => {
+  const login = (newToken: string, newRefreshToken: string, newUser: User) => {
     localStorage.setItem('token', newToken);
+    localStorage.setItem('refreshToken', newRefreshToken);
     localStorage.setItem('user', JSON.stringify(newUser));
     setToken(newToken);
     setUser(newUser);
@@ -50,10 +55,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('refreshToken');
     localStorage.removeItem('user');
     setToken(null);
     setUser(null);
-    window.location.href = '/auth/login';
+    window.location.href = '/login';
   };
 
   const isAuthenticated = !!token;

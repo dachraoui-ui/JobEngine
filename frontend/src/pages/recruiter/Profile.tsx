@@ -28,14 +28,14 @@ export default function RecruiterProfile() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-muted-foreground">Company Name</label>
-                <Input defaultValue="TechCorp" className="bg-foreground/5 border-foreground/10 focus:border-violet-500/50 text-white" />
+                <Input defaultValue="TechCorp" className="bg-foreground/5 border-foreground/10 focus:border-violet-500/50 text-foreground" />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium text-muted-foreground">Industry</label>
-                 <select className="flex h-10 w-full items-center justify-between rounded-md border text-white border-foreground/10 bg-foreground/5 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 disabled:cursor-not-allowed disabled:opacity-50">
-                  <option>Technology</option>
-                  <option>Finance</option>
-                  <option>Healthcare</option>
+                 <select className="flex h-10 w-full items-center justify-between rounded-md border text-foreground border-foreground/10 bg-foreground/5 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 disabled:cursor-not-allowed disabled:opacity-50">
+                  <option className="bg-card">Technology</option>
+                  <option className="bg-card">Finance</option>
+                  <option className="bg-card">Healthcare</option>
                 </select>
               </div>
             </div>
@@ -43,21 +43,21 @@ export default function RecruiterProfile() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-muted-foreground">Company Size</label>
-                <select className="flex h-10 w-full items-center justify-between rounded-md border text-white border-foreground/10 bg-foreground/5 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 disabled:cursor-not-allowed disabled:opacity-50">
-                  <option>1-10</option>
-                  <option selected>51-200</option>
-                  <option>500+</option>
+                <select className="flex h-10 w-full items-center justify-between rounded-md border text-foreground border-foreground/10 bg-foreground/5 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 disabled:cursor-not-allowed disabled:opacity-50">
+                  <option className="bg-card">1-10</option>
+                  <option className="bg-card" selected>51-200</option>
+                  <option className="bg-card">500+</option>
                 </select>
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium text-muted-foreground">Website</label>
-                <Input defaultValue="https://techcorp.ai" className="bg-foreground/5 border-foreground/10 focus:border-violet-500/50 text-white" />
+                <Input defaultValue="https://techcorp.ai" className="bg-foreground/5 border-foreground/10 focus:border-violet-500/50 text-foreground" />
               </div>
             </div>
             
             <div className="space-y-2">
               <label className="text-sm font-medium text-muted-foreground">About Your Company</label>
-              <Textarea defaultValue="We build advanced AI solutions for modern businesses." className="bg-foreground/5 border-foreground/10 focus:border-violet-500/50 text-white min-h-[100px]" />
+              <Textarea defaultValue="We build advanced AI solutions for modern businesses." className="bg-foreground/5 border-foreground/10 focus:border-violet-500/50 text-foreground min-h-[100px]" />
             </div>
 
             <div className="space-y-3">
@@ -73,7 +73,7 @@ export default function RecruiterProfile() {
 
             <div className="pt-6 flex gap-4">
               <Button style={{ backgroundColor: '#8B5CF6' }} className="text-white hover:bg-violet-600 shadow-[0_0_15px_rgba(139,92,246,0.4)]">Save Profile</Button>
-              <Button variant="ghost" className="text-muted-foreground hover:text-white hover:bg-foreground/10">Discard Changes</Button>
+              <Button variant="ghost" className="text-muted-foreground hover:text-foreground hover:bg-foreground/10">Discard Changes</Button>
             </div>
           </div>
         </div>

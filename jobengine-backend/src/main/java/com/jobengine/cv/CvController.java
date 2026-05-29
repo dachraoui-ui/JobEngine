@@ -1,8 +1,8 @@
 package com.jobengine.cv;
 
 import com.jobengine.common.ApiResponse;
+import com.jobengine.common.AuthUtils;
 import com.jobengine.user.User;
-import com.jobengine.user.UserRepository;
 
 
 import lombok.RequiredArgsConstructor;
@@ -24,13 +24,13 @@ import java.util.Map;
 public class CvController {
 
     private final CvService cvService;
-    private final UserRepository userRepository;
+    private final AuthUtils authUtils;
 
     @PostMapping("/upload")
     public ResponseEntity<ApiResponse<Map<String, String>>> uploadCv(
             @RequestParam("file") MultipartFile file,
             @AuthenticationPrincipal UserDetails userDetails) throws IOException {
-        User user = getUserFromDetails(userDetails);
+        User user = authUtils.getUserFromDetails(userDetails);
         Cv cv = cvService.uploadCv(file, user.getId());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.created(
@@ -72,13 +72,9 @@ public class CvController {
     public ResponseEntity<ApiResponse<Void>> deleteCv(
             @PathVariable String id,
             @AuthenticationPrincipal UserDetails userDetails) {
-        User user = getUserFromDetails(userDetails);
+        User user = authUtils.getUserFromDetails(userDetails);
         cvService.deleteCv(id, user.getId());
         return ResponseEntity.ok(ApiResponse.success(null, "CV deleted successfully"));
     }
 
-    private User getUserFromDetails(UserDetails userDetails) {
-        return userRepository.findByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-    }
 }

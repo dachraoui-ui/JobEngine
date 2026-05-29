@@ -1,6 +1,7 @@
 package com.jobengine.user;
 
 import com.jobengine.common.ResourceNotFoundException;
+import com.jobengine.common.Role;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final CandidateProfileRepository candidateProfileRepository;
 
     public List<UserResponse> getAllUsers() {
         return userRepository.findAll().stream()
@@ -54,8 +56,33 @@ public class UserService {
 
     public List<UserResponse> getPendingRecruiters() {
         return userRepository.findAll().stream()
-                .filter(u -> u.getRole() == com.jobengine.common.Role.RECRUITER && !u.isVerified())
+                .filter(u -> u.getRole() == Role.RECRUITER && !u.isVerified())
                 .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    public List<CandidateResponse> getCandidates() {
+        return userRepository.findAll().stream()
+                .filter(u -> u.getRole() == Role.CANDIDATE && u.isActive())
+                .map(u -> {
+                    CandidateProfile profile = candidateProfileRepository.findByUserId(u.getId()).orElse(null);
+                    return CandidateResponse.builder()
+                            .id(u.getId())
+                            .email(u.getEmail())
+                            .firstName(u.getFirstName())
+                            .lastName(u.getLastName())
+                            .phone(u.getPhone())
+                            .role(u.getRole())
+                            .isVerified(u.isVerified())
+                            .isActive(u.isActive())
+                            .createdAt(u.getCreatedAt())
+                            .skills(profile != null ? profile.getSkills() : null)
+                            .experienceLevel(profile != null ? profile.getExperienceLevel() : null)
+                            .values(profile != null ? profile.getValues() : null)
+                            .visibility(profile != null ? profile.getVisibility() : null)
+                            .cvId(profile != null ? profile.getCvId() : null)
+                            .build();
+                })
                 .collect(Collectors.toList());
     }
 

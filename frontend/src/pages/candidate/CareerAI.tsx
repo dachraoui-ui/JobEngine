@@ -50,7 +50,7 @@ export default function CareerAI() {
                     <circle cx="64" cy="64" r="60" stroke="currentColor" strokeWidth="6" fill="transparent" strokeDasharray={60 * 2 * Math.PI} strokeDashoffset={60 * 2 * Math.PI * (1 - 0.74)} className="text-cyan-400 transition-all duration-1000" />
                   </svg>
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-3xl font-mono font-bold text-white shadow-[0_0_15px_rgba(0,212,255,0.3)]">74</span>
+                    <span className="text-3xl font-mono font-bold text-foreground shadow-[0_0_15px_rgba(0,212,255,0.3)]">74</span>
                     <span className="text-xs text-muted-foreground">/ 100</span>
                   </div>
                 </div>
@@ -115,7 +115,7 @@ export default function CareerAI() {
             ].map((gap, i) => (
               <div key={i} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-lg bg-foreground/5 border border-foreground/5 gap-3">
                 <div className="flex-1">
-                  <span className="font-semibold text-white block mb-1">{gap.skill}</span>
+                  <span className="font-semibold text-foreground block mb-1">{gap.skill}</span>
                   <div className="flex gap-2 items-center text-xs text-muted-foreground w-full sm:w-48">
                     <div className="flex-1 h-1.5 bg-foreground/10 rounded-full relative overflow-hidden">
                        <div className="absolute left-0 top-0 bottom-0 bg-cyan-400" style={{ width: gap.current === 'None' ? '5%' : '30%' }} />
@@ -145,7 +145,7 @@ export default function CareerAI() {
             <div className="border-t-2 border-t-cyan-400 bg-foreground/5 rounded-b-xl p-5 hover:bg-foreground/10 transition-colors cursor-pointer group">
               <div className="flex justify-between items-start mb-3">
                 <div>
-                  <h3 className="font-semibold text-lg text-white group-hover:text-cyan-400 transition-colors">Full Stack → Tech Lead</h3>
+                  <h3 className="font-semibold text-lg text-foreground group-hover:text-cyan-400 transition-colors">Full Stack → Tech Lead</h3>
                   <p className="text-sm text-cyan-500 mt-0.5">~2-3 years journey • $130k—$180k</p>
                 </div>
                 <PulseOrb score={72} size="md" />
@@ -164,7 +164,7 @@ export default function CareerAI() {
             <div className="border-t-2 border-t-violet-400 bg-foreground/5 rounded-b-xl p-5 hover:bg-foreground/10 transition-colors cursor-pointer group">
               <div className="flex justify-between items-start mb-3">
                 <div>
-                  <h3 className="font-semibold text-lg text-white group-hover:text-violet-400 transition-colors">Full Stack → DevOps Engineer</h3>
+                  <h3 className="font-semibold text-lg text-foreground group-hover:text-violet-400 transition-colors">Full Stack → DevOps Engineer</h3>
                   <p className="text-sm text-violet-400 mt-0.5">~1-2 years journey • $120k—$170k</p>
                 </div>
                 <PulseOrb score={68} size="md" />
@@ -184,7 +184,7 @@ export default function CareerAI() {
             <div className="border-t-2 border-t-emerald-400 bg-foreground/5 rounded-b-xl p-5 hover:bg-foreground/10 transition-colors cursor-pointer group">
               <div className="flex justify-between items-start mb-3">
                 <div>
-                  <h3 className="font-semibold text-lg text-white group-hover:text-emerald-400 transition-colors">Full Stack → Solutions Architect</h3>
+                  <h3 className="font-semibold text-lg text-foreground group-hover:text-emerald-400 transition-colors">Full Stack → Solutions Architect</h3>
                   <p className="text-sm text-emerald-400 mt-0.5">~3-5 years journey • $150k—$200k</p>
                 </div>
                 <PulseOrb score={55} size="md" />

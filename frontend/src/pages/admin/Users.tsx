@@ -70,7 +70,7 @@ export default function Users() {
           <h1 className="text-3xl font-bold tracking-tight text-foreground">User Registry</h1>
           <p className="text-muted-foreground mt-1">1,247 users</p>
         </div>
-        <Button variant="outline" className="border-foreground/20 text-white bg-foreground/5 hover:bg-foreground/10 backdrop-blur-md">
+        <Button variant="outline" className="border-border text-foreground bg-foreground/5 hover:bg-foreground/10 backdrop-blur-md">
           <Download className="w-4 h-4 mr-2" /> Export
         </Button>
       </div>
@@ -84,7 +84,7 @@ export default function Users() {
             placeholder="Search by name or email... (⌘K)" 
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full bg-black/20 border border-foreground/10 rounded-lg pl-10 pr-4 py-2.5 text-sm text-white focus:border-cyan-500/50 outline-none placeholder:text-muted-foreground/80" 
+            className="w-full bg-black/20 border border-foreground/10 rounded-lg pl-10 pr-4 py-2.5 text-sm text-foreground focus:border-cyan-500/50 outline-none placeholder:text-muted-foreground/80" 
           />
         </div>
         <div className="relative">
@@ -114,8 +114,8 @@ export default function Users() {
 
       {/* Bulk Actions Sliding Bar */}
       <div className={`fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-300 ${selectedIds.length > 0 ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0 pointer-events-none'}`}>
-          <GlassCard className="flex items-center gap-6 px-6 py-3 border-cyan-500/30 shadow-[0_10px_40px_rgba(0,0,0,0.5),0_0_20px_rgba(0,212,255,0.15)] bg-slate-900/95">
-             <span className="font-semibold text-white">{selectedIds.length} selected</span>
+          <GlassCard className="flex items-center gap-6 px-6 py-3 border-cyan-500/30 shadow-[0_10px_40px_rgba(0,0,0,0.5),0_0_20px_rgba(0,212,255,0.15)] bg-card">
+             <span className="font-semibold text-foreground">{selectedIds.length} selected</span>
              <div className="h-4 w-px bg-foreground/20" />
              <div className="flex gap-2">
                 <Button size="sm" className="bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 border border-cyan-500/20">Activate</Button>
@@ -126,7 +126,7 @@ export default function Users() {
       </div>
 
       {/* User Table */}
-      <GlassCard className="p-0 overflow-hidden bg-[#0A0A0A]/50">
+      <GlassCard className="p-0 overflow-hidden bg-card border border-border">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -146,11 +146,11 @@ export default function Users() {
                   <td className="p-4 pl-6"><input type="checkbox" checked={selectedIds.includes(user.id)} onChange={() => toggleSelect(user.id)} className="rounded border-foreground/20 accent-cyan-500 cursor-pointer" /></td>
                   <td className="p-4 min-w-[200px]">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-foreground/5 flex items-center justify-center font-bold text-white shrink-0 border border-foreground/10 group-hover:border-cyan-500/30 transition-colors">
+                      <div className="w-10 h-10 rounded-full bg-foreground/5 flex items-center justify-center font-bold text-foreground shrink-0 border border-foreground/10 group-hover:border-cyan-500/30 transition-colors">
                         {user.name.split(" ").map(w => w[0]).join("").substring(0, 2)}
                       </div>
                       <div>
-                        <p className="font-semibold text-white leading-snug tracking-tight">{user.name}</p>
+                        <p className="font-semibold text-foreground leading-snug tracking-tight">{user.name}</p>
                         <p className="text-xs text-muted-foreground/80">{user.email}</p>
                       </div>
                     </div>
@@ -166,12 +166,12 @@ export default function Users() {
                   <td className="p-4 text-sm text-muted-foreground hidden md:table-cell">{user.joined}</td>
                   <td className="p-4 text-sm text-muted-foreground hidden lg:table-cell">{user.lastActive}</td>
                   <td className="p-4 pr-6 text-right relative group/menu">
-                    <button className="text-muted-foreground/80 hover:text-white p-2 rounded-full hover:bg-foreground/10 transition-colors"><MoreVertical className="w-4 h-4" /></button>
+                    <button className="text-muted-foreground/80 hover:text-foreground p-2 rounded-full hover:bg-foreground/10 transition-colors"><MoreVertical className="w-4 h-4" /></button>
                     {/* Hover menu mock */}
-                    <div className="absolute right-12 top-1/2 -translate-y-1/2 w-40 bg-slate-900 border border-foreground/10 rounded-lg shadow-xl opacity-0 invisible group-hover/menu:opacity-100 group-hover/menu:visible transition-all z-20 flex flex-col py-1">
-                       <button onClick={() => setViewUser(user)} className="px-4 py-2 text-sm text-muted-foreground hover:text-white hover:bg-foreground/5 text-left w-full">View Details</button>
-                       <button className="px-4 py-2 text-sm text-muted-foreground hover:text-white hover:bg-foreground/5 text-left w-full">Edit</button>
-                       <button className="px-4 py-2 text-sm text-muted-foreground hover:text-white hover:bg-foreground/5 text-left w-full">Toggle Status</button>
+                    <div className="absolute right-12 top-1/2 -translate-y-1/2 w-40 bg-card border border-border rounded-lg shadow-xl opacity-0 invisible group-hover/menu:opacity-100 group-hover/menu:visible transition-all z-20 flex flex-col py-1">
+                       <button onClick={() => setViewUser(user)} className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-foreground/5 text-left w-full">View Details</button>
+                       <button className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-foreground/5 text-left w-full">Edit</button>
+                       <button className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-foreground/5 text-left w-full">Toggle Status</button>
                        <button className="px-4 py-2 text-sm text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 text-left w-full border-t border-foreground/5 mt-1 pt-2">Delete</button>
                     </div>
                   </td>
@@ -181,10 +181,10 @@ export default function Users() {
           </table>
         </div>
         {/* Pagination bar */}
-        <div className="px-6 py-4 border-t border-foreground/5 flex items-center justify-between text-sm text-muted-foreground">
-           <span>1-10 of 1,247</span>
-           <div className="flex items-center gap-4">
-              <span className="hidden sm:inline">Rows per page: <select className="bg-transparent text-white outline-none"><option>10</option><option>20</option></select></span>
+         <div className="px-6 py-4 border-t border-foreground/5 flex items-center justify-between text-sm text-muted-foreground">
+            <span>1-10 of 1,247</span>
+            <div className="flex items-center gap-4">
+              <span className="hidden sm:inline">Rows per page: <select className="bg-transparent text-foreground outline-none"><option className="bg-card">10</option><option className="bg-card">20</option></select></span>
               <div className="flex gap-1">
                  <button className="px-3 py-1 rounded bg-foreground/5 hover:bg-foreground/10">&lt;</button>
                  <button className="px-3 py-1 rounded bg-cyan-500/20 text-cyan-400">1</button>
@@ -199,24 +199,24 @@ export default function Users() {
       {/* User Detail Modal */}
       {viewUser && (
         <Dialog open={!!viewUser} onOpenChange={(open) => !open && setViewUser(null)}>
-          <DialogContent className="max-w-md bg-[#0A0A0A]/95 border-foreground/10 backdrop-blur-xl p-0 overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.7)]">
+          <DialogContent className="max-w-md bg-card border border-border backdrop-blur-xl p-0 overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.7)]">
              {/* Dynamic Top Accent Bar */}
              <div className={`h-[3px] w-full ${viewUser.role === 'Admin' ? 'bg-[#FF7A59]' : viewUser.role === 'Recruiter' ? 'bg-violet-500' : 'bg-cyan-500'}`} />
              
              <div className="p-6">
-                <button onClick={() => setViewUser(null)} className="absolute top-4 right-4 text-muted-foreground hover:text-white p-1 rounded-full hover:bg-foreground/10"><X className="w-5 h-5"/></button>
+                <button onClick={() => setViewUser(null)} className="absolute top-4 right-4 text-muted-foreground hover:text-foreground p-1 rounded-full hover:bg-foreground/10"><X className="w-5 h-5"/></button>
                 
                 <div className="flex flex-col items-center mb-6">
-                   <div className="w-20 h-20 rounded-full bg-foreground/5 flex items-center justify-center font-bold text-3xl text-white border-2 border-foreground/10 mb-4 shadow-xl">
+                   <div className="w-20 h-20 rounded-full bg-foreground/5 flex items-center justify-center font-bold text-3xl text-foreground border-2 border-foreground/10 mb-4 shadow-xl">
                       {viewUser.name.split(" ").map(w => w[0]).join("").substring(0, 2)}
                    </div>
-                   <h2 className="text-xl font-bold text-white mb-1">{viewUser.name}</h2>
+                   <h2 className="text-xl font-bold text-foreground mb-1">{viewUser.name}</h2>
                    <div className="flex items-center gap-2 mb-3">
                       <span className={`px-2 py-0.5 border rounded-full text-xs font-semibold ${roleStyle(viewUser.role)}`}>{viewUser.role}</span>
                       {getStatusDisplay(viewUser.status)}
                    </div>
                    <div className="flex gap-4 text-sm text-muted-foreground">
-                      <span className="flex items-center gap-1.5 hover:text-white transition-colors cursor-pointer"><Mail className="w-4 h-4"/> {viewUser.email}</span>
+                      <span className="flex items-center gap-1.5 hover:text-foreground transition-colors cursor-pointer"><Mail className="w-4 h-4"/> {viewUser.email}</span>
                    </div>
                 </div>
 
@@ -230,15 +230,15 @@ export default function Users() {
                    {viewUser.role === 'Recruiter' && (
                       <div className="pt-4 border-t border-foreground/10 mt-4">
                          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground/80 mb-3">Company Information</p>
-                         <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                               <div className="p-2 bg-foreground/5 rounded"><Briefcase className="w-4 h-4 text-violet-400"/></div>
-                               <div>
-                                  <p className="font-semibold text-white text-sm">{viewUser.company}</p>
-                                  <a href="#" className="text-xs text-cyan-400 flex items-center gap-1 hover:underline">{viewUser.companyUrl} <ExternalLink className="w-3 h-3"/></a>
-                               </div>
-                            </div>
-                         </div>
+                          <div className="flex items-center justify-between">
+                             <div className="flex items-center gap-3">
+                                <div className="p-2 bg-foreground/5 rounded"><Briefcase className="w-4 h-4 text-violet-400"/></div>
+                                <div>
+                                   <p className="font-semibold text-foreground text-sm">{viewUser.company}</p>
+                                   <a href="#" className="text-xs text-cyan-400 flex items-center gap-1 hover:underline">{viewUser.companyUrl} <ExternalLink className="w-3 h-3"/></a>
+                                </div>
+                             </div>
+                          </div>
 
                          {viewUser.status.includes("Pending Verification") && (
                             <div className="flex gap-2 mt-4 pt-4 border-t border-foreground/10">
@@ -253,16 +253,16 @@ export default function Users() {
                       <div className="pt-4 border-t border-foreground/10 mt-4">
                          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground/80 mb-3">Candidate Profile</p>
                          
-                         <div className="grid grid-cols-2 gap-4 mb-4">
-                            <div className="bg-foreground/5 rounded-lg p-3">
-                               <p className="text-xs text-muted-foreground mb-1">Applications</p>
-                               <p className="font-mono text-lg text-white font-bold">{viewUser.apps}</p>
-                            </div>
-                            <div className="bg-foreground/5 rounded-lg p-3">
-                               <p className="text-xs text-muted-foreground mb-1">CV Status</p>
-                               <p className="font-semibold text-sm text-cyan-400 flex items-center gap-1.5 mt-0.5"><FileText className="w-4 h-4"/> {viewUser.cv}</p>
-                            </div>
-                         </div>
+                          <div className="grid grid-cols-2 gap-4 mb-4">
+                             <div className="bg-foreground/5 rounded-lg p-3">
+                                <p className="text-xs text-muted-foreground mb-1">Applications</p>
+                                <p className="font-mono text-lg text-foreground font-bold">{viewUser.apps}</p>
+                             </div>
+                             <div className="bg-foreground/5 rounded-lg p-3">
+                                <p className="text-xs text-muted-foreground mb-1">CV Status</p>
+                                <p className="font-semibold text-sm text-cyan-400 flex items-center gap-1.5 mt-0.5"><FileText className="w-4 h-4"/> {viewUser.cv}</p>
+                             </div>
+                          </div>
 
                          {viewUser.skills && (
                             <div>
@@ -278,11 +278,11 @@ export default function Users() {
                    )}
                 </div>
 
-                <div className="mt-8 pt-4 border-t border-foreground/10 flex items-center justify-between">
-                   <div className="flex gap-2">
-                     <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-white px-2"><Edit2 className="w-4 h-4 mr-1.5"/> Edit</Button>
-                     <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-white px-2 text-xs">Reset Pwd</Button>
-                   </div>
+                 <div className="mt-8 pt-4 border-t border-foreground/10 flex items-center justify-between">
+                    <div className="flex gap-2">
+                      <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground px-2"><Edit2 className="w-4 h-4 mr-1.5"/> Edit</Button>
+                      <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground px-2 text-xs">Reset Pwd</Button>
+                    </div>
                    <Button variant="ghost" size="sm" className="text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 px-2"><Trash2 className="w-4 h-4 mr-1.5"/> Delete User</Button>
                 </div>
              </div>

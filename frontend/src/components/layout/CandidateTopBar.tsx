@@ -1,25 +1,24 @@
 import { Bell, Search } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 export function CandidateTopBar({ title }: { title?: string }) {
   return (
-    <header className="h-16 flex items-center justify-between px-4 md:px-8 shrink-0 relative z-10">
-      <h2 className="text-xl font-bold text-foreground tracking-tighter">{title || "Dashboard"}</h2>
-      <div className="flex items-center gap-3">
-        <div className="hidden sm:flex items-center h-9 px-3 gap-2 rounded-xl glass-card text-sm text-muted-foreground cursor-pointer hover:border-foreground/10 transition-colors">
-          <Search className="w-4 h-4" />
-          <span>Search...</span>
-          <kbd className="text-[10px] px-1.5 py-0.5 rounded bg-foreground/5 border border-foreground/10 font-mono">⌘K</kbd>
+    <header className="h-16 flex items-center justify-between px-4 md:px-8 shrink-0 relative z-10 border-b border-border bg-background/80 backdrop-blur-md">
+      <h2 className="text-lg font-bold text-foreground tracking-tight">{title || "Dashboard"}</h2>
+      <div className="flex items-center gap-2.5">
+        <div className="hidden sm:flex items-center h-9 px-3 gap-2 rounded-xl bg-muted/60 border border-border text-sm text-muted-foreground cursor-pointer hover:border-primary/30 transition-colors">
+          <Search className="w-3.5 h-3.5" />
+          <span className="text-xs">Search...</span>
+          <kbd className="text-[10px] px-1.5 py-0.5 rounded bg-background border border-border font-mono">⌘K</kbd>
         </div>
         <ThemeToggle />
-        <button className="relative w-9 h-9 rounded-xl flex items-center justify-center hover:bg-foreground/5 transition-colors text-muted-foreground">
+        <button className="relative w-9 h-9 rounded-xl flex items-center justify-center hover:bg-muted/60 transition-colors text-muted-foreground hover:text-foreground">
           <Bell className="w-4 h-4" />
-          <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-primary animate-pulse" />
+          <div className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-primary shadow-sm shadow-primary/40" />
         </button>
-        <Avatar className="w-8 h-8 cursor-pointer">
-          <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">JD</AvatarFallback>
-        </Avatar>
+        <div className="w-9 h-9 rounded-xl bg-primary/15 border border-primary/25 flex items-center justify-center text-primary text-xs font-bold">
+          JD
+        </div>
       </div>
     </header>
   );

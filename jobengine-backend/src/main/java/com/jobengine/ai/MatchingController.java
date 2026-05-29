@@ -2,8 +2,6 @@ package com.jobengine.ai;
 
 import com.jobengine.common.ApiResponse;
 
-import com.jobengine.user.UserRepository;
-
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +17,6 @@ import java.util.Map;
 public class MatchingController {
 
     private final MatchingService matchingService;
-    private final UserRepository userRepository;
 
     @PostMapping("/score")
     public ResponseEntity<ApiResponse<Map<String, Object>>> calculateScore(
