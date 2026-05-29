@@ -26,6 +26,8 @@ export default function Pipeline() {
   });
   const [candidatesMap, setCandidatesMap] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(true);
+  const [notifyOnDrag, setNotifyOnDrag] = useState(false);
+  const [sendEmailNotify, setSendEmailNotify] = useState(false);
 
   const columns = [
     { id: "applied", title: "Applied", color: "bg-slate-500", glow: "" },
@@ -70,9 +72,9 @@ export default function Pipeline() {
     }
   };
 
-  const fetchPipeline = async (jobId: string) => {
+  const fetchPipeline = async (jobId: string, showLoading = true) => {
     try {
-      setLoading(true);
+      if (showLoading) setLoading(true);
       const res = await api.get(`/applications/job/${jobId}/pipeline`);
       const backendMap = res.data.data || {};
       
@@ -109,7 +111,7 @@ export default function Pipeline() {
       console.error("Error fetching pipeline", err);
       toast.error("Failed to load job pipeline");
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
     }
   };
 
@@ -142,37 +144,90 @@ export default function Pipeline() {
     setDraggedCard(null);
     setDraggedSourceCol(null);
 
-    if (!cardId || sourceCol === targetCol) return;
+    if (!cardId || !sourceCol || sourceCol === targetCol) return;
     
     const backendStatus = statusMap[targetCol];
     if (!backendStatus) return;
     
+    // 1. Save original pipeline state for rollback on error
+    const originalPipelineData = { ...pipelineData };
+
+    // 2. Perform optimistic update instantly
+    const sourceCards = [...(pipelineData[sourceCol] || [])];
+    const targetCards = [...(pipelineData[targetCol] || [])];
+    
+    const cardIndex = sourceCards.findIndex(c => c.id === cardId);
+    if (cardIndex === -1) return;
+    
+    const [movedCard] = sourceCards.splice(cardIndex, 1);
+    const updatedCard = { ...movedCard, status: backendStatus };
+    targetCards.push(updatedCard);
+    
+    setPipelineData(prev => ({
+      ...prev,
+      [sourceCol]: sourceCards,
+      [targetCol]: targetCards
+    }));
+    
     try {
       await api.put(`/applications/${cardId}/status`, {
-        status: backendStatus
+        status: backendStatus,
+        sendEmail: notifyOnDrag
       });
       
       toast.success(`Candidate moved to ${targetCol.charAt(0).toUpperCase() + targetCol.slice(1)}`);
       if (selectedJob) {
-        fetchPipeline(selectedJob.id);
+        // Fetch in background (silent refresh) to stay perfectly in sync
+        await fetchPipeline(selectedJob.id, false);
       }
     } catch (err: any) {
       console.error("Error updating status", err);
       toast.error(err?.response?.data?.message || "Failed to move candidate status");
+      // Rollback to original state on failure
+      setPipelineData(originalPipelineData);
     }
   };
 
   const handleUpdateStatus = async (appId: string, targetStatus: string) => {
+    const originalPipelineData = { ...pipelineData };
+    
+    // 1. Perform optimistic update instantly
+    const nextPipelineData = { ...pipelineData };
+    let foundApp: any = null;
+    let sourceCol: string = "";
+    
+    for (const colKey of Object.keys(nextPipelineData)) {
+      const idx = nextPipelineData[colKey].findIndex(a => a.id === appId);
+      if (idx !== -1) {
+        [foundApp] = nextPipelineData[colKey].splice(idx, 1);
+        sourceCol = colKey;
+        break;
+      }
+    }
+    
+    if (foundApp) {
+      const targetCol = Object.keys(statusMap).find(k => statusMap[k] === targetStatus) || "applied";
+      const updatedApp = { ...foundApp, status: targetStatus };
+      nextPipelineData[targetCol] = [...(nextPipelineData[targetCol] || []), updatedApp];
+      setPipelineData(nextPipelineData);
+    }
+
     try {
-      await api.put(`/applications/${appId}/status`, { status: targetStatus });
+      await api.put(`/applications/${appId}/status`, { 
+        status: targetStatus,
+        sendEmail: sendEmailNotify
+      });
       toast.success(`Candidate status updated successfully`);
       setSelectedCandidate(null);
       if (selectedJob) {
-        fetchPipeline(selectedJob.id);
+        // Fetch in background (silent refresh) to stay perfectly in sync
+        await fetchPipeline(selectedJob.id, false);
       }
     } catch (err: any) {
       console.error(err);
       toast.error(err?.response?.data?.message || "Failed to update status");
+      // Rollback to original state on failure
+      setPipelineData(originalPipelineData);
     }
   };
 
@@ -211,7 +266,19 @@ export default function Pipeline() {
           <ChevronDown className="w-5 h-5 text-muted-foreground absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
         </div>
 
-        <div className="flex gap-6 text-sm">
+        <div className="flex gap-6 items-center text-sm">
+          <div className="flex items-center gap-2 text-muted-foreground border-r border-foreground/10 pr-6">
+            <input
+              type="checkbox"
+              id="notifyOnDrag"
+              checked={notifyOnDrag}
+              onChange={(e) => setNotifyOnDrag(e.target.checked)}
+              className="w-4 h-4 rounded border-foreground/20 text-cyan-500 focus:ring-cyan-500/50 bg-background/5 accent-cyan-500 cursor-pointer"
+            />
+            <label htmlFor="notifyOnDrag" className="text-xs font-semibold cursor-pointer select-none">
+              Email Candidate on Drag
+            </label>
+          </div>
           <div className="flex items-center gap-2 text-muted-foreground">
             <span className="text-foreground font-mono text-lg font-bold">{allApps.length}</span> Candidates
           </div>
@@ -361,11 +428,24 @@ export default function Pipeline() {
                      )}
                   </div>
 
+                  {/* Notification Choice */}
+                  <div className="flex items-center gap-2 mb-4 mt-6">
+                    <input
+                      type="checkbox"
+                      id="sendEmailNotify"
+                      checked={sendEmailNotify}
+                      onChange={(e) => setSendEmailNotify(e.target.checked)}
+                      className="w-4 h-4 rounded border-foreground/20 text-cyan-500 focus:ring-cyan-500/50 bg-background/5 accent-cyan-500 cursor-pointer"
+                    />
+                    <label htmlFor="sendEmailNotify" className="text-xs font-semibold cursor-pointer select-none text-muted-foreground hover:text-foreground transition-colors">
+                      Send email notification to candidate
+                    </label>
+                  </div>
+
                   {/* Actions */}
-                  <div className="grid grid-cols-2 gap-3 mt-8">
+                  <div className="grid grid-cols-2 gap-3">
                     <Button 
                       onClick={() => handleUpdateStatus(selectedCandidate.id, "HIRED")}
-                      disabled={selectedCandidate.status === "HIRED"}
                       className="col-span-2 bg-emerald-500 hover:bg-emerald-400 text-emerald-950 font-bold shadow-[0_0_15px_rgba(52,211,153,0.4)]"
                     >
                       Move to Hired ✨
@@ -380,7 +460,6 @@ export default function Pipeline() {
                     <Button 
                       variant="outline" 
                       onClick={() => handleUpdateStatus(selectedCandidate.id, "REJECTED")}
-                      disabled={selectedCandidate.status === "REJECTED"}
                       className="border-rose-500/50 text-rose-500 dark:text-rose-400 hover:bg-rose-500/10"
                     >
                       Reject

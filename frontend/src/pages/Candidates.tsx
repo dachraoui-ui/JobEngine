@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { PulseOrb } from "@/components/ui/PulseOrb";
 import { Button } from "@/components/ui/button";
-import { Search, X, Plus, LayoutGrid, List, Globe, Lock, Mail, Sparkles, Check, Loader2, ArrowLeft, UserPlus, Phone, Briefcase, Tag, Compass } from "lucide-react";
+import { Search, X, Plus, LayoutGrid, List, Globe, Lock, Mail, Sparkles, Check, Loader2, ArrowLeft, UserPlus, Phone, Briefcase, Tag, Compass, UploadCloud, FileText, Download } from "lucide-react";
 import api from "@/lib/api";
 import { toast } from "sonner";
 import Swal from "sweetalert2";
@@ -58,6 +58,7 @@ const calculateScore = (c: Partial<Candidate>) => {
   if (c.isVerified) score += 15;
   if (c.skills && c.skills.length > 0) score += 20;
   if (c.values && c.values.length > 0) score += 20;
+  if (c.cvId) score += 15; // CV adds strength to completeness
   return Math.min(100, score);
 };
 
@@ -98,7 +99,7 @@ function DetailPanel({
             {candidate.phone && (
               <p className="text-xs text-muted-foreground/80 mt-0.5 font-mono">{candidate.phone}</p>
             )}
-            <div className="flex items-center gap-2 mt-2">
+            <div className="flex items-center gap-2 mt-2 flex-wrap">
               {candidate.visibility === "PUBLIC" || !candidate.visibility ? (
                 <span className="flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20 font-medium">
                   <Globe className="w-3 h-3" /> Public
@@ -106,6 +107,12 @@ function DetailPanel({
               ) : (
                 <span className="flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20 font-medium">
                   <Lock className="w-3 h-3" /> Verified Only
+                </span>
+              )}
+
+              {candidate.cvId && (
+                <span className="flex items-center gap-1 text-xs text-violet-600 dark:text-violet-400 bg-violet-500/10 px-2 py-0.5 rounded-full border border-violet-500/20 font-medium">
+                  <FileText className="w-3 h-3" /> CV Uploaded
                 </span>
               )}
             </div>
@@ -125,7 +132,7 @@ function DetailPanel({
             {[
               ["Contact Details & Verification", candidate.isVerified ? 100 : 50],
               ["Skills Inventory", candidate.skills && candidate.skills.length > 0 ? 100 : 0],
-              ["Preferences & Culture Values", candidate.values && candidate.values.length > 0 ? 100 : 0]
+              ["CV / Resume Attachment", candidate.cvId ? 100 : 0]
             ].map(([label, pct]) => (
               <div key={label as string}>
                 <div className="flex justify-between text-xs mb-1">
@@ -195,6 +202,20 @@ function DetailPanel({
         >
           <Sparkles className="w-4 h-4 mr-2" /> Assign to Job / Pipeline
         </Button>
+        {candidate.cvId && (
+          <a 
+            href={`http://localhost:8088/api/v1/cv/${candidate.cvId}/download`}
+            download
+            className="w-full block"
+          >
+            <Button 
+              variant="outline"
+              className="w-full border-foreground/20 text-slate-800 dark:text-slate-200 hover:bg-foreground/10 font-bold transition-all"
+            >
+              <Download className="w-4 h-4 mr-2" /> Download CV / Resume
+            </Button>
+          </a>
+        )}
       </div>
     </div>
   );
@@ -227,6 +248,9 @@ export default function Candidates() {
   // Submit loadings
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false);
+
+  // CV Upload state
+  const [cvFile, setCvFile] = useState<File | null>(null);
 
   // Add candidate form state
   const [newCandidate, setNewCandidate] = useState({
@@ -311,7 +335,21 @@ export default function Candidates() {
         throw new Error("Could not retrieve user ID from response");
       }
 
-      // 2. Update their candidate profile
+      // 2. Optional CV upload
+      let cvId = null;
+      if (cvFile) {
+        const formData = new FormData();
+        formData.append("file", cvFile);
+        
+        const uploadRes = await api.post(`/cv/upload/candidate/${userId}`, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data"
+          }
+        });
+        cvId = uploadRes.data.data?.cvId;
+      }
+
+      // 3. Update their candidate profile
       const skillsArray = newCandidate.skills
         ? newCandidate.skills.split(",").map(s => s.trim()).filter(s => s.length > 0)
         : [];
@@ -323,6 +361,7 @@ export default function Candidates() {
         skills: skillsArray,
         experienceLevel: newCandidate.experienceLevel,
         values: valuesArray,
+        cvId: cvId,
         preferences: {
           jobType: newCandidate.jobType,
           location: newCandidate.location,
@@ -352,7 +391,7 @@ export default function Candidates() {
         jobType: "FULL_TIME",
         remoteOk: false
       });
-      
+      setCvFile(null);
       setActiveView("list");
       fetchCandidates();
     } catch (error: any) {
@@ -451,7 +490,10 @@ export default function Candidates() {
             </div>
 
             <Button 
-              onClick={() => setActiveView("add")}
+              onClick={() => {
+                setCvFile(null);
+                setActiveView("add");
+              }}
               className="bg-violet-600 hover:bg-violet-500 text-white font-bold shadow-[0_0_20px_rgba(139,92,246,0.3)] transition-all gap-1.5"
             >
               <Plus className="w-4 h-4" /> Add Candidate
@@ -611,11 +653,16 @@ export default function Candidates() {
                         </div>
                         <div className="flex flex-col items-end gap-2 shrink-0">
                           <PulseOrb score={score} size="md" />
-                          {candidate.visibility === "PUBLIC" || !candidate.visibility ? (
-                            <span className="flex items-center gap-1 text-[10px] text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20 font-semibold"><Globe className="w-2.5 h-2.5" /> Public</span>
-                          ) : (
-                            <span className="flex items-center gap-1 text-[10px] text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20 font-semibold"><Lock className="w-2.5 h-2.5" /> Verified</span>
-                          )}
+                          <div className="flex gap-1 items-center mt-1">
+                            {candidate.visibility === "PUBLIC" || !candidate.visibility ? (
+                              <span className="flex items-center gap-1 text-[9px] text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20 font-semibold"><Globe className="w-2 h-2" /> Public</span>
+                            ) : (
+                              <span className="flex items-center gap-1 text-[9px] text-amber-600 dark:text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20 font-semibold"><Lock className="w-2 h-2" /> Verified</span>
+                            )}
+                            {candidate.cvId && (
+                              <span className="flex items-center gap-1 text-[9px] text-violet-600 dark:text-violet-400 bg-violet-500/10 px-1.5 py-0.5 rounded border border-violet-500/20 font-semibold"><FileText className="w-2 h-2" /> CV</span>
+                            )}
+                          </div>
                         </div>
                       </div>
 
@@ -680,7 +727,7 @@ export default function Candidates() {
                   <UserPlus className="w-6 h-6 text-violet-500" />
                   Add New Candidate
                 </h1>
-                <p className="text-sm text-muted-foreground">Register account and build a searchable professional candidate profile</p>
+                <p className="text-sm text-muted-foreground">Register account, upload a CV, and build a searchable candidate profile</p>
               </div>
             </div>
             <Button 
@@ -695,7 +742,7 @@ export default function Candidates() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
             
             {/* Left Pane: Interactive Dynamic Preview Card */}
-            <div className="space-y-6 lg:sticky lg:top-4">
+            <div className="space-y-6 lg:sticky lg:top-4 animate-fade-in">
               <div className="p-1">
                 <p className="text-xs uppercase tracking-widest text-muted-foreground font-bold mb-3">Real-time Profile Preview</p>
                 <GlassCard className="p-5 flex gap-4 border-violet-500/30 shadow-[0_0_30px_rgba(139,92,246,0.15)] relative overflow-hidden bg-background/50">
@@ -722,6 +769,7 @@ export default function Candidates() {
                           phone: newCandidate.phone,
                           skills: newCandidate.skills ? newCandidate.skills.split(",").map(s => s.trim()).filter(s => s) : [],
                           values: newCandidate.values ? newCandidate.values.split(",").map(v => v.trim()).filter(v => v) : [],
+                          cvId: cvFile ? "temp_cv" : null,
                           isVerified: true
                         })} size="md" />
                       </div>
@@ -730,7 +778,14 @@ export default function Candidates() {
                     <p className="text-sm font-mono text-violet-600 dark:text-violet-400 mb-1 font-bold capitalize">
                       {newCandidate.experienceLevel ? newCandidate.experienceLevel.toLowerCase() : "MID"} experience
                     </p>
-                    <p className="text-xs text-muted-foreground/80 mb-3 truncate">{newCandidate.phone || "No phone listed"}</p>
+                    <p className="text-xs text-muted-foreground/80 mb-2 truncate">{newCandidate.phone || "No phone listed"}</p>
+
+                    {/* CV attached badge */}
+                    {cvFile ? (
+                      <span className="inline-flex items-center gap-1 text-[10px] text-violet-600 dark:text-violet-400 bg-violet-500/10 px-2 py-0.5 rounded border border-violet-500/20 font-bold mb-3">
+                        <FileText className="w-2.5 h-2.5" /> CV: {cvFile.name.length > 20 ? cvFile.name.slice(0, 18) + "..." : cvFile.name}
+                      </span>
+                    ) : null}
 
                     {/* Skills tags */}
                     {newCandidate.skills && newCandidate.skills.trim() ? (
@@ -760,7 +815,7 @@ export default function Candidates() {
                   Neural Scanning Tip
                 </h4>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Adding precise **skills comma-separated** matches candidate queries faster during recruiter keyword scans. Dynamic profile completeness ranks their matches significantly higher in the "Neural Scanner" results.
+                  Attaching a CV automatically unlocks match analysis against recruiters' pipelines. The uploaded document is stored securely in MongoDB and parsing extracts professional profiles.
                 </p>
               </GlassCard>
             </div>
@@ -875,6 +930,50 @@ export default function Candidates() {
                           className="w-full px-3.5 py-2.5 bg-foreground/5 border border-foreground/10 rounded-lg text-slate-900 dark:text-white placeholder:text-muted-foreground/60 focus:outline-none focus:border-violet-500/50 transition-all focus:ring-1 focus:ring-violet-500/20"
                         />
                       </div>
+
+                      {/* Dynamic CV File Drop Zone */}
+                      <div className="md:col-span-2 pt-2">
+                        <label className="block text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
+                          <UploadCloud className="w-3.5 h-3.5 text-violet-500" /> Candidate CV / Resume (PDF or DOCX)
+                        </label>
+                        {cvFile ? (
+                          <div className="flex items-center justify-between p-3.5 bg-violet-500/10 border border-violet-500/30 rounded-lg text-sm font-semibold animate-fade-in text-slate-900 dark:text-white">
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <FileText className="w-5 h-5 text-violet-500 shrink-0" />
+                              <div className="min-w-0">
+                                <p className="text-slate-900 dark:text-white leading-tight truncate font-bold">{cvFile.name}</p>
+                                <p className="text-[10px] text-muted-foreground/80 font-mono mt-0.5">{(cvFile.size / (1024 * 1024)).toFixed(2)} MB</p>
+                              </div>
+                            </div>
+                            <button 
+                              type="button" 
+                              onClick={() => setCvFile(null)} 
+                              className="p-1 rounded-full hover:bg-foreground/10 text-muted-foreground hover:text-slate-900 dark:hover:text-white shrink-0"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="relative border-2 border-dashed border-foreground/10 hover:border-violet-500/40 rounded-lg p-6 flex flex-col items-center justify-center text-center cursor-pointer bg-foreground/[0.01] hover:bg-foreground/[0.03] transition-all">
+                            <input
+                              type="file"
+                              accept=".pdf,.doc,.docx"
+                              onChange={e => {
+                                if (e.target.files && e.target.files[0]) {
+                                  setCvFile(e.target.files[0]);
+                                }
+                              }}
+                              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                            />
+                            <UploadCloud className="w-8 h-8 text-muted-foreground/60 mb-2" />
+                            <p className="text-xs text-slate-800 dark:text-slate-200 font-bold mb-0.5">
+                              Drop CV here or click to browse
+                            </p>
+                            <p className="text-[10px] text-muted-foreground">PDF or DOCX up to 10MB</p>
+                          </div>
+                        )}
+                      </div>
+
                     </div>
                   </div>
 

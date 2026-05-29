@@ -27,6 +27,7 @@ import NotFound from "./pages/NotFound";
 import AdminUsers from "./pages/admin/Users";
 import AdminDashboard from "./pages/admin/Dashboard";
 import RecruiterProfile from "./pages/recruiter/Profile";
+import Settings from "./pages/Settings";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
 
@@ -71,6 +72,7 @@ const App = () => (
             <Route path="/pipeline" element={<ProtectedRoute allowedRoles={['RECRUITER']}><DashboardShell><Pipeline /></DashboardShell></ProtectedRoute>} />
             <Route path="/analytics" element={<ProtectedRoute allowedRoles={['RECRUITER']}><DashboardShell><Analytics /></DashboardShell></ProtectedRoute>} />
             <Route path="/recruiter/profile" element={<ProtectedRoute allowedRoles={['RECRUITER']}><DashboardShell><RecruiterProfile /></DashboardShell></ProtectedRoute>} />
+            <Route path="/settings" element={<ProtectedRoute allowedRoles={['RECRUITER']}><DashboardShell><Settings /></DashboardShell></ProtectedRoute>} />
             {/* Admin section */}
             <Route path="/admin" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminShell><AdminDashboard /></AdminShell></ProtectedRoute>} />
             <Route path="/admin/users" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminShell><AdminUsers /></AdminShell></ProtectedRoute>} />

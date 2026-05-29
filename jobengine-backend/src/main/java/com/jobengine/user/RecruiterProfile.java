@@ -26,4 +26,6 @@ public class RecruiterProfile {
     private List<String> companyValues;
     private String industry;
     private String website;
+    private String companySize;
 }
+

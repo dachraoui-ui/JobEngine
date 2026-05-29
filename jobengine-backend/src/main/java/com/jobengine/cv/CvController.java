@@ -12,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -36,6 +37,18 @@ public class CvController {
                 .body(ApiResponse.created(
                         Map.of("cvId", cv.getId(), "fileName", cv.getOriginalFileName()),
                         "CV uploaded successfully"));
+    }
+
+    @PostMapping("/upload/candidate/{candidateId}")
+    @PreAuthorize("hasRole('RECRUITER')")
+    public ResponseEntity<ApiResponse<Map<String, String>>> uploadCandidateCv(
+            @RequestParam("file") MultipartFile file,
+            @PathVariable String candidateId) throws IOException {
+        Cv cv = cvService.uploadCv(file, candidateId);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.created(
+                        Map.of("cvId", cv.getId(), "fileName", cv.getOriginalFileName()),
+                        "Candidate CV uploaded successfully"));
     }
 
     @GetMapping("/{id}")

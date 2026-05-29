@@ -19,4 +19,6 @@ public class StatusUpdateRequest {
     private ApplicationStatus status;
 
     private String notes;
+
+    private boolean sendEmail;
 }

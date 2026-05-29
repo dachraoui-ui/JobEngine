@@ -78,12 +78,14 @@ public class ApplicationController {
         User user = authUtils.getUserFromDetails(userDetails);
         Application updated = applicationService.updateStatus(id, request.getStatus(), user.getId());
 
-        // Send webhook to n8n
-        webhookService.sendStatusChangeWebhook(Map.of(
-                "applicationId", updated.getId(),
-                "newStatus", updated.getStatus().name(),
-                "changedBy", user.getFirstName() + " " + user.getLastName()
-        ));
+        // Send webhook to n8n only if sendEmail is enabled
+        if (request.isSendEmail()) {
+            webhookService.sendStatusChangeWebhook(Map.of(
+                    "applicationId", updated.getId(),
+                    "newStatus", updated.getStatus().name(),
+                    "changedBy", user.getFirstName() + " " + user.getLastName()
+            ));
+        }
 
         return ResponseEntity.ok(ApiResponse.success(updated, "Status updated"));
     }
@@ -104,6 +106,22 @@ public class ApplicationController {
         Application application = applicationService.recruiterAddToJob(candidateId, jobId);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.created(application, "Candidate assigned to job successfully"));
+    }
+
+    @GetMapping("/dashboard")
+    @PreAuthorize("hasRole('RECRUITER')")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getDashboard(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        User user = authUtils.getUserFromDetails(userDetails);
+        return ResponseEntity.ok(ApiResponse.success(applicationService.getRecruiterDashboard(user.getId())));
+    }
+
+    @GetMapping("/analytics")
+    @PreAuthorize("hasRole('RECRUITER')")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getAnalytics(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        User user = authUtils.getUserFromDetails(userDetails);
+        return ResponseEntity.ok(ApiResponse.success(applicationService.getRecruiterAnalytics(user.getId())));
     }
 
 }
