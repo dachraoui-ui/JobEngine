@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/cv")
@@ -26,17 +27,78 @@ public class CvController {
 
     private final CvService cvService;
     private final AuthUtils authUtils;
+    private final com.jobengine.ai.MatchingService matchingService;
 
     @PostMapping("/upload")
-    public ResponseEntity<ApiResponse<Map<String, String>>> uploadCv(
+    public ResponseEntity<ApiResponse<Map<String, Object>>> uploadCv(
             @RequestParam("file") MultipartFile file,
             @AuthenticationPrincipal UserDetails userDetails) throws IOException {
         User user = authUtils.getUserFromDetails(userDetails);
         Cv cv = cvService.uploadCv(file, user.getId());
+
+        // Parse CV details using matchingService
+        Map<String, Object> parseResult = matchingService.parseCv(cv.getFileData(), cv.getOriginalFileName());
+
+        @SuppressWarnings("unchecked")
+        List<String> skills = (List<String>) parseResult.getOrDefault("detectedSkills", java.util.List.of());
+        
+        int exp = 3;
+        Object expObj = parseResult.get("yearsExperience");
+        if (expObj instanceof Number) {
+            exp = ((Number) expObj).intValue();
+        }
+        
+        String edu = (String) parseResult.getOrDefault("education", "");
+        
+        @SuppressWarnings("unchecked")
+        List<String> languages = (List<String>) parseResult.getOrDefault("languages", java.util.List.of());
+        
+        int strengthScore = 70;
+        Object scoreObj = parseResult.get("cvStrengthScore");
+        if (scoreObj instanceof Number) {
+            strengthScore = ((Number) scoreObj).intValue();
+        }
+
+        // Save parsed details into the Cv entity
+        cvService.updateParsedData(cv.getId(), "[Extracted CV Text Content]", skills, exp, edu, languages);
+
+        Map<String, Object> responseData = Map.of(
+                "cvId", cv.getId(),
+                "fileName", cv.getOriginalFileName(),
+                "fileSize", String.format("%.1f MB", (double) file.getSize() / (1024 * 1024)),
+                "detectedSkills", skills,
+                "yearsExperience", exp,
+                "education", edu,
+                "languages", languages,
+                "cvStrengthScore", strengthScore
+        );
+
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.created(
-                        Map.of("cvId", cv.getId(), "fileName", cv.getOriginalFileName()),
-                        "CV uploaded successfully"));
+                .body(ApiResponse.created(responseData, "CV uploaded and parsed successfully"));
+    }
+
+    @GetMapping("/active")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getActiveCv(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        User user = authUtils.getUserFromDetails(userDetails);
+        try {
+            Cv cv = cvService.getCvByUserId(user.getId());
+            Map<String, Object> info = Map.of(
+                    "id", cv.getId(),
+                    "userId", cv.getUserId(),
+                    "originalFileName", cv.getOriginalFileName(),
+                    "fileType", cv.getFileType(),
+                    "detectedSkills", cv.getDetectedSkills() != null ? cv.getDetectedSkills() : java.util.List.of(),
+                    "yearsExperience", cv.getYearsExperience(),
+                    "education", cv.getEducation() != null ? cv.getEducation() : "",
+                    "languages", cv.getLanguages() != null ? cv.getLanguages() : java.util.List.of(),
+                    "uploadedAt", cv.getUploadedAt().toString(),
+                    "fileSize", String.format("%.1f MB", (double) cv.getFileData().length / (1024 * 1024))
+            );
+            return ResponseEntity.ok(ApiResponse.success(info));
+        } catch (com.jobengine.common.ResourceNotFoundException e) {
+            return ResponseEntity.ok(ApiResponse.success(null, "No active CV found"));
+        }
     }
 
     @PostMapping("/upload/candidate/{candidateId}")

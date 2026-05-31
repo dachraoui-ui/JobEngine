@@ -8,6 +8,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import api from "@/lib/api";
 import { toast } from "sonner";
 import Swal from "sweetalert2";
+import { getSwalTheme } from "@/lib/swal";
 
 export default function Jobs() {
   const navigate = useNavigate();
@@ -61,11 +62,10 @@ export default function Jobs() {
       text: "This job mission will be permanently removed!",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#06b6d4", // Cyan color
-      cancelButtonColor: "#ef4444", // Red color
+      confirmButtonColor: "#06b6d4",
+      cancelButtonColor: "#ef4444",
       confirmButtonText: "Yes, delete it!",
-      background: document.documentElement.classList.contains("dark") ? "#1e293b" : "#ffffff",
-      color: document.documentElement.classList.contains("dark") ? "#f8fafc" : "#0f172a"
+      ...getSwalTheme(),
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
@@ -75,8 +75,7 @@ export default function Jobs() {
             text: "Your job has been deleted.",
             icon: "success",
             confirmButtonColor: "#06b6d4",
-            background: document.documentElement.classList.contains("dark") ? "#1e293b" : "#ffffff",
-            color: document.documentElement.classList.contains("dark") ? "#f8fafc" : "#0f172a"
+            ...getSwalTheme(),
           });
           fetchJobs();
         } catch (error: any) {

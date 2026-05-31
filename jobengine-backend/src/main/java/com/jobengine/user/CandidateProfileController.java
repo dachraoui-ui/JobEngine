@@ -48,6 +48,9 @@ public class CandidateProfileController {
         if (updates.getCvId() != null) {
             profile.setCvId(updates.getCvId());
         }
+        if (updates.getSummary() != null) {
+            profile.setSummary(updates.getSummary());
+        }
 
         CandidateProfile saved = candidateProfileRepository.save(profile);
         return ResponseEntity.ok(ApiResponse.success(saved, "Candidate profile updated successfully"));

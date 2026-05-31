@@ -46,7 +46,7 @@ function LogoMark({ expanded }: { expanded: boolean }) {
 
 export function CandidateSidebar() {
   const [expanded, setExpanded] = useState(true);
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
 
   return (
     <>
@@ -109,9 +109,9 @@ export function CandidateSidebar() {
             className="flex items-center gap-3 px-3 py-2 rounded-xl text-sidebar-foreground hover:text-foreground hover:bg-sidebar-accent transition-colors"
           >
             <div className="w-8 h-8 rounded-full bg-primary/15 border border-primary/25 flex items-center justify-center text-xs font-bold text-primary shrink-0">
-              JD
+              {user ? `${user.firstName?.charAt(0) || ''}${user.lastName?.charAt(0) || ''}`.toUpperCase() : "U"}
             </div>
-            {expanded && <span className="text-sm truncate">John Doe</span>}
+            {expanded && <span className="text-sm truncate">{user ? `${user.firstName} ${user.lastName}` : "User"}</span>}
           </NavLink>
           <button
             onClick={() => setExpanded(!expanded)}

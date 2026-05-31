@@ -44,9 +44,27 @@ public class MatchingController {
             @RequestBody Map<String, Object> request) {
         @SuppressWarnings("unchecked")
         List<String> skills = (List<String>) request.get("skills");
-        int experience = (int) request.get("yearsExperience");
+        
+        Object expObj = request.get("yearsExperience");
+        int experience = 2; // fallback default
+        if (expObj instanceof Number) {
+            experience = ((Number) expObj).intValue();
+        } else if (expObj instanceof String) {
+            try {
+                experience = Integer.parseInt((String) expObj);
+            } catch (NumberFormatException e) {
+                String expStr = ((String) expObj).toUpperCase();
+                if (expStr.equals("JUNIOR")) experience = 1;
+                else if (expStr.equals("MID")) experience = 4;
+                else if (expStr.equals("SENIOR")) experience = 8;
+            }
+        }
+
         @SuppressWarnings("unchecked")
         List<String> targetJobs = (List<String>) request.get("targetJobTitles");
+        if (targetJobs == null) {
+            targetJobs = List.of("Full Stack Engineer", "DevOps Engineer", "Solutions Architect");
+        }
 
         Map<String, Object> result = matchingService.getCareerAdvice(skills, experience, targetJobs);
         return ResponseEntity.ok(ApiResponse.success(result));

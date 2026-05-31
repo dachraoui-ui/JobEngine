@@ -161,8 +161,7 @@ export default function Register() {
       setStep(step - 1);
       setError("");
     } else if (step === 1) {
-      if (window.history.length > 2) navigate(-1);
-      else navigate("/");
+      navigate("/");
     }
   };
 

@@ -6,6 +6,7 @@ import { Search, X, Plus, LayoutGrid, List, Globe, Lock, Mail, Sparkles, Check, 
 import api from "@/lib/api";
 import { toast } from "sonner";
 import Swal from "sweetalert2";
+import { getSwalTheme } from "@/lib/swal";
 
 interface Candidate {
   id: string;
@@ -374,8 +375,7 @@ export default function Candidates() {
         text: "Candidate has been successfully registered and profile populated.",
         icon: "success",
         confirmButtonColor: "#8b5cf6",
-        background: document.documentElement.classList.contains("dark") ? "#1e293b" : "#ffffff",
-        color: document.documentElement.classList.contains("dark") ? "#f8fafc" : "#0f172a"
+        ...getSwalTheme(),
       });
 
       setNewCandidate({
@@ -422,8 +422,7 @@ export default function Candidates() {
         text: `${assigningCandidate.firstName} has been successfully added to the job pipeline.`,
         icon: "success",
         confirmButtonColor: "#8b5cf6",
-        background: document.documentElement.classList.contains("dark") ? "#1e293b" : "#ffffff",
-        color: document.documentElement.classList.contains("dark") ? "#f8fafc" : "#0f172a"
+        ...getSwalTheme(),
       });
       
       setAssignModalOpen(false);

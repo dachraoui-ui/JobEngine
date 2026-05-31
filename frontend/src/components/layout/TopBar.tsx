@@ -4,8 +4,8 @@ import { useAuth } from "@/hooks/useAuth";
 
 export function TopBar() {
   const { user } = useAuth();
-  const initials = user?.fullName
-    ? user.fullName.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)
+  const initials = user
+    ? `${user.firstName?.charAt(0) || ""}${user.lastName?.charAt(0) || ""}`.toUpperCase()
     : "JE";
 
   return (

@@ -91,10 +91,10 @@ export default function Login() {
       setStep(1);
       setError("");
     } else {
-      if (window.history.length > 2) navigate(-1);
-      else navigate("/");
+      navigate("/");
     }
   };
+
 
   return (
     <div className="min-h-screen bg-background relative flex overflow-hidden">

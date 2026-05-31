@@ -39,6 +39,8 @@ public class CandidateProfile {
 
     private String cvId;
 
+    private String summary;
+
     @Data
     @Builder
     @NoArgsConstructor
