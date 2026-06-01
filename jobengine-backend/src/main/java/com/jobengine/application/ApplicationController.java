@@ -4,7 +4,6 @@ import com.jobengine.common.ApiResponse;
 import com.jobengine.common.ApplicationStatus;
 import com.jobengine.common.AuthUtils;
 import com.jobengine.user.User;
-import com.jobengine.webhook.WebhookService;
 
 
 import jakarta.validation.Valid;
@@ -26,7 +25,6 @@ public class ApplicationController {
 
     private final ApplicationService applicationService;
     private final AuthUtils authUtils;
-    private final WebhookService webhookService;
 
     @PostMapping
     @PreAuthorize("hasRole('CANDIDATE')")
@@ -38,13 +36,6 @@ public class ApplicationController {
         String cvId = body.get("cvId");
 
         Application application = applicationService.applyToJob(user.getId(), jobId, cvId);
-
-        // Send webhook to n8n
-        webhookService.sendNewApplicationWebhook(Map.of(
-                "applicationId", application.getId(),
-                "candidateName", user.getFirstName() + " " + user.getLastName(),
-                "jobId", jobId
-        ));
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.created(application, "Application submitted successfully"));
@@ -76,16 +67,7 @@ public class ApplicationController {
             @Valid @RequestBody StatusUpdateRequest request,
             @AuthenticationPrincipal UserDetails userDetails) {
         User user = authUtils.getUserFromDetails(userDetails);
-        Application updated = applicationService.updateStatus(id, request.getStatus(), user.getId());
-
-        // Send webhook to n8n only if sendEmail is enabled
-        if (request.isSendEmail()) {
-            webhookService.sendStatusChangeWebhook(Map.of(
-                    "applicationId", updated.getId(),
-                    "newStatus", updated.getStatus().name(),
-                    "changedBy", user.getFirstName() + " " + user.getLastName()
-            ));
-        }
+        Application updated = applicationService.updateStatus(id, request.getStatus(), user.getId(), request.isSendEmail());
 
         return ResponseEntity.ok(ApiResponse.success(updated, "Status updated"));
     }

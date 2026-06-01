@@ -32,6 +32,7 @@ public class Cv {
     private int yearsExperience;
     private String education;
     private List<String> languages;
+    private int cvStrengthScore;
 
     private LocalDateTime uploadedAt;
 }

@@ -80,13 +80,15 @@ public class CvService {
      * Called after AI service parses the CV — updates extracted data.
      */
     public Cv updateParsedData(String cvId, String extractedText, List<String> detectedSkills,
-                                int yearsExperience, String education, List<String> languages) {
+                                int yearsExperience, String education, List<String> languages,
+                                int cvStrengthScore) {
         Cv cv = getCvById(cvId);
         cv.setExtractedText(extractedText);
         cv.setDetectedSkills(detectedSkills);
         cv.setYearsExperience(yearsExperience);
         cv.setEducation(education);
         cv.setLanguages(languages);
+        cv.setCvStrengthScore(cvStrengthScore);
         return cvRepository.save(cv);
     }
 }
