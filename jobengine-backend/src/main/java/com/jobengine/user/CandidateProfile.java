@@ -8,7 +8,7 @@ import com.jobengine.common.Visibility;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.PersistenceCreator;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -16,10 +16,13 @@ import java.util.List;
 
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 @Document("candidate_profiles")
 public class CandidateProfile {
+
+    @PersistenceCreator
+    public CandidateProfile() {
+    }
 
     @Id
     private String id;
@@ -43,9 +46,11 @@ public class CandidateProfile {
 
     @Data
     @Builder
-    @NoArgsConstructor
     @AllArgsConstructor
     public static class Preferences {
+        @PersistenceCreator
+        public Preferences() {
+        }
         private JobType jobType;
         private String location;
         @Builder.Default

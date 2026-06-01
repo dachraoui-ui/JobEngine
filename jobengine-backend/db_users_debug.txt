@@ -1,0 +1,12 @@
+Database users log on startup:
+Email: ahmed@gmail.com | Role: ADMIN | Active: true | Verified: true | Hash: $2a$10$J7sAWKPdoFGEb6wsjvyQlOB3btVKHyPaU2GGl/vnbmgH2s96uPmVm
+  -> Password reset to 'admin123' for ADMIN email: ahmed@gmail.com
+Email: ahmed.dachraoui03@gmail.com | Role: CANDIDATE | Active: true | Verified: true | Hash: $2a$10$fUrv57HXcRMTIYYBwhgKiutNljZsFkJfg.b87JZ/dZOGwN6iEJj02
+Email: dachraouia193@gmail.com | Role: CANDIDATE | Active: true | Verified: true | Hash: $2a$10$OBRg0DA8qgtE5F3P9CcEFOFfsQiKC5/5Iw.0OKfX442TT6v042PmG
+Email: gezeniamin@gmail.com | Role: CANDIDATE | Active: true | Verified: true | Hash: $2a$10$PPlZXkfOJ5oYl9rrb3JS7u4R3xezYuzqTs9pCk.3ZnEItCgaEyfvG
+Email: ahhhmed@gmail.com | Role: ADMIN | Active: true | Verified: true | Hash: $2a$10$ScvklhbC6KSoJaEFh.G05u6MXgI/nbSW89z7ZZTSq9wEkNVTiNqbO
+  -> Password reset to 'admin123' for ADMIN email: ahhhmed@gmail.com
+Email: oubaied29@gmail.com | Role: RECRUITER | Active: true | Verified: false | Hash: $2a$10$ALFprrOfwxxD5I8wBqS.9uvWqTl3LZkKeCH4wvvqaKQV5bWlrFbFu
+Email: dachraouia903@gmail.com | Role: CANDIDATE | Active: false | Verified: true | Hash: $2a$10$NEzEiuqBiMfYycjG28FZquCL6QrDNAVYJub4bNN6jx/6e36JtbpZe
+Email: admin@jobengine.com | Role: ADMIN | Active: true | Verified: true | Hash: $2a$10$3dSgfebIwIG5nc226wIipuUC1kSmqfZC79jh8Jr9weMi0vG3x6kUq
+  -> Password reset to 'admin123' for ADMIN email: admin@jobengine.com

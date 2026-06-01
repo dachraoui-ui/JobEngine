@@ -4,15 +4,18 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import lombok.*;
+import org.springframework.data.annotation.PersistenceCreator;
 
 import java.time.Instant;
 
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 @Document(collection = "refresh_tokens")
 public class RefreshToken {
+    @PersistenceCreator
+    public RefreshToken() {
+    }
     
     @Id
     private String id;

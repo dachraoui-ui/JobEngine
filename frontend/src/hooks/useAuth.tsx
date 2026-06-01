@@ -55,12 +55,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const logout = () => {
+    const storedUser = localStorage.getItem('user');
+    let role = null;
+    try {
+      role = storedUser ? JSON.parse(storedUser).role : null;
+    } catch (e) {
+      // Ignore error
+    }
     localStorage.removeItem('token');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('user');
     setToken(null);
     setUser(null);
-    window.location.href = '/login';
+    window.location.href = role === 'ADMIN' ? '/admin/login' : '/login';
   };
 
   const isAuthenticated = !!token;

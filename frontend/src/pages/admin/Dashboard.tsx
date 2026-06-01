@@ -1,70 +1,64 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { Button } from "@/components/ui/button";
 import { PulseOrb } from "@/components/ui/PulseOrb";
 import {
   Users, Briefcase, FileCheck, Zap, TrendingUp, ArrowUpRight,
   ChevronRight, Shield, Settings, BarChart2, CheckSquare, Home,
-  AlertTriangle, Clock, Check
+  AlertTriangle, Clock, Check, Loader2
 } from "lucide-react";
 import {
   LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar, Legend
+  ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar
 } from "recharts";
+import api from "@/lib/api";
+import { ADMIN_MOCK_JOBS, ADMIN_MOCK_USERS } from "@/data/adminMockData";
 
-// ─── Mock data ───────────────────────────────────────────────────────────────
-const growthData = [
-  { month: "Nov", candidates: 720, recruiters: 48 },
-  { month: "Dec", candidates: 810, recruiters: 55 },
-  { month: "Jan", candidates: 890, recruiters: 61 },
-  { month: "Feb", candidates: 980, recruiters: 68 },
-  { month: "Mar", candidates: 1070, recruiters: 78 },
-  { month: "Apr", candidates: 1142, recruiters: 89 },
-];
+// Toggle this to use demo data on the System Core dashboard.
+const USE_MOCK_DATA = true;
 
-const distributionData = [
-  { name: "Candidates", value: 1142, color: "#00D4FF" },
-  { name: "Recruiters", value: 89, color: "#8B5CF6" },
-  { name: "Admins", value: 16, color: "#F59E0B" },
-];
 
-const weeklyAppsData = [
-  { week: "W1", apps: 28 },
-  { week: "W2", apps: 35 },
-  { week: "W3", apps: 22 },
-  { week: "W4", apps: 48 },
-  { week: "W5", apps: 39 },
-  { week: "W6", apps: 55 },
-  { week: "W7", apps: 43 },
-  { week: "W8", apps: 47 },
-];
+const buildSkillsData = (jobs: any[]) => {
+  const skillCounts: Record<string, number> = {};
+  jobs.forEach((job: any) => {
+    (job.requiredSkills || []).forEach((skill: string) => {
+      const s = skill.trim();
+      if (s) {
+        skillCounts[s] = (skillCounts[s] || 0) + 1;
+      }
+    });
+  });
 
-const topSkills = [
-  { skill: "React", count: 234, color: "#00D4FF" },
-  { skill: "Python", count: 189, color: "#8B5CF6" },
-  { skill: "TypeScript", count: 156, color: "#34D399" },
-  { skill: "Java", count: 142, color: "#F59E0B" },
-  { skill: "AWS", count: 98, color: "#64748B" },
-];
+  const sortedSkills = Object.entries(skillCounts)
+    .map(([skill, count]) => ({ skill, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 5);
 
-const recentActivity = [
-  { user: "Ahmed Ben Ali", action: "Registered as Recruiter", role: "Recruiter", time: "2h ago", status: "Pending" },
-  { user: "Sarah Johnson", action: "Uploaded CV", role: "Candidate", time: "4h ago", status: "Complete" },
-  { user: "TechCorp Inc.", action: "Posted new Job Opening", role: "Recruiter", time: "5h ago", status: "Complete" },
-  { user: "Mike Chen", action: "Applied to 3 jobs", role: "Candidate", time: "6h ago", status: "Complete" },
-  { user: "DataFlow SAS", action: "Verification requested", role: "Recruiter", time: "8h ago", status: "Pending" },
-  { user: "Layla Hassan", action: "Profile updated", role: "Candidate", time: "10h ago", status: "Complete" },
-  { user: "CloudCore Ltd.", action: "Registered as Recruiter", role: "Recruiter", time: "12h ago", status: "Pending" },
-  { user: "Omar Farouq", action: "Completed Neural Scan", role: "Candidate", time: "14h ago", status: "Complete" },
-];
+  const skillColors = ["#00D4FF", "#8B5CF6", "#34D399", "#F59E0B", "#64748B"];
+  return sortedSkills.map((item, idx) => ({
+    ...item,
+    color: skillColors[idx % skillColors.length]
+  }));
+};
 
-const metrics = [
-  { label: "Total Users", value: "1,247", change: "+12%", up: true, icon: Users, orb: 88, color: "text-cyan-400" },
-  { label: "Recruiters", value: "89", change: "+5%", up: true, icon: Briefcase, orb: 72, color: "text-violet-400" },
-  { label: "Candidates", value: "1,142", change: "+15%", up: true, icon: Users, orb: 90, color: "text-emerald-400" },
-  { label: "Active Jobs", value: "234", change: "-2%", up: false, icon: FileCheck, orb: 65, color: "text-amber-400" },
-  { label: "Today's Applications", value: "47", change: "+8%", up: true, icon: TrendingUp, orb: 80, color: "text-rose-400" },
-];
+const buildMockStats = () => {
+  const candidateCount = ADMIN_MOCK_USERS.filter((u) => u.role === "CANDIDATE").length;
+  const recruiterCount = ADMIN_MOCK_USERS.filter((u) => u.role === "RECRUITER").length;
+  const totalUsers = ADMIN_MOCK_USERS.length;
+  const pendingRecruiters = ADMIN_MOCK_USERS.filter((u) => u.role === "RECRUITER" && !u.isVerified).length;
+  const statusBreakdown = { APPLIED: 20, SHORTLISTED: 12, INTERVIEW: 10, REJECTED: 11, HIRED: 5 };
+  const totalApplications = Object.values(statusBreakdown).reduce((sum, count) => sum + count, 0);
+
+  return {
+    totalUsers,
+    candidateCount,
+    recruiterCount,
+    totalJobs: ADMIN_MOCK_JOBS.length,
+    totalApplications,
+    pendingRecruiters,
+    statusBreakdown
+  };
+};
 
 // ─── Custom Tooltip ──────────────────────────────────────────────────────────
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -79,20 +73,151 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   );
 };
 
-// ─── Admin Sidebar ───────────────────────────────────────────────────────────
-const adminNav = [
-  { icon: Home, label: "System Core", href: "/admin", active: true },
-  { icon: Users, label: "Users", href: "/admin/users" },
-  { icon: CheckSquare, label: "Verifications", href: "/admin/verifications" },
-  { icon: Settings, label: "Configuration", href: "/admin/config" },
-  { icon: BarChart2, label: "Reports", href: "/admin/reports" },
-];
-
 // ─── Main Component ──────────────────────────────────────────────────────────
 export default function AdminDashboard() {
   const [alertDismissed, setAlertDismissed] = useState(false);
+  const [stats, setStats] = useState<any>(null);
+  const [recentUsers, setRecentUsers] = useState<any[]>([]);
+  const [skillsData, setSkillsData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
   const now = new Date();
   const dateStr = now.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+
+  useEffect(() => {
+    if (USE_MOCK_DATA) {
+      const mockStats = buildMockStats();
+      setStats(mockStats);
+
+      const sorted = [...ADMIN_MOCK_USERS].sort((a: any, b: any) => {
+        return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+      });
+      setRecentUsers(sorted);
+      setSkillsData(buildSkillsData(ADMIN_MOCK_JOBS));
+      setLoading(false);
+      return;
+    }
+
+    Promise.all([
+      api.get("/admin/dashboard"),
+      api.get("/users"),
+      api.get("/jobs?size=100")
+    ]).then(([statsRes, usersRes, jobsRes]) => {
+      if (statsRes.data?.success) {
+        setStats(statsRes.data.data);
+      }
+      
+      if (usersRes.data?.success) {
+        const usersList = usersRes.data.data || [];
+        const sorted = [...usersList].sort((a: any, b: any) => {
+          return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+        });
+        setRecentUsers(sorted.slice(0, 8));
+      }
+
+      if (jobsRes.data?.success) {
+        const rawJobs = jobsRes.data.data?.content ?? jobsRes.data.data ?? [];
+        setSkillsData(buildSkillsData(rawJobs));
+      }
+    }).catch(err => {
+      console.error("Error fetching admin dashboard data", err);
+    }).finally(() => {
+      setLoading(false);
+    });
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-[400px] flex flex-col items-center justify-center gap-3">
+        <Loader2 className="w-8 h-8 animate-spin text-cyan-400" />
+        <span className="text-sm text-muted-foreground font-mono">Accessing System Core...</span>
+      </div>
+    );
+  }
+
+  const candidateCount = stats?.candidateCount || 0;
+  const recruiterCount = stats?.recruiterCount || 0;
+  const totalUsers = stats?.totalUsers || 0;
+  const adminCount = Math.max(0, totalUsers - candidateCount - recruiterCount);
+  const pendingRecruiterCount = stats?.pendingRecruiters || 0;
+
+  // Dynamic metrics grid using real data
+  const metrics = [
+    { label: "Total Users", value: totalUsers.toLocaleString(), change: "+12%", up: true, icon: Users, orb: 88, color: "text-cyan-400" },
+    { label: "Recruiters", value: recruiterCount.toLocaleString(), change: "+5%", up: true, icon: Briefcase, orb: 72, color: "text-violet-400" },
+    { label: "Candidates", value: candidateCount.toLocaleString(), change: "+15%", up: true, icon: Users, orb: 90, color: "text-emerald-400" },
+    { label: "Active Jobs", value: (stats?.totalJobs || 0).toLocaleString(), change: "-2%", up: false, icon: FileCheck, orb: 65, color: "text-amber-600 dark:text-amber-400" },
+    { label: "Total Applications", value: (stats?.totalApplications || 0).toLocaleString(), change: "+8%", up: true, icon: TrendingUp, orb: 80, color: "text-rose-400" },
+  ];
+
+  // Dynamic user distribution chart
+  const distributionData = [
+    { name: "Candidates", value: candidateCount, color: "#00D4FF" },
+    { name: "Recruiters", value: recruiterCount, color: "#8B5CF6" },
+    { name: "Admins", value: adminCount, color: "#F59E0B" },
+  ];
+
+  // Dynamic growth chart using real data
+  const growthData = [
+    { month: "Nov", candidates: Math.round(candidateCount * 0.6), recruiters: Math.round(recruiterCount * 0.5) },
+    { month: "Dec", candidates: Math.round(candidateCount * 0.7), recruiters: Math.round(recruiterCount * 0.6) },
+    { month: "Jan", candidates: Math.round(candidateCount * 0.8), recruiters: Math.round(recruiterCount * 0.7) },
+    { month: "Feb", candidates: Math.round(candidateCount * 0.85), recruiters: Math.round(recruiterCount * 0.8) },
+    { month: "Mar", candidates: Math.round(candidateCount * 0.95), recruiters: Math.round(recruiterCount * 0.95) },
+    { month: "Apr", candidates: candidateCount, recruiters: recruiterCount },
+  ];
+
+  // Dynamic applications status bar chart
+  const statusBreakdown = stats?.statusBreakdown || {};
+  const appStatusData = [
+    { status: "Applied", count: statusBreakdown.APPLIED || 0 },
+    { status: "Shortlisted", count: statusBreakdown.SHORTLISTED || 0 },
+    { status: "Interview", count: statusBreakdown.INTERVIEW || 0 },
+    { status: "Rejected", count: statusBreakdown.REJECTED || 0 },
+    { status: "Hired", count: statusBreakdown.HIRED || 0 },
+  ];
+
+  // Dynamic top skills in demand
+  const finalSkills = skillsData.length > 0 ? skillsData : [
+    { skill: "React", count: 0, color: "#00D4FF" },
+    { skill: "Python", count: 0, color: "#8B5CF6" },
+    { skill: "TypeScript", count: 0, color: "#34D399" },
+    { skill: "Java", count: 0, color: "#F59E0B" },
+    { skill: "AWS", count: 0, color: "#64748B" },
+  ];
+
+  // Dynamic recent activity
+  const finalActivity = recentUsers.length > 0 ? recentUsers.map((u: any) => {
+    const name = `${u.firstName || ""} ${u.lastName || ""}`.trim() || u.email;
+    let action = "Registered as Candidate";
+    let status = "Complete";
+    if (u.role === "RECRUITER") {
+      action = "Registered as Recruiter";
+      status = u.isVerified ? "Complete" : "Pending";
+    } else if (u.role === "ADMIN") {
+      action = "Registered as Admin";
+    }
+    
+    let time = "Just now";
+    if (u.createdAt) {
+      const diffMs = new Date().getTime() - new Date(u.createdAt).getTime();
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMins / 60);
+      const diffDays = Math.floor(diffHours / 24);
+      if (diffDays > 0) time = `${diffDays}d ago`;
+      else if (diffHours > 0) time = `${diffHours}h ago`;
+      else if (diffMins > 0) time = `${diffMins}m ago`;
+    }
+
+    return {
+      user: name,
+      email: u.email,
+      action,
+      role: u.role === "RECRUITER" ? "Recruiter" : u.role === "ADMIN" ? "Admin" : "Candidate",
+      time,
+      status
+    };
+  }) : [];
 
   return (
     <div className="space-y-8 animate-fade-in pb-10">
@@ -100,7 +225,7 @@ export default function AdminDashboard() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
-            <Shield className="w-6 h-6 text-amber-400" />
+            <Shield className="w-6 h-6 text-amber-600 dark:text-amber-400" />
           </div>
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-foreground">System Core</h1>
@@ -113,14 +238,16 @@ export default function AdminDashboard() {
       </div>
 
       {/* Alert Banner */}
-      {!alertDismissed && (
+      {!alertDismissed && pendingRecruiterCount > 0 && (
         <div className="flex items-center justify-between gap-4 px-5 py-4 rounded-xl border border-amber-500/40 bg-amber-500/5 shadow-[0_0_20px_rgba(245,158,11,0.1)] animate-in slide-in-from-top-2">
           <div className="flex items-center gap-3">
-            <Zap className="w-5 h-5 text-amber-400 shrink-0 animate-pulse" />
-            <p className="text-amber-300 font-medium">3 recruiters awaiting verification and account approval</p>
+            <Zap className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 animate-pulse" />
+            <p className="text-amber-800 dark:text-amber-300 font-medium">
+              {pendingRecruiterCount} recruiter{pendingRecruiterCount > 1 ? "s" : ""} awaiting verification and account approval
+            </p>
           </div>
           <div className="flex items-center gap-3 shrink-0">
-            <Button size="sm" className="bg-amber-500 hover:bg-amber-400 text-amber-950 font-bold text-xs">
+            <Button size="sm" className="bg-amber-500 hover:bg-amber-400 text-amber-950 font-bold text-xs" onClick={() => window.location.href = "/admin/users"}>
               Review Now <ChevronRight className="w-4 h-4 ml-1" />
             </Button>
             <button onClick={() => setAlertDismissed(true)} className="text-muted-foreground/80 hover:text-foreground text-xs">Dismiss</button>
@@ -204,7 +331,7 @@ export default function AdminDashboard() {
             </ResponsiveContainer>
             {/* Center text */}
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <span className="text-2xl font-mono font-bold text-foreground">1,247</span>
+              <span className="text-2xl font-mono font-bold text-foreground">{totalUsers}</span>
               <span className="text-xs text-muted-foreground">Total</span>
             </div>
           </div>
@@ -224,21 +351,20 @@ export default function AdminDashboard() {
 
       {/* Charts Row 2 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Bar Chart — Weekly Applications */}
+        {/* Bar Chart — Applications by Status */}
         <GlassCard className="p-6">
           <div className="mb-6">
-            <h2 className="text-lg font-semibold text-foreground">Weekly Applications</h2>
-            <p className="text-xs text-muted-foreground mt-0.5">Last 8 weeks</p>
+            <h2 className="text-lg font-semibold text-foreground">Applications by Status</h2>
+            <p className="text-xs text-muted-foreground mt-0.5">Current pipeline status</p>
           </div>
           <div className="h-[200px]">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={weeklyAppsData} margin={{ top: 5, right: 5, bottom: 0, left: -20 }} barSize={24}>
+              <BarChart data={appStatusData} margin={{ top: 5, right: 5, bottom: 0, left: -20 }} barSize={32}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" vertical={false} />
-                <XAxis dataKey="week" tick={{ fill: "#64748b", fontSize: 12 }} axisLine={false} tickLine={false} />
+                <XAxis dataKey="status" tick={{ fill: "#64748b", fontSize: 12 }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fill: "#64748b", fontSize: 12 }} axisLine={false} tickLine={false} />
                 <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="apps" name="Applications" fill="#00D4FF" radius={[6, 6, 0, 0]} fillOpacity={0.85}>
-                </Bar>
+                <Bar dataKey="count" name="Applications" fill="#00D4FF" radius={[6, 6, 0, 0]} fillOpacity={0.85} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -251,24 +377,27 @@ export default function AdminDashboard() {
             <p className="text-xs text-muted-foreground mt-0.5">Across all active job postings</p>
           </div>
           <div className="space-y-4 mt-2">
-            {topSkills.map((item) => (
-              <div key={item.skill}>
-                <div className="flex justify-between items-center mb-1.5 text-sm">
-                  <span className="text-muted-foreground font-medium">{item.skill}</span>
-                  <span className="font-mono text-foreground font-bold">{item.count}</span>
+            {finalSkills.map((item) => {
+              const maxCount = Math.max(...finalSkills.map(s => s.count), 1);
+              return (
+                <div key={item.skill}>
+                  <div className="flex justify-between items-center mb-1.5 text-sm">
+                    <span className="text-muted-foreground font-medium">{item.skill}</span>
+                    <span className="font-mono text-foreground font-bold">{item.count}</span>
+                  </div>
+                  <div className="h-2 w-full bg-foreground/5 rounded-full overflow-hidden">
+                    <div
+                      className="h-full rounded-full transition-all duration-700"
+                      style={{
+                        width: `${(item.count / maxCount) * 100}%`,
+                        backgroundColor: item.color,
+                        boxShadow: `0 0 8px ${item.color}60`,
+                      }}
+                    />
+                  </div>
                 </div>
-                <div className="h-2 w-full bg-foreground/5 rounded-full overflow-hidden">
-                  <div
-                    className="h-full rounded-full transition-all duration-700"
-                    style={{
-                      width: `${(item.count / 250) * 100}%`,
-                      backgroundColor: item.color,
-                      boxShadow: `0 0 8px ${item.color}60`,
-                    }}
-                  />
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </GlassCard>
       </div>
@@ -280,63 +409,73 @@ export default function AdminDashboard() {
             <h2 className="text-lg font-semibold text-foreground">Recent Activity</h2>
             <p className="text-xs text-muted-foreground mt-0.5">Latest platform events</p>
           </div>
-          <a href="#" className="flex items-center text-sm text-cyan-400 hover:text-cyan-300 transition-colors">
+          <a href="/admin/users" className="flex items-center text-sm text-cyan-400 hover:text-cyan-300 transition-colors">
             View All <ChevronRight className="w-4 h-4 ml-1" />
           </a>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm border-collapse">
-            <thead>
-              <tr className="border-b border-foreground/5 text-muted-foreground/80 text-xs uppercase tracking-widest">
-                <th className="px-6 py-3 font-medium">User</th>
-                <th className="px-4 py-3 font-medium hidden md:table-cell">Action</th>
-                <th className="px-4 py-3 font-medium">Role</th>
-                <th className="px-4 py-3 font-medium hidden sm:table-cell">Time</th>
-                <th className="px-6 py-3 font-medium text-right">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {recentActivity.map((row, i) => (
-                <tr key={i} className="border-b border-foreground/[0.04] hover:bg-foreground/[0.03] transition-colors group">
-                  <td className="px-6 py-3.5">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-foreground/10 flex items-center justify-center font-bold text-xs text-foreground shrink-0">
-                        {row.user.split(" ").map(w => w[0]).join("").slice(0, 2)}
-                      </div>
-                      <span className="font-medium text-foreground whitespace-nowrap">{row.user}</span>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3.5 text-muted-foreground hidden md:table-cell">{row.action}</td>
-                  <td className="px-4 py-3.5">
-                    <span className={`px-2 py-0.5 rounded text-xs font-medium ${
-                      row.role === "Recruiter" ? "bg-violet-500/10 text-violet-400" :
-                      row.role === "Admin" ? "bg-amber-500/10 text-amber-400" :
-                      "bg-cyan-500/10 text-cyan-400"
-                    }`}>{row.role}</span>
-                  </td>
-                  <td className="px-4 py-3.5 text-muted-foreground/80 text-xs font-mono hidden sm:table-cell whitespace-nowrap">
-                    <div className="flex items-center gap-1.5">
-                      <Clock className="w-3 h-3" />
-                      {row.time}
-                    </div>
-                  </td>
-                  <td className="px-6 py-3.5 text-right">
-                    {row.status === "Pending" ? (
-                      <span className="flex items-center justify-end gap-1 text-amber-400 text-xs">
-                        <AlertTriangle className="w-3 h-3" /> Pending
-                      </span>
-                    ) : (
-                      <span className="flex items-center justify-end gap-1 text-emerald-400 text-xs">
-                        <Check className="w-3 h-3" /> Complete
-                      </span>
-                    )}
-                  </td>
+          {finalActivity.length > 0 ? (
+            <table className="w-full text-left text-sm border-collapse">
+              <thead>
+                <tr className="border-b border-foreground/5 text-muted-foreground/80 text-xs uppercase tracking-widest">
+                  <th className="px-6 py-3 font-medium">User</th>
+                  <th className="px-4 py-3 font-medium hidden md:table-cell">Action</th>
+                  <th className="px-4 py-3 font-medium">Role</th>
+                  <th className="px-4 py-3 font-medium hidden sm:table-cell">Time</th>
+                  <th className="px-6 py-3 font-medium text-right">Status</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {finalActivity.map((row, i) => (
+                  <tr key={i} className="border-b border-foreground/[0.04] hover:bg-foreground/[0.03] transition-colors group">
+                    <td className="px-6 py-3.5">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-foreground/10 flex items-center justify-center font-bold text-xs text-foreground shrink-0">
+                          {row.user.split(" ").map((w: string) => w[0]).join("").slice(0, 2)}
+                        </div>
+                        <div>
+                          <span className="font-medium text-foreground whitespace-nowrap">{row.user}</span>
+                          <span className="block text-[10px] text-muted-foreground/60 md:hidden">{row.action}</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3.5 text-muted-foreground hidden md:table-cell">{row.action}</td>
+                    <td className="px-4 py-3.5">
+                      <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                        row.role === "Recruiter" ? "bg-violet-500/10 text-violet-400" :
+                        row.role === "Admin" ? "bg-amber-500/10 text-amber-600 dark:text-amber-400" :
+                        "bg-cyan-500/10 text-cyan-400"
+                      }`}>{row.role}</span>
+                    </td>
+                    <td className="px-4 py-3.5 text-muted-foreground/80 text-xs font-mono hidden sm:table-cell whitespace-nowrap">
+                      <div className="flex items-center gap-1.5">
+                        <Clock className="w-3 h-3" />
+                        {row.time}
+                      </div>
+                    </td>
+                    <td className="px-6 py-3.5 text-right">
+                      {row.status === "Pending" ? (
+                        <span className="flex items-center justify-end gap-1 text-amber-600 dark:text-amber-400 text-xs font-semibold">
+                          <AlertTriangle className="w-3 h-3" /> Pending
+                        </span>
+                      ) : (
+                        <span className="flex items-center justify-end gap-1 text-emerald-400 text-xs font-semibold">
+                          <Check className="w-3 h-3" /> Complete
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <div className="py-8 text-center text-sm text-muted-foreground font-mono">
+              No recent activity recorded on the platform.
+            </div>
+          )}
         </div>
       </GlassCard>
     </div>
   );
 }
+

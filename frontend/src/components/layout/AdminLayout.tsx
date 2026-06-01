@@ -1,8 +1,9 @@
 import { ReactNode } from "react";
 import { NavLink } from "react-router-dom";
-import { Home, Users, CheckSquare, Settings, BarChart2, Shield } from "lucide-react";
+import { Home, Users, CheckSquare, Settings, BarChart2, Shield, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { useAuth } from "@/hooks/useAuth";
 
 const adminNav = [
   { icon: Home,        label: "System Core",    href: "/admin" },
@@ -13,6 +14,8 @@ const adminNav = [
 ];
 
 export function AdminLayout({ children }: { children: ReactNode }) {
+  const { user, logout } = useAuth();
+
   return (
     <div className="flex h-screen bg-background overflow-hidden">
       {/* ── Sidebar ── */}
@@ -60,15 +63,37 @@ export function AdminLayout({ children }: { children: ReactNode }) {
           ))}
         </nav>
 
-        {/* Footer */}
-        <div className="p-3 border-t border-border flex items-center gap-2">
-          <ThemeToggle />
-          <NavLink
-            to="/dashboard"
-            className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-xs text-muted-foreground hover:text-foreground transition-colors rounded-xl hover:bg-sidebar-accent"
-          >
-            ← Back to App
-          </NavLink>
+        {/* Footer Profile & Actions */}
+        <div className="mt-auto p-4 border-t border-border bg-sidebar-accent/30 flex flex-col gap-3.5">
+          {user && (
+            <div className="flex items-center gap-3 px-1">
+              <div className="w-9 h-9 rounded-full bg-warning/15 border border-warning/30 flex items-center justify-center text-warning text-xs font-bold uppercase select-none">
+                {user.firstName?.charAt(0) || ""}{user.lastName?.charAt(0) || ""}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-foreground truncate leading-snug">
+                  {user.firstName} {user.lastName}
+                </p>
+                <p className="text-xs text-muted-foreground truncate leading-none mt-0.5">
+                  {user.email}
+                </p>
+              </div>
+            </div>
+          )}
+          
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <button
+              onClick={logout}
+              className={cn(
+                "flex-1 flex items-center justify-center gap-2 px-3 py-2 h-9 text-xs font-semibold rounded-xl transition-all duration-200",
+                "bg-destructive/10 text-destructive border border-destructive/20 hover:bg-destructive hover:text-white"
+              )}
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span>Log Out</span>
+            </button>
+          </div>
         </div>
       </aside>
 

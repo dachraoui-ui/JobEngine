@@ -24,6 +24,8 @@ public class CustomUserDetailsService implements UserDetailsService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
+        String roleName = user.getRole() != null ? user.getRole().name() : "CANDIDATE"; // Fallback to CANDIDATE
+        
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(),
                 user.getPassword(),
@@ -31,7 +33,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                 true,                // accountNonExpired
                 true,                // credentialsNonExpired
                 true,                // accountNonLocked
-                Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + roleName))
         );
     }
 }

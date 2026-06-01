@@ -3,7 +3,7 @@ package com.jobengine.cv;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.PersistenceCreator;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -12,10 +12,13 @@ import java.util.List;
 
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 @Document("cvs")
 public class Cv {
+
+    @PersistenceCreator
+    public Cv() {
+    }
 
     @Id
     private String id;

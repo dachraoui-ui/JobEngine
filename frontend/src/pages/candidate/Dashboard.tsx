@@ -131,7 +131,7 @@ export default function Dashboard() {
           { label: "Profile Strength", value: `${profileStrength}/100`, icon: <BrainCircuit className="w-5 h-5 text-primary" />, color: "border-primary/20", bg: "bg-primary/5" },
           { label: "Active Applications", value: String(activeAppsCount), icon: <Briefcase className="w-5 h-5 text-secondary" />, color: "border-secondary/20", bg: "bg-secondary/5" },
           { label: "Interviews", value: String(interviewsCount), icon: <Target className="w-5 h-5 text-emerald-400" />, color: "border-emerald-500/20", bg: "bg-emerald-500/5" },
-          { label: "Profile Views", value: String(profileViewsCount), icon: <FileText className="w-5 h-5 text-amber-400" />, color: "border-amber-500/20", bg: "bg-amber-500/5" },
+          { label: "Profile Views", value: String(profileViewsCount), icon: <FileText className="w-5 h-5 text-amber-600 dark:text-amber-400" />, color: "border-amber-500/20", bg: "bg-amber-500/5" },
         ].map((stat, i) => (
           <GlassCard key={i} className={`p-5 border ${stat.color} ${stat.bg}`}>
             <div className="flex justify-between items-start mb-2">
@@ -197,7 +197,7 @@ export default function Dashboard() {
               <div className="absolute top-0 right-0 w-2 h-full bg-amber-500" />
               <h3 className="font-semibold text-foreground mb-1">No Upcoming Interviews</h3>
               <p className="text-sm text-muted-foreground mb-3">Apply to more jobs to increase your scheduling chances.</p>
-              <Link to="/candidate/explore" className="text-xs text-amber-400 font-mono hover:underline">Explore jobs now →</Link>
+              <Link to="/candidate/explore" className="text-xs text-amber-600 dark:text-amber-400 font-mono hover:underline">Explore jobs now →</Link>
             </GlassCard>
           )}
 

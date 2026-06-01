@@ -360,7 +360,7 @@ export default function UploadCV() {
                        </span>
                        {!isEditing && (
                           <span className={`text-[10px] font-semibold w-full text-center ${
-                             skill.conf === 'High' ? 'text-emerald-400' : skill.conf === 'Medium' ? 'text-amber-400' : 'text-muted-foreground/80'
+                             skill.conf === 'High' ? 'text-emerald-400' : skill.conf === 'Medium' ? 'text-amber-600 dark:text-amber-400' : 'text-muted-foreground/80'
                           }`}>
                              {skill.conf === 'High' ? 'High ✓' : skill.conf === 'Medium' ? 'Medium ~' : 'Review ?'}
                           </span>

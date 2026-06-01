@@ -6,7 +6,7 @@ import com.jobengine.common.ApplicationStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.PersistenceCreator;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -16,10 +16,13 @@ import java.util.List;
 
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 @Document("applications")
 public class Application {
+
+    @PersistenceCreator
+    public Application() {
+    }
 
     @Id
     private String id;
@@ -45,9 +48,11 @@ public class Application {
 
     @Data
     @Builder
-    @NoArgsConstructor
     @AllArgsConstructor
     public static class ScoreBreakdown {
+        @PersistenceCreator
+        public ScoreBreakdown() {
+        }
         private double skills;
         private double experience;
         private double culture;
@@ -55,9 +60,11 @@ public class Application {
 
     @Data
     @Builder
-    @NoArgsConstructor
     @AllArgsConstructor
     public static class StatusHistoryEntry {
+        @PersistenceCreator
+        public StatusHistoryEntry() {
+        }
         private ApplicationStatus status;
         private LocalDateTime changedAt;
         private String changedBy;

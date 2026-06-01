@@ -147,7 +147,7 @@ export default function Profile() {
             <p className="text-sm text-muted-foreground mb-4">{user?.email}</p>
             
             <div className="flex items-center gap-2 mt-2">
-              <Badge variant="outline" className={visibility === "PUBLIC" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-amber-500/10 text-amber-400 border-amber-500/20"}>
+              <Badge variant="outline" className={visibility === "PUBLIC" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30"}>
                 {visibility === "PUBLIC" ? <Globe className="w-3.5 h-3.5 mr-1" /> : <Lock className="w-3.5 h-3.5 mr-1" />}
                 {visibility === "PUBLIC" ? "Public Profile" : "Private Profile"}
               </Badge>

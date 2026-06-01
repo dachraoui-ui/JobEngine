@@ -189,12 +189,12 @@ export default function CareerAI() {
                   </ul>
                 </div>
                 <div className="space-y-4">
-                  <h3 className="text-sm font-semibold text-amber-400 uppercase tracking-widest bg-amber-400/10 w-fit px-3 py-1 rounded-full">Improvements</h3>
+                  <h3 className="text-sm font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-widest bg-amber-500/10 w-fit px-3 py-1 rounded-full">Improvements</h3>
                   <ul className="space-y-3">
                     {improvements.length > 0 ? (
                       improvements.map((imp, index) => (
                         <li key={index} className="flex gap-2 text-sm text-muted-foreground bg-foreground/5 p-3 rounded-lg border border-amber-500/20 animate-fade-in">
-                          <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" /> 
+                          <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" /> 
                           {imp}
                         </li>
                       ))

@@ -19,12 +19,15 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowe
     );
   }
 
+  // Admin routes use their own portal — redirect to /admin/login if not authenticated
+  const isAdminRoute = allowedRoles?.includes('ADMIN') && allowedRoles.length === 1;
+
   if (!isAuthenticated) {
+    if (isAdminRoute) return <Navigate to="/admin/login" state={{ from: location }} replace />;
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   if (allowedRoles && user && !allowedRoles.includes(user.role)) {
-    // Redirect to their respective dashboards if they try to access unauthorized routes
     if (user.role === 'CANDIDATE') return <Navigate to="/candidate" replace />;
     if (user.role === 'ADMIN') return <Navigate to="/admin" replace />;
     return <Navigate to="/dashboard" replace />;

@@ -56,8 +56,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse<Void>> handleGeneral(Exception ex) {
+    public ResponseEntity<ApiResponse<Void>> handleGeneral(Exception ex, jakarta.servlet.http.HttpServletRequest request) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error("An unexpected error occurred: " + ex.getMessage(), 500));
+                .body(ApiResponse.error("An unexpected error occurred on " + request.getMethod() + " " + request.getRequestURI() + ": " + ex.getMessage(), 500));
     }
 }

@@ -1,21 +1,124 @@
 import { useState } from "react";
-import { Search, MoreVertical, Download, X, Edit2, Shield, UserX, UserCheck, Trash2, Mail, ExternalLink, CalendarClock, Briefcase, FileText, CheckCircle2 } from "lucide-react";
+import { Search, MoreVertical, Download, X, Edit2, UserX, Trash2, Mail, ExternalLink, CalendarClock, Briefcase, FileText, CheckCircle2 } from "lucide-react";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { ADMIN_MOCK_USERS } from "@/data/adminMockData";
 
-const mockUsers = [
-  { id: 1, name: "Neural Talent", email: "talent@neural.org", role: "Candidate", status: "Active 🟢", joined: "Mar 10, 2026", lastActive: "2h ago", skills: ["React", "TypeScript", "Node.js"], cv: "Uploaded", apps: 12 },
-  { id: 2, name: "TechCorp Labs", email: "hr@techcorp.com", role: "Recruiter", status: "Active 🟢", joined: "Feb 28, 2026", lastActive: "1d ago", company: "TechCorp Labs", companyUrl: "techcorp.com" },
-  { id: 3, name: "John Doe", email: "john@example.com", role: "Recruiter", status: "Pending Verification 🟡", joined: "Mar 15, 2026", lastActive: "5h ago", company: "NextGen Software", companyUrl: "nextgen.io" },
-  { id: 4, name: "System Admin", email: "admin@jobengine.io", role: "Admin", status: "Active 🟢", joined: "Jan 01, 2026", lastActive: "Now" },
-  { id: 5, name: "Jane Smith", email: "jane.smith@dev.net", role: "Candidate", status: "Inactive 🔴", joined: "Jan 20, 2026", lastActive: "1mo ago", skills: ["Product Management"], cv: "Outdated", apps: 0 },
-  { id: 6, name: "CloudWorks Info", email: "careers@cloudworks.io", role: "Recruiter", status: "Active 🟢", joined: "Mar 01, 2026", lastActive: "2d ago", company: "CloudWorks", companyUrl: "cloudworks.io" },
-  { id: 7, name: "Sarah Connor", email: "s.connor@sky.net", role: "Candidate", status: "Active 🟢", joined: "Feb 10, 2026", lastActive: "10m ago", skills: ["AI", "Robotics", "Python"], cv: "Uploaded", apps: 3 },
-  { id: 8, name: "Felix Wagner", email: "felix.w@design.co", role: "Candidate", status: "Active 🟢", joined: "Mar 22, 2026", lastActive: "1h ago", skills: ["UI/UX", "Figma", "CSS"], cv: "Uploaded", apps: 7 },
-  { id: 9, name: "DataFlow Ltd.", email: "hr@dataflow.com", role: "Recruiter", status: "Inactive 🔴", joined: "Oct 15, 2025", lastActive: "6mo ago", company: "DataFlow", companyUrl: "dataflow.com" },
-  { id: 10, name: "Omar Nabil", email: "omar@data-science.org", role: "Candidate", status: "Pending Verification 🟡", joined: "Mar 25, 2026", lastActive: "30m ago", skills: ["Python", "Machine Learning"], cv: "Uploaded", apps: 1 },
-];
+
+const CANDIDATE_DETAILS: Record<string, { skills: string[]; cv: string; apps: number }> = {
+  "amina.haddad@example.com": { skills: ["React", "TypeScript", "Tailwind"], cv: "Uploaded", apps: 4 },
+  "lucas.meyer@example.com": { skills: ["Node.js", "PostgreSQL"], cv: "Uploaded", apps: 2 },
+  "sofia.rossi@example.com": { skills: ["Python", "SQL"], cv: "Uploaded", apps: 3 },
+  "omar.khalil@example.com": { skills: ["Python", "FastAPI"], cv: "Uploaded", apps: 1 },
+  "lina.benali@example.com": { skills: ["UX", "Figma"], cv: "Uploaded", apps: 5 },
+  "hugo.martin@example.com": { skills: ["Java", "Spring"], cv: "Uploaded", apps: 2 },
+  "nina.petrova@example.com": { skills: ["Go", "Docker"], cv: "Uploaded", apps: 3 },
+  "karim.bensalem@example.com": { skills: ["React", "Redux"], cv: "Uploaded", apps: 6 },
+  "salma.farah@example.com": { skills: ["Product", "Agile"], cv: "Uploaded", apps: 1 },
+  "adam.kowalski@example.com": { skills: ["Data", "Pandas"], cv: "Uploaded", apps: 2 },
+  "yasmine.nouri@example.com": { skills: ["TypeScript", "Next.js"], cv: "Uploaded", apps: 4 },
+  "noah.dubois@example.com": { skills: ["QA", "Playwright"], cv: "Uploaded", apps: 1 },
+  "layla.saeed@example.com": { skills: ["UI", "CSS"], cv: "Uploaded", apps: 3 },
+  "matteo.ricci@example.com": { skills: ["Java", "Kafka"], cv: "Uploaded", apps: 2 },
+  "farid.idrissi@example.com": { skills: ["Cloud", "AWS"], cv: "Uploaded", apps: 5 },
+  "clara.nguyen@example.com": { skills: ["Analytics", "SQL"], cv: "Uploaded", apps: 2 },
+  "gezeniamin@gmail.com": { skills: ["Java", "Spring"], cv: "Uploaded", apps: 1 },
+  "dachraouia193@gmail.com": { skills: ["React", "Node.js"], cv: "Uploaded", apps: 2 },
+  "ahmed.dachraoui03@gmail.com": { skills: ["React", "TypeScript"], cv: "Uploaded", apps: 1 },
+  "dachraouia903@gmail.com": { skills: ["Support", "CRM"], cv: "Outdated", apps: 0 }
+};
+
+const RECRUITER_DETAILS: Record<string, { company: string; companyUrl: string }> = {
+  "oubaied29@gmail.com": { company: "Oubaied Group", companyUrl: "oubaiedgroup.com" },
+  "emma.laurent@example.com": { company: "Aurora Labs", companyUrl: "auroralabs.com" },
+  "rami.kader@example.com": { company: "Northwind HR", companyUrl: "northwindhr.com" },
+  "sara.elamrani@example.com": { company: "BluePeak Talent", companyUrl: "bluepeaktalent.com" },
+  "julien.costa@example.com": { company: "Seaside Tech", companyUrl: "seasidetech.com" },
+  "maha.zahid@example.com": { company: "BrightPath Careers", companyUrl: "brightpath.com" },
+  "victor.silva@example.com": { company: "Silverline Hiring", companyUrl: "silverline.io" },
+  "dalia.haddad@example.com": { company: "Atlas Systems", companyUrl: "atlasy.io" },
+  "aziz.rahman@example.com": { company: "Vertex Staffing", companyUrl: "vertexstaffing.com" }
+};
+
+const formatDate = (isoDate: string) => {
+  const date = new Date(isoDate);
+  if (Number.isNaN(date.getTime())) return "—";
+  return date.toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" });
+};
+
+const formatRelative = (isoDate: string) => {
+  const date = new Date(isoDate);
+  if (Number.isNaN(date.getTime())) return "—";
+  const diffMs = Date.now() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMins / 60);
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays > 0) return `${diffDays}d ago`;
+  if (diffHours > 0) return `${diffHours}h ago`;
+  if (diffMins > 0) return `${diffMins}m ago`;
+  return "Just now";
+};
+
+const buildStatus = (user: { role: string; isVerified?: boolean; isActive?: boolean }) => {
+  const isActive = user.isActive !== false;
+  const isVerified = user.isVerified !== false;
+  if (user.role === "RECRUITER" && !isVerified) return "Pending Verification 🟡";
+  if (!isActive) return "Inactive 🔴";
+  return "Active 🟢";
+};
+
+const toRoleLabel = (role: string) => {
+  if (role === "ADMIN") return "Admin";
+  if (role === "RECRUITER") return "Recruiter";
+  return "Candidate";
+};
+
+const mockUsers = [...ADMIN_MOCK_USERS]
+  .sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())
+  .map((user, index) => {
+    const name = `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.email;
+    const role = toRoleLabel(user.role);
+    const status = buildStatus(user);
+    const lastActiveAt = user.createdAt;
+    const candidateProfile = role === "Candidate" ? (CANDIDATE_DETAILS[user.email] || { skills: [], cv: "Not Uploaded", apps: 0 }) : undefined;
+    const recruiterProfile = role === "Recruiter" ? RECRUITER_DETAILS[user.email] : undefined;
+
+    return {
+      id: index + 1,
+      name,
+      email: user.email,
+      role,
+      status,
+      joined: formatDate(user.createdAt),
+      lastActive: formatRelative(lastActiveAt),
+      skills: candidateProfile?.skills,
+      cv: candidateProfile?.cv,
+      apps: candidateProfile?.apps,
+      company: recruiterProfile?.company,
+      companyUrl: recruiterProfile?.companyUrl
+    };
+  });
+
+const toCsvValue = (value: string | number) => {
+  const escaped = String(value ?? "").replace(/"/g, '""');
+  return `"${escaped}"`;
+};
+
+const downloadCsv = (filename: string, rows: Array<Record<string, string | number>>) => {
+  if (rows.length === 0) return;
+  const headers = Object.keys(rows[0]);
+  const csv = [headers.join(","), ...rows.map((row) => headers.map((h) => toCsvValue(row[h])).join(","))].join("\n");
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const link = document.createElement("a");
+  const url = URL.createObjectURL(blob);
+  link.href = url;
+  link.setAttribute("download", filename);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
 
 export default function Users() {
   const [filterRole, setFilterRole] = useState("All");
@@ -24,21 +127,19 @@ export default function Users() {
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [viewUser, setViewUser] = useState<typeof mockUsers[0] | null>(null);
 
-  const toggleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.checked) setSelectedIds(mockUsers.map(u => u.id));
-    else setSelectedIds([]);
-  };
-
-  const toggleSelect = (id: number) => {
-    if (selectedIds.includes(id)) setSelectedIds(selectedIds.filter(i => i !== id));
-    else setSelectedIds([...selectedIds, id]);
-  };
-
   const getStatusDisplay = (statusStr: string) => {
      const text = statusStr.slice(0, -2).trim();
      const icon = statusStr.slice(-1);
-     const color = icon === '🟢' ? 'text-emerald-400' : icon === '🟡' ? 'text-amber-400' : 'text-rose-400';
-     const dotClass = icon === '🟢' ? 'bg-emerald-500 shadow-[0_0_8px_#10b981]' : icon === '🟡' ? 'bg-amber-500 shadow-[0_0_8px_#f59e0b]' : 'bg-rose-500 shadow-[0_0_8px_#f43f5e]';
+     const color = icon === '🟢'
+       ? 'text-emerald-700 dark:text-emerald-400'
+       : icon === '🟡'
+         ? 'text-amber-700 dark:text-amber-400'
+         : 'text-rose-700 dark:text-rose-400';
+     const dotClass = icon === '🟢'
+       ? 'bg-emerald-500 shadow-[0_0_8px_#10b981]'
+       : icon === '🟡'
+         ? 'bg-amber-500 shadow-[0_0_8px_#f59e0b]'
+         : 'bg-rose-500 shadow-[0_0_8px_#f43f5e]';
      return (
         <span className="flex items-center text-sm gap-2">
            <span className={`w-2 h-2 rounded-full ${dotClass}`} />
@@ -48,9 +149,9 @@ export default function Users() {
   }
 
   const roleStyle = (role: string) => {
-     if (role === 'Admin') return "bg-coral-500/10 border-coral-500/20 text-[#FF7A59]"; // approx coral
-     if (role === 'Recruiter') return "bg-violet-500/10 border-violet-500/20 text-violet-400";
-     return "bg-cyan-500/10 border-cyan-500/20 text-cyan-400";
+     if (role === 'Admin') return "bg-amber-500/10 border-amber-500/20 text-amber-700 dark:text-amber-400";
+     if (role === 'Recruiter') return "bg-violet-500/10 border-violet-500/20 text-violet-700 dark:text-violet-400";
+     return "bg-cyan-500/10 border-cyan-500/20 text-cyan-700 dark:text-cyan-400";
   }
 
   const filteredUsers = mockUsers.filter(u => {
@@ -62,15 +163,45 @@ export default function Users() {
      return textMatch && roleMatch && statusMatch;
   });
 
+  const allFilteredSelected = filteredUsers.length > 0 && filteredUsers.every((u) => selectedIds.includes(u.id));
+
+  const toggleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.checked) setSelectedIds(filteredUsers.map(u => u.id));
+    else setSelectedIds([]);
+  };
+
+  const toggleSelect = (id: number) => {
+    if (selectedIds.includes(id)) setSelectedIds(selectedIds.filter(i => i !== id));
+    else setSelectedIds([...selectedIds, id]);
+  };
+
+  const handleExport = () => {
+    const exportUsers = selectedIds.length > 0
+      ? filteredUsers.filter((u) => selectedIds.includes(u.id))
+      : filteredUsers;
+
+    const rows = exportUsers.map((u) => ({
+      Name: u.name,
+      Email: u.email,
+      Role: u.role,
+      Status: u.status.slice(0, -2).trim(),
+      Joined: u.joined,
+      "Last Active": u.lastActive
+    }));
+
+    const today = new Date().toISOString().slice(0, 10);
+    downloadCsv(`users-${today}.csv`, rows);
+  };
+
   return (
     <div className="space-y-6 animate-fade-in relative pb-20">
       {/* Header */}
       <div className="flex justify-between items-end">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">User Registry</h1>
-          <p className="text-muted-foreground mt-1">1,247 users</p>
+          <p className="text-muted-foreground mt-1">{filteredUsers.length} of {mockUsers.length} users</p>
         </div>
-        <Button variant="outline" className="border-border text-foreground bg-foreground/5 hover:bg-foreground/10 backdrop-blur-md">
+        <Button onClick={handleExport} variant="outline" className="border-border text-foreground bg-foreground/5 hover:bg-foreground/10 backdrop-blur-md">
           <Download className="w-4 h-4 mr-2" /> Export
         </Button>
       </div>
@@ -84,42 +215,42 @@ export default function Users() {
             placeholder="Search by name or email... (⌘K)" 
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full bg-black/20 border border-foreground/10 rounded-lg pl-10 pr-4 py-2.5 text-sm text-foreground focus:border-cyan-500/50 outline-none placeholder:text-muted-foreground/80" 
+            className="w-full bg-foreground/5 dark:bg-black/20 border border-foreground/10 rounded-lg pl-10 pr-4 py-2.5 text-sm text-foreground focus:border-cyan-500/50 outline-none placeholder:text-muted-foreground/80"
           />
         </div>
         <div className="relative">
            <select 
              value={filterRole} onChange={e => setFilterRole(e.target.value)}
-             className="bg-black/20 border border-foreground/10 rounded-lg px-4 py-2.5 pr-8 text-sm text-muted-foreground outline-none appearance-none cursor-pointer hover:border-foreground/20"
+             className="bg-foreground/5 dark:bg-black/20 border border-foreground/10 rounded-lg px-4 py-2.5 pr-8 text-sm text-foreground outline-none appearance-none cursor-pointer hover:border-foreground/20"
            >
              <option value="All">All Roles</option>
              <option value="Admin">Admin</option>
              <option value="Recruiter">Recruiter</option>
              <option value="Candidate">Candidate</option>
            </select>
-        </div>
-        <div className="relative">
-           <select 
-             value={filterStatus} onChange={e => setFilterStatus(e.target.value)}
-             className="bg-black/20 border border-foreground/10 rounded-lg px-4 py-2.5 pr-8 text-sm text-muted-foreground outline-none appearance-none cursor-pointer hover:border-foreground/20"
-           >
-             <option value="All">Status: All</option>
-             <option value="Active">Active</option>
-             <option value="Inactive">Inactive</option>
-             <option value="Pending">Pending</option>
-           </select>
-        </div>
-        <Button className="bg-cyan-500 hover:bg-cyan-400 text-slate-900 shadow-[0_0_15px_rgba(0,212,255,0.3)]">Filter</Button>
-      </GlassCard>
-
-      {/* Bulk Actions Sliding Bar */}
-      <div className={`fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-300 ${selectedIds.length > 0 ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0 pointer-events-none'}`}>
-          <GlassCard className="flex items-center gap-6 px-6 py-3 border-cyan-500/30 shadow-[0_10px_40px_rgba(0,0,0,0.5),0_0_20px_rgba(0,212,255,0.15)] bg-card">
-             <span className="font-semibold text-foreground">{selectedIds.length} selected</span>
-             <div className="h-4 w-px bg-foreground/20" />
-             <div className="flex gap-2">
-                <Button size="sm" className="bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 border border-cyan-500/20">Activate</Button>
-                <Button size="sm" className="bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border border-amber-500/20">Deactivate</Button>
+         </div>
+         <div className="relative">
+            <select 
+              value={filterStatus} onChange={e => setFilterStatus(e.target.value)}
+               className="bg-foreground/5 dark:bg-black/20 border border-foreground/10 rounded-lg px-4 py-2.5 pr-8 text-sm text-foreground outline-none appearance-none cursor-pointer hover:border-foreground/20"
+            >
+              <option value="All">Status: All</option>
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+              <option value="Pending">Pending</option>
+            </select>
+         </div>
+         <Button className="bg-cyan-500 hover:bg-cyan-400 text-slate-900 shadow-[0_0_15px_rgba(0,212,255,0.3)]">Filter</Button>
+       </GlassCard>
+ 
+       {/* Bulk Actions Sliding Bar */}
+       <div className={`fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-300 ${selectedIds.length > 0 ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0 pointer-events-none'}`}>
+           <GlassCard className="flex items-center gap-6 px-6 py-3 border-cyan-500/30 shadow-[0_10px_40px_rgba(0,0,0,0.5),0_0_20px_rgba(0,212,255,0.15)] bg-card">
+              <span className="font-semibold text-foreground">{selectedIds.length} selected</span>
+              <div className="h-4 w-px bg-foreground/20" />
+              <div className="flex gap-2">
+                 <Button size="sm" className="bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 border border-cyan-500/20">Activate</Button>
+                 <Button size="sm" className="bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 border border-amber-500/30">Deactivate</Button>
                 <Button size="sm" className="bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 border border-rose-500/20">Delete</Button>
              </div>
           </GlassCard>
@@ -131,7 +262,7 @@ export default function Users() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-foreground/5 text-muted-foreground text-xs uppercase tracking-widest pl-2">
-                <th className="p-4 pl-6 w-12"><input type="checkbox" onChange={toggleSelectAll} checked={mockUsers.length > 0 && selectedIds.length === mockUsers.length} className="rounded border-foreground/20 accent-cyan-500 cursor-pointer" /></th>
+                <th className="p-4 pl-6 w-12"><input type="checkbox" onChange={toggleSelectAll} checked={allFilteredSelected} className="rounded border-foreground/20 accent-cyan-500 cursor-pointer" /></th>
                 <th className="p-4 font-semibold">User</th>
                 <th className="p-4 font-semibold">Role</th>
                 <th className="p-4 font-semibold">Status</th>

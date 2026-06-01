@@ -54,10 +54,15 @@ export default function Login() {
       setLoading(true);
       const res = await api.post("/auth/login", { email, password });
       const { token, refreshToken, role, ...userData } = res.data.data;
+      if (role === "ADMIN") {
+        setError("Administrator accounts must use the Admin Portal.");
+        triggerShake();
+        setTimeout(() => navigate("/admin/login"), 1800);
+        return;
+      }
       login(token, refreshToken, { ...userData, role });
       if (role === "CANDIDATE") navigate("/candidate");
       else if (role === "RECRUITER") navigate("/dashboard");
-      else navigate("/admin");
     } catch (err: any) {
       setError(err?.response?.data?.message || "Invalid email or password");
       triggerShake();
@@ -74,10 +79,15 @@ export default function Login() {
         isRegistration: false
       });
       const { token, refreshToken, role, ...userData } = res.data.data;
+      if (role === "ADMIN") {
+        setError("Administrator accounts must use the Admin Portal.");
+        triggerShake();
+        setTimeout(() => navigate("/admin/login"), 1800);
+        return;
+      }
       login(token, refreshToken, { ...userData, role });
       if (role === "CANDIDATE") navigate("/candidate");
       else if (role === "RECRUITER") navigate("/dashboard");
-      else navigate("/admin");
     } catch (err: any) {
       setError(err?.response?.data?.message || "Google authentication failed");
       triggerShake();

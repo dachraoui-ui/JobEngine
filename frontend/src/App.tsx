@@ -26,6 +26,10 @@ import UploadCV from "./pages/candidate/UploadCV";
 import NotFound from "./pages/NotFound";
 import AdminUsers from "./pages/admin/Users";
 import AdminDashboard from "./pages/admin/Dashboard";
+import AdminLogin from "./pages/admin/AdminLogin";
+import AdminVerifications from "./pages/admin/Verifications";
+import AdminConfig from "./pages/admin/Config";
+import AdminReports from "./pages/admin/Reports";
 import RecruiterProfile from "./pages/recruiter/Profile";
 import Settings from "./pages/Settings";
 import { AuthProvider } from "@/hooks/useAuth";
@@ -73,9 +77,13 @@ const App = () => (
             <Route path="/analytics" element={<ProtectedRoute allowedRoles={['RECRUITER']}><DashboardShell><Analytics /></DashboardShell></ProtectedRoute>} />
             <Route path="/recruiter/profile" element={<ProtectedRoute allowedRoles={['RECRUITER']}><DashboardShell><RecruiterProfile /></DashboardShell></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute allowedRoles={['RECRUITER']}><DashboardShell><Settings /></DashboardShell></ProtectedRoute>} />
-            {/* Admin section */}
+            {/* Admin section — separate portal */}
+            <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminShell><AdminDashboard /></AdminShell></ProtectedRoute>} />
             <Route path="/admin/users" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminShell><AdminUsers /></AdminShell></ProtectedRoute>} />
+            <Route path="/admin/verifications" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminShell><AdminVerifications /></AdminShell></ProtectedRoute>} />
+            <Route path="/admin/config" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminShell><AdminConfig /></AdminShell></ProtectedRoute>} />
+            <Route path="/admin/reports" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminShell><AdminReports /></AdminShell></ProtectedRoute>} />
             {/* Candidate dashboard */}
             <Route path="/candidate" element={<ProtectedRoute allowedRoles={['CANDIDATE']}><CandidateShell title="Dashboard"><Dashboard /></CandidateShell></ProtectedRoute>} />
             <Route path="/candidate/explore" element={<ProtectedRoute allowedRoles={['CANDIDATE']}><CandidateShell title="Explore Jobs"><ExploreJobs /></CandidateShell></ProtectedRoute>} />

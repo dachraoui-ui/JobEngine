@@ -8,7 +8,7 @@ import com.jobengine.common.JobType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.PersistenceCreator;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -18,10 +18,13 @@ import java.util.List;
 
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 @Document("jobs")
 public class Job {
+
+    @PersistenceCreator
+    public Job() {
+    }
 
     @Id
     private String id;

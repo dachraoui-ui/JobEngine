@@ -46,6 +46,7 @@ public class AdminController {
 
         // Status breakdown
         Map<String, Long> statusBreakdown = applicationRepository.findAll().stream()
+                .filter(a -> a.getStatus() != null)
                 .collect(java.util.stream.Collectors.groupingBy(
                         a -> a.getStatus().name(),
                         java.util.stream.Collectors.counting()

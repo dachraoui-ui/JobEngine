@@ -82,7 +82,7 @@ public class ApplicationController {
         if (request.isSendEmail()) {
             webhookService.sendStatusChangeWebhook(Map.of(
                     "applicationId", updated.getId(),
-                    "newStatus", updated.getStatus().name(),
+                    "newStatus", updated.getStatus() != null ? updated.getStatus().name() : "UNKNOWN",
                     "changedBy", user.getFirstName() + " " + user.getLastName()
             ));
         }

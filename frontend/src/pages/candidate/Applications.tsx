@@ -63,7 +63,7 @@ function capitalize(s: string): string {
 
 const STATUS_CONFIG: Record<string, { bg: string; text: string; border: string; icon: React.ReactNode; label: string }> = {
   APPLIED:     { bg: "bg-slate-500/15",   text: "text-slate-400",   border: "border-slate-500/30",   icon: <Clock className="w-3.5 h-3.5" />,         label: "Applied" },
-  SHORTLISTED: { bg: "bg-amber-500/15",   text: "text-amber-400",   border: "border-amber-500/30",   icon: <CheckCircle2 className="w-3.5 h-3.5" />,   label: "Shortlisted" },
+  SHORTLISTED: { bg: "bg-amber-500/15",   text: "text-amber-600 dark:text-amber-400",   border: "border-amber-500/30",   icon: <CheckCircle2 className="w-3.5 h-3.5" />,   label: "Shortlisted" },
   INTERVIEW:   { bg: "bg-violet-500/15",  text: "text-violet-400",  border: "border-violet-500/30",  icon: <Clock className="w-3.5 h-3.5" />,         label: "Interview" },
   REJECTED:    { bg: "bg-rose-500/15",    text: "text-rose-400",    border: "border-rose-500/30",    icon: <XCircle className="w-3.5 h-3.5" />,        label: "Rejected" },
   HIRED:       { bg: "bg-emerald-500/15", text: "text-emerald-400", border: "border-emerald-500/30", icon: <Trophy className="w-3.5 h-3.5" />,         label: "Hired 🎉" },
@@ -154,7 +154,7 @@ export default function Applications() {
 
   const stats = [
     { label: "Total Applied",  value: applications.length,           color: "text-blue-400" },
-    { label: "Shortlisted",    value: countByStatus("SHORTLISTED"),   color: "text-amber-400" },
+    { label: "Shortlisted",    value: countByStatus("SHORTLISTED"),   color: "text-amber-600 dark:text-amber-400" },
     { label: "Interviews",     value: countByStatus("INTERVIEW"),     color: "text-violet-400" },
     { label: "Offers / Hired", value: countByStatus("HIRED"),        color: "text-emerald-400" },
   ];

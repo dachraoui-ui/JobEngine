@@ -62,8 +62,9 @@ api.interceptors.response.use(
          localStorage.removeItem('token');
          localStorage.removeItem('refreshToken');
          localStorage.removeItem('user');
-         if (!window.location.pathname.startsWith('/login') && !window.location.pathname.startsWith('/register')) {
-            window.location.href = '/login';
+         const path = window.location.pathname;
+         if (!path.startsWith('/login') && !path.startsWith('/register') && !path.startsWith('/admin/login')) {
+            window.location.href = path.startsWith('/admin') ? '/admin/login' : '/login';
          }
          return Promise.reject(error);
       }
@@ -86,8 +87,9 @@ api.interceptors.response.use(
         localStorage.removeItem('token');
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('user');
-        if (!window.location.pathname.startsWith('/login') && !window.location.pathname.startsWith('/register')) {
-            window.location.href = '/login';
+        const path = window.location.pathname;
+        if (!path.startsWith('/login') && !path.startsWith('/register') && !path.startsWith('/admin/login')) {
+            window.location.href = path.startsWith('/admin') ? '/admin/login' : '/login';
         }
         return Promise.reject(err);
       } finally {
