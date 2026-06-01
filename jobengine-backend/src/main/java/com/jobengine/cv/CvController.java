@@ -36,7 +36,7 @@ public class CvController {
         User user = authUtils.getUserFromDetails(userDetails);
         Cv cv = cvService.uploadCv(file, user.getId());
 
-        // Parse CV details using matchingService
+        // Parse CV details using Gemini
         Map<String, Object> parseResult = matchingService.parseCv(cv.getFileData(), cv.getOriginalFileName());
 
         @SuppressWarnings("unchecked")
@@ -59,8 +59,10 @@ public class CvController {
             strengthScore = ((Number) scoreObj).intValue();
         }
 
+        String extractedText = (String) parseResult.getOrDefault("extractedText", "");
+
         // Save parsed details into the Cv entity
-        cvService.updateParsedData(cv.getId(), "[Extracted CV Text Content]", skills, exp, edu, languages);
+        cvService.updateParsedData(cv.getId(), extractedText, skills, exp, edu, languages, strengthScore);
 
         Map<String, Object> responseData = Map.of(
                 "cvId", cv.getId(),
@@ -83,34 +85,67 @@ public class CvController {
         User user = authUtils.getUserFromDetails(userDetails);
         try {
             Cv cv = cvService.getCvByUserId(user.getId());
-            Map<String, Object> info = Map.of(
-                    "id", cv.getId(),
-                    "userId", cv.getUserId(),
-                    "originalFileName", cv.getOriginalFileName(),
-                    "fileType", cv.getFileType(),
-                    "detectedSkills", cv.getDetectedSkills() != null ? cv.getDetectedSkills() : java.util.List.of(),
-                    "yearsExperience", cv.getYearsExperience(),
-                    "education", cv.getEducation() != null ? cv.getEducation() : "",
-                    "languages", cv.getLanguages() != null ? cv.getLanguages() : java.util.List.of(),
-                    "uploadedAt", cv.getUploadedAt().toString(),
-                    "fileSize", String.format("%.1f MB", (double) cv.getFileData().length / (1024 * 1024))
-            );
-            return ResponseEntity.ok(ApiResponse.success(info));
-        } catch (com.jobengine.common.ResourceNotFoundException e) {
-            return ResponseEntity.ok(ApiResponse.success(null, "No active CV found"));
-        }
+        
+            Map<String, Object> info = new java.util.HashMap<>();
+            info.put("id", cv.getId());
+            info.put("userId", cv.getUserId());
+            info.put("originalFileName", cv.getOriginalFileName());
+            info.put("fileType", cv.getFileType());
+            info.put("detectedSkills", cv.getDetectedSkills() != null ? cv.getDetectedSkills() : java.util.List.of());
+            info.put("yearsExperience", cv.getYearsExperience());
+            info.put("education", cv.getEducation() != null ? cv.getEducation() : "");
+            info.put("languages", cv.getLanguages() != null ? cv.getLanguages() : java.util.List.of());
+            info.put("cvStrengthScore", cv.getCvStrengthScore());
+            info.put("uploadedAt", cv.getUploadedAt().toString());
+            info.put("fileSize", String.format("%.1f MB", (double) cv.getFileData().length / (1024 * 1024)));
+
+        return ResponseEntity.ok(ApiResponse.success(info));
+    } catch (com.jobengine.common.ResourceNotFoundException e) {
+        return ResponseEntity.ok(ApiResponse.success(null, "No active CV found"));
+    }
     }
 
     @PostMapping("/upload/candidate/{candidateId}")
     @PreAuthorize("hasRole('RECRUITER')")
-    public ResponseEntity<ApiResponse<Map<String, String>>> uploadCandidateCv(
+    public ResponseEntity<ApiResponse<Map<String, Object>>> uploadCandidateCv(
             @RequestParam("file") MultipartFile file,
             @PathVariable String candidateId) throws IOException {
+
         Cv cv = cvService.uploadCv(file, candidateId);
+
+        // ✅ Ajouter l'analyse IA (même logique que l'upload candidat)
+        Map<String, Object> parseResult = matchingService.parseCv(cv.getFileData(), cv.getOriginalFileName());
+
+        List<String> skills = (List<String>) parseResult.getOrDefault("detectedSkills", List.of());
+
+        int exp = 3;
+        Object expObj = parseResult.get("yearsExperience");
+        if (expObj instanceof Number) exp = ((Number) expObj).intValue();
+
+        String edu = (String) parseResult.getOrDefault("education", "");
+
+        List<String> languages = (List<String>) parseResult.getOrDefault("languages", List.of());
+
+        int strengthScore = 70;
+        Object scoreObj = parseResult.get("cvStrengthScore");
+        if (scoreObj instanceof Number) strengthScore = ((Number) scoreObj).intValue();
+
+        String extractedText = (String) parseResult.getOrDefault("extractedText", "");
+
+        cvService.updateParsedData(cv.getId(), extractedText, skills, exp, edu, languages, strengthScore);
+
+        Map<String, Object> responseData = Map.of(
+            "cvId", cv.getId(),
+            "fileName", cv.getOriginalFileName(),
+            "detectedSkills", skills,
+            "yearsExperience", exp,
+            "education", edu,
+            "languages", languages,
+            "cvStrengthScore", strengthScore
+        );
+
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.created(
-                        Map.of("cvId", cv.getId(), "fileName", cv.getOriginalFileName()),
-                        "Candidate CV uploaded successfully"));
+            .body(ApiResponse.created(responseData, "Candidate CV uploaded and parsed successfully"));
     }
 
     @GetMapping("/{id}")
@@ -125,6 +160,7 @@ public class CvController {
                 "detectedSkills", cv.getDetectedSkills() != null ? cv.getDetectedSkills() : java.util.List.of(),
                 "yearsExperience", cv.getYearsExperience(),
                 "education", cv.getEducation() != null ? cv.getEducation() : "",
+                "cvStrengthScore", cv.getCvStrengthScore(),
                 "uploadedAt", cv.getUploadedAt().toString()
         );
         return ResponseEntity.ok(ApiResponse.success(info));

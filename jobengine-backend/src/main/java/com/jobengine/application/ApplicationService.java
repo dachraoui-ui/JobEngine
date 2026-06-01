@@ -299,15 +299,14 @@ public class ApplicationService {
                 cMap.put("name", user.getFirstName() + " " + user.getLastName());
                 cMap.put("role", job.getTitle());
                 cMap.put("score", Math.round(app.getMatchingScore()));
-                cMap.put("status", app.getStatus() != null ? app.getStatus().name() : "APPLIED");
-                cMap.put("stage", app.getStatus() != null ? app.getStatus().name().toLowerCase() : "applied");
+                cMap.put("status", app.getStatus().name());
+                cMap.put("stage", app.getStatus().name().toLowerCase());
                 topMatches.add(cMap);
             }
         }
 
         // Pipeline Stages count
         Map<String, Long> stageCounts = applications.stream()
-                .filter(a -> a.getStatus() != null)
                 .collect(Collectors.groupingBy(
                         a -> a.getStatus().name().toLowerCase(),
                         Collectors.counting()
@@ -399,7 +398,6 @@ public class ApplicationService {
 
         // Hiring funnel
         Map<String, Long> funnelCounts = applications.stream()
-                .filter(a -> a.getStatus() != null)
                 .collect(Collectors.groupingBy(
                         a -> a.getStatus().name(),
                         Collectors.counting()

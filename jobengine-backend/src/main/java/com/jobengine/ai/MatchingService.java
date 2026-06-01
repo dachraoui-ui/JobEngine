@@ -2,74 +2,56 @@ package com.jobengine.ai;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.*;
+import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.text.PDFTextStripper;
+import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
 
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Calls the Python AI microservice (FastAPI) for:
+ * Calls the Gemini API for:
  * - CV parsing
  * - Matching score calculation
- * - Career advice generation
+ * - Career advice generation (optional)
  */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class MatchingService {
 
-    @Value("${ai.service.url}")
-    private String aiServiceUrl;
-
-    private final RestTemplate restTemplate;
+     private final GeminiClient geminiClient;
 
     /**
-     * Send CV file to AI service for parsing.
-     * POST /api/ai/parse
+     * Parse CV using Gemini. If Gemini fails, fallback to a local keyword parser.
      */
     @SuppressWarnings("unchecked")
     public Map<String, Object> parseCv(byte[] fileData, String fileName) {
-        try {
-            String url = aiServiceUrl + "/api/ai/parse";
+        String extractedText = extractText(fileData, fileName);
+        String prompt = buildCvParsingPrompt(extractedText, fileName);
+        Map<String, Object> result = geminiClient.generateJson(prompt);
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-
-            MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-            ByteArrayResource fileResource = new ByteArrayResource(fileData) {
-                @Override
-                public String getFilename() {
-                    return fileName;
-                }
-            };
-            body.add("file", fileResource);
-
-            HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(body, headers);
-            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
-                    url,
-                    HttpMethod.POST,
-                    request,
-                    new ParameterizedTypeReference<Map<String, Object>>() {}
-            );
-
-            return response.getBody();
-        } catch (Exception e) {
-            log.warn("FastAPI parse service unavailable. Running high-fidelity local keyword parser: {}", e.getMessage());
-            return parseCvFallback(fileData, fileName);
+        if (result == null || !result.containsKey("detectedSkills")) {
+            Map<String, Object> fallback = parseCvFallback(fileData, fileName);
+            fallback.put("extractedText", extractedText);
+            return fallback;
         }
+
+        result.putIfAbsent("extractedText", extractedText);
+        return result;
     }
 
     private Map<String, Object> parseCvFallback(byte[] fileData, String fileName) {
         String content = "";
         try {
-            content = new String(fileData, "ISO-8859-1").toLowerCase();
+            content = new String(fileData, StandardCharsets.ISO_8859_1).toLowerCase();
         } catch (Exception e) {
             content = "";
         }
@@ -158,79 +140,43 @@ public class MatchingService {
         }
         
         return Map.of(
-            "detectedSkills", skills,
-            "yearsExperience", exp,
-            "education", education,
-            "languages", languages,
-            "cvStrengthScore", 50 + Math.min(skills.size() * 4, 30) + Math.min(exp * 4, 20)
+                "detectedSkills", skills,
+                "yearsExperience", exp,
+                "education", education,
+                "languages", languages,
+                "cvStrengthScore", 50 + Math.min(skills.size() * 4, 30) + Math.min(exp * 4, 20)
         );
     }
 
     /**
-     * Calculate matching score between a job and a candidate.
-     * POST /api/ai/match
+     * Calculate matching score between a job and a candidate using Gemini.
      */
     @SuppressWarnings("unchecked")
     public Map<String, Object> calculateMatchingScore(
             List<String> jobSkills, int jobExperience, List<String> jobValues,
             List<String> candidateSkills, int candidateExperience, List<String> candidateValues) {
-        try {
-            String url = aiServiceUrl + "/api/ai/match";
-
-            Map<String, Object> payload = Map.of(
-                    "jobSkills", jobSkills,
-                    "jobExperience", jobExperience,
-                    "jobValues", jobValues,
-                    "candidateSkills", candidateSkills,
-                    "candidateExperience", candidateExperience,
-                    "candidateValues", candidateValues
-            );
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<Map<String, Object>> request = new HttpEntity<>(payload, headers);
-
-            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
-                    url,
-                    HttpMethod.POST,
-                    request,
-                    new ParameterizedTypeReference<Map<String, Object>>() {}
-            );
-            return response.getBody();
-        } catch (Exception e) {
-            log.error("Failed to call AI matching service: {}", e.getMessage());
-            return Map.of("score", 0, "error", "AI service unavailable");
+        String prompt = buildMatchingPrompt(jobSkills, jobExperience, jobValues,
+                candidateSkills, candidateExperience, candidateValues);
+        Map<String, Object> result = geminiClient.generateJson(prompt);
+        if (result == null || !result.containsKey("score")) {
+            return fallbackMatching(jobSkills, jobExperience, candidateSkills, candidateExperience);
         }
+        return result;
     }
 
     /**
-     * Get career advice from AI service.
-     * POST /api/ai/career-advice
+     * Get career advice from Gemini. Optional.
      */
     @SuppressWarnings("unchecked")
     public Map<String, Object> getCareerAdvice(List<String> skills, int experience, List<String> targetJobs) {
         try {
-            String url = aiServiceUrl + "/api/ai/career-advice";
-
-            Map<String, Object> payload = Map.of(
-                    "skills", skills,
-                    "yearsExperience", experience,
-                    "targetJobTitles", targetJobs
-            );
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<Map<String, Object>> request = new HttpEntity<>(payload, headers);
-
-            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
-                    url,
-                    HttpMethod.POST,
-                    request,
-                    new ParameterizedTypeReference<Map<String, Object>>() {}
-            );
-            return response.getBody();
+            String prompt = buildCareerPrompt(skills, experience, targetJobs);
+            Map<String, Object> result = geminiClient.generateJson(prompt);
+            if (result != null && !result.isEmpty()) {
+                return result;
+            }
         } catch (Exception e) {
-            log.warn("FastAPI career service unavailable. Using high-fidelity local fallback engine: {}", e.getMessage());
+            log.warn("Gemini career advice unavailable. Using local fallback: {}", e.getMessage());
             
             // Calculate a personalized neural evaluation purely based on actual candidate data
             int skillCount = (skills != null) ? skills.size() : 0;
@@ -391,15 +337,111 @@ public class MatchingService {
                 )
             );
 
-            return Map.of(
-                "cvScore", cvScore,
-                "cvStrengthLabel", label,
-                "strengths", strengths,
-                "improvements", improvements,
-                "skillGalaxy", skillGalaxy,
-                "skillGaps", skillGaps,
-                "pathways", pathways
-            );
+                return Map.of(
+                    "cvScore", cvScore,
+                    "cvStrengthLabel", label,
+                    "strengths", strengths,
+                    "improvements", improvements,
+                    "skillGalaxy", skillGalaxy,
+                    "skillGaps", skillGaps,
+                    "pathways", pathways
+                );
+            }
+            return Map.of("error", "Career advice unavailable");
+            }
+
+    private String extractText(byte[] fileData, String fileName) {
+        if (fileName == null) {
+            return new String(fileData, StandardCharsets.ISO_8859_1);
         }
+
+        String name = fileName.toLowerCase();
+        try {
+            if (name.endsWith(".pdf")) {
+                try (PDDocument document = Loader.loadPDF(fileData)) {
+                    return new PDFTextStripper().getText(document);
+                }
+            }
+            if (name.endsWith(".docx")) {
+                try (XWPFDocument doc = new XWPFDocument(new ByteArrayInputStream(fileData));
+                     XWPFWordExtractor extractor = new XWPFWordExtractor(doc)) {
+                    return extractor.getText();
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Failed to extract CV text: {}", e.getMessage());
+        }
+
+        return new String(fileData, StandardCharsets.ISO_8859_1);
+    }
+
+    private String buildCvParsingPrompt(String extractedText, String fileName) {
+        String safeText = extractedText == null ? "" : extractedText;
+        if (safeText.length() > 6000) {
+            safeText = safeText.substring(0, 6000);
+        }
+
+        return "You are an HR CV parser. Extract structured info and respond in strict JSON only. " +
+                "Return keys: detectedSkills (array of strings), yearsExperience (int), education (string), " +
+                "languages (array of strings), cvStrengthScore (int 0-100). " +
+                "No extra text, no markdown.\n" +
+                "FileName: " + fileName + "\n" +
+                "CV_TEXT:\n" + safeText;
+    }
+
+    private String buildMatchingPrompt(List<String> jobSkills, int jobExperience, List<String> jobValues,
+                                       List<String> candidateSkills, int candidateExperience, List<String> candidateValues) {
+        return "You are a recruitment scoring engine. Output strict JSON only. " +
+                "Return keys: score (int 0-100), breakdown (object with skills, experience, culture ints 0-100), " +
+                "matchedSkills (array), missingSkills (array)." +
+                "\nJOB_SKILLS: " + jobSkills +
+                "\nJOB_EXPERIENCE_YEARS: " + jobExperience +
+                "\nJOB_VALUES: " + jobValues +
+                "\nCANDIDATE_SKILLS: " + candidateSkills +
+                "\nCANDIDATE_EXPERIENCE_YEARS: " + candidateExperience +
+                "\nCANDIDATE_VALUES: " + candidateValues;
+    }
+
+    private String buildCareerPrompt(List<String> skills, int experience, List<String> targetJobs) {
+        return "Provide career advice as strict JSON only. " +
+                "Return keys: score (int 0-100), label (string), strengths (array), improvements (array), " +
+                "skillGalaxy (array), skillGaps (array)." +
+                "\nSKILLS: " + skills +
+                "\nYEARS_EXPERIENCE: " + experience +
+                "\nTARGET_JOBS: " + targetJobs;
+    }
+
+    private Map<String, Object> fallbackMatching(List<String> jobSkills, int jobExperience,
+                                                 List<String> candidateSkills, int candidateExperience) {
+        List<String> js = jobSkills != null ? jobSkills : List.of();
+        List<String> cs = candidateSkills != null ? candidateSkills : List.of();
+        List<String> matched = new ArrayList<>();
+        List<String> missing = new ArrayList<>();
+
+        for (String skill : js) {
+            boolean has = cs.stream().anyMatch(c -> c.equalsIgnoreCase(skill));
+            if (has) {
+                matched.add(skill);
+            } else {
+                missing.add(skill);
+            }
+        }
+
+        double skillScore = js.isEmpty() ? 60.0 : (matched.size() * 100.0 / js.size());
+        double expScore = jobExperience <= 0 ? 60.0 : (Math.min(candidateExperience, jobExperience) * 100.0 / jobExperience);
+        double finalScore = (skillScore * 0.7) + (expScore * 0.3);
+
+        Map<String, Object> breakdown = Map.of(
+                "skills", Math.round(skillScore),
+                "experience", Math.round(expScore),
+                "culture", 60
+        );
+
+        return Map.of(
+                "score", Math.round(finalScore),
+                "breakdown", breakdown,
+                "matchedSkills", matched,
+                "missingSkills", missing
+        );
     }
 }
